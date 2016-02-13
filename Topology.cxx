@@ -34,7 +34,7 @@ Topology::Topology(const AliITSUClusterPix &cluster):TObject(){//UniqueID of the
     for(Int_t ic=0;ic<fCs;ic++){
       if(cluster.TestPixel(ir,ic)){
 	fPattern.SetBitNumber(ir*fCs+ic);
-	fFiredPixels++;
+	tempFiredPixels++;
 	tempxCOG+=ir;
 	tempzCOG+=ic;
       }
