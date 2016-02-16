@@ -12,7 +12,7 @@
 #include "./Topology.h"
 #include "TFile.h"
 #include "./TopDatabase.h"
-#include "AliITSUClusterPix.h"
+#include "AliITSMFTClusterPix.h"
 
 ClassImp(TopDatabase)
 
@@ -36,7 +36,7 @@ TopDatabase::~TopDatabase(){
   fArrTopologies.Delete();
 }
 
-void TopDatabase::AccountTopology(const AliITSUClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta){
+void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta){
 
   TBits Top;
   Top.Clear();
@@ -373,7 +373,7 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   }
 }
 
-Int_t TopDatabase::FromCluster2GroupID(const AliITSUClusterPix &cl) const{
+Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   
   //Passing from cluster to UChar_t*
   Int_t rs = cl.GetPatternRowSpan();

@@ -7,7 +7,7 @@
 #include "TArrayI.h"
 #include "TArrayF.h"
 #include "TObjArray.h"
-#include "AliITSUClusterPix.h"
+#include "AliITSMFTClusterPix.h"
 
 
 class TopDatabase : public TObject {
@@ -21,7 +21,7 @@ class TopDatabase : public TObject {
   TopDatabase();
   TopDatabase(TopDatabase &ogg);
   ~TopDatabase();
-  void AccountTopology(const AliITSUClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta);
+  void AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta);
   void ExpandDB(const TBits* patt);
 
   Int_t GetN() const {return fN;}
@@ -38,7 +38,7 @@ class TopDatabase : public TObject {
   void SetThreshold(Float_t thr);
   void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
   void SetNmax(Int_t a) { fNmax = a;}
-  Int_t FromCluster2GroupID(const AliITSUClusterPix &cl) const;
+  Int_t FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
   
 
  private:

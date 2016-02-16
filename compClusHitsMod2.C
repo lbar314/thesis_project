@@ -3,7 +3,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
-#include "AliITSUClusterPix.h"
+#include "AliITSMFTClusterPix.h"
 #include "AliITSURecoLayer.h"
 #include "AliITSURecoDet.h"
 #include "AliITSUHit.h"
@@ -153,7 +153,7 @@ void compClusHitsMod2(int nev=-1)
   AliGeomManager::ApplyAlignObjsToGeom(algITS);
   //
   AliITSUGeomTGeo* gm = new AliITSUGeomTGeo(kTRUE);
-  AliITSUClusterPix::SetGeom(gm);
+  AliITSMFTClusterPix::SetGeom(gm);
   //
   AliITSURecoDet *its = new AliITSURecoDet(gm, "ITSinterface");
   its->CreateClusterArrays();
@@ -254,7 +254,7 @@ void compClusHitsMod2(int nev=-1)
       //printf("Layer %d : %d clusters\n",ilr,nClu);
       //
       for (int icl=0;icl<nClu;icl++) {
-        AliITSUClusterPix *cl = (AliITSUClusterPix*)clr->At(icl);
+        AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
         int modID = cl->GetVolumeId();
 
         //------------ check if this is a split cluster
@@ -267,7 +267,7 @@ void compClusHitsMod2(int nev=-1)
           int offs = sens->GetFirstClusterId();
           //  printf("To check for %d (mod:%d) N=%d from %d\n",icl,modID,nclSn,offs);
           for (int ics=0;ics<nclSn;ics++) {
-            AliITSUClusterPix* clusT = (AliITSUClusterPix*)lr->GetCluster(offs+ics); // access to clusters
+            AliITSMFTClusterPix* clusT = (AliITSMFTClusterPix*)lr->GetCluster(offs+ics); // access to clusters
             if (clusT==cl) continue;
             for (int ilb0=0;ilb0<3;ilb0++) {
               int lb0 = cl->GetLabel(ilb0); if (lb0<=-1) break;

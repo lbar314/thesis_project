@@ -22,8 +22,8 @@
 #include "TPaveStats.h"
 #include "TClonesArray.h"
 #include "TStopwatch.h"
-#include "./MyClasses/Topology.h"
-#include "./MyClasses/TopDatabase.h"
+#include "./Topology.h"
+#include "./TopDatabase.h"
 
 #endif
 
@@ -84,7 +84,7 @@ void testDecoding4(int nev, int nRepetintions){
   AliGeomManager::ApplyAlignObjsToGeom(algITS);
   //
   AliITSUGeomTGeo* gm = new AliITSUGeomTGeo(kTRUE);
-  AliITSUClusterPix::SetGeom(gm);
+  AliITSMFTClusterPix::SetGeom(gm);
   //
   AliITSURecoDet *its = new AliITSURecoDet(gm, "ITSinterface");
   its->CreateClusterArrays();
@@ -159,7 +159,7 @@ void testDecoding4(int nev, int nRepetintions){
 	//
 	for (int icl=0;icl<nClu;icl++){
 	  //if(icl%1000==0)printf("%d / %d\n", icl, nClu);
-	  AliITSUClusterPix *cl = (AliITSUClusterPix*)clr->At(icl);
+	  AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
 	  Timer.Start(!totClusters);
 	  Int_t num = DB.FromCluster2GroupID(*cl);
 	  Timer.Stop();
