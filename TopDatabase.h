@@ -22,7 +22,6 @@ class TopDatabase : public TObject {
   TopDatabase(TopDatabase &ogg);
   ~TopDatabase();
   void AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta);
-  void ExpandDB(const TBits* patt);
 
   Int_t GetN() const {return fN;}
   Int_t GetTotClusters() const {return fTotClusters;}
@@ -51,7 +50,7 @@ class TopDatabase : public TObject {
   Int_t fNmax;//patterns above this number (included) belong to a "junk" bin
   TObjArray fArrHisto;
   TObjArray* GetArrTopologies() {return &fArrTopologies;}
-  void ExpandDB(TBits* patt); 
+  void ExpandDB(const TBits* patt); 
   
 
 ClassDef(TopDatabase,1)

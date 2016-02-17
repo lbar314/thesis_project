@@ -76,11 +76,11 @@ void compClusHitsMod1(int nev=-1)
   AliCDBManager* man = AliCDBManager::Instance();
   man->SetDefaultStorage("local://$ALICE_ROOT/OCDB");
   man->SetSpecificStorage("GRP/GRP/Data",
-        Form("local://%s",gSystem->pwd()));
+			  Form("local://%s",gSystem->pwd()));
   man->SetSpecificStorage("ITS/Align/Data",
-        Form("local://%s",gSystem->pwd()));
+			  Form("local://%s",gSystem->pwd()));
   man->SetSpecificStorage("ITS/Calib/RecoParam",
-        Form("local://%s",gSystem->pwd()));
+			  Form("local://%s",gSystem->pwd()));
   man->SetRun(0);
 
   gAlice=NULL;
@@ -227,9 +227,9 @@ void compClusHitsMod1(int nev=-1)
                   cl->SetBit(kSplit);
                   clusT->SetBit(kSplit);
                   /*
-                  printf("Discard clusters of module %d:\n",modID);
-                  cl->Print();
-                  clusT->Print();
+		    printf("Discard clusters of module %d:\n",modID);
+		    cl->Print();
+		    clusT->Print();
                   */
                   break;
                 }
@@ -292,15 +292,15 @@ void compClusHitsMod1(int nev=-1)
           Double_t dirHit[3]={(xExit-xEnt),(yExit-yEnt),(zExit-zEnt)};
 
           /*double PG[3] = {(double)pHit->GetPXG(), (double)pHit->GetPYG(), (double)pHit->GetPZG()}; //Momentum at hit-point in Global Frame
-          double PL[3];
-          if (TMath::Abs(PG[0])<10e-7 && TMath::Abs(PG[1])<10e-7) {
+	    double PL[3];
+	    if (TMath::Abs(PG[0])<10e-7 && TMath::Abs(PG[1])<10e-7) {
             pHit->Dump();
             int lb = pHit->GetTrack();
             stack->Particle(lb)->Print();
             continue;
-          }
-          mat->MasterToLocalVect(PG,PL); //Momentum in local Frame
-          //printf(">> %e %e   %e %e   %e %e\n",PG[0],PL[0],PG[1],PL[1],PG[2],PL[2]);*/
+	    }
+	    mat->MasterToLocalVect(PG,PL); //Momentum in local Frame
+	    //printf(">> %e %e   %e %e   %e %e\n",PG[0],PL[0],PG[1],PL[1],PG[2],PL[2]);*/
 
           Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[1])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2])); //Polar Angle
           Float_t alpha2 = (Float_t) alpha1; //convert to float
@@ -382,10 +382,10 @@ void compClusHitsMod1(int nev=-1)
           //
           trOut->Fill();
           /*
-          if (clsize==5) {
+	    if (clsize==5) {
             printf("\nL%d(%c) Mod%d, Cl:%d | %+5.1f %+5.1f (%d/%d)|H:%e %e %e | C:%e %e %e\n",ilr,cl->TestBit(kSplit) ? 'S':'N',
-             modID,icl,(txyzH[0]-xyzClTr[0])*1e4,(txyzH[2]-xyzClTr[2])*1e4, row,col,
-             gxyzH[0],gxyzH[1],gxyzH[2],xyzClGlo[0],xyzClGlo[1],xyzClGlo[2]);
+	    modID,icl,(txyzH[0]-xyzClTr[0])*1e4,(txyzH[2]-xyzClTr[2])*1e4, row,col,
+	    gxyzH[0],gxyzH[1],gxyzH[2],xyzClGlo[0],xyzClGlo[1],xyzClGlo[2]);
             cl->Print();
             pHit->Print();
             //
@@ -396,7 +396,7 @@ void compClusHitsMod1(int nev=-1)
             cl->GetLocalXYZ(cloc);
             printf("LocH: %e %e %e | %e %e %e\n",a0,b0,c0,a1,b1,c1);
             printf("LocC: %e %e %e | %e %e %e\n",cloc[0],cloc[1],cloc[2],xyzClTr[0],xyzClTr[1],xyzClTr[2]);
-          }
+	    }
           */
           //
         }

@@ -80,7 +80,7 @@ void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX
   h3a->Fill(beta, dZ);
 }
 
-void TopDatabase::ExpandDB(TBits* patt){
+void TopDatabase::ExpandDB(const TBits* patt){
   fN++;
   fArrTopologies.Expand(fN);
   Topology* top = new Topology(*patt);
