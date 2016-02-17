@@ -16,8 +16,8 @@ class TopDatabase : public TObject {
 
   enum SortMode_t{kFrequency=0, kHashes=1};//fMode
   enum FitIndex_t{kDeltaZmean=0, kDeltaZmeanErr=1, kDeltaXmean=2, kDeltaXmeanErr=3, kDeltaZsigma=4, kDeltaZsigmaErr=5,
-		  kDeltaXsigma=6, kDeltaXsigmaErr=7, kChi2z=8, kChi2x=9, kNDFx=10, kNDFz=11, kFitLength=12}; //position in Topology fArrFit 
-  
+		  kDeltaXsigma=6, kDeltaXsigmaErr=7, kChi2z=8, kChi2x=9, kNDFx=10, kNDFz=11, kFitLength=12}; //position in Topology fArrFit
+
   TopDatabase();
   TopDatabase(TopDatabase &ogg);
   ~TopDatabase();
@@ -38,7 +38,8 @@ class TopDatabase : public TObject {
   void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
   void SetNmax(Int_t a) { fNmax = a;}
   Int_t FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
-  
+  Bool_t TestChain2Ways(const AliITSMFTClusterPix &cl) const;
+
 
  private:
   Int_t fN; //length of arrays
@@ -50,8 +51,8 @@ class TopDatabase : public TObject {
   Int_t fNmax;//patterns above this number (included) belong to a "junk" bin
   TObjArray fArrHisto;
   TObjArray* GetArrTopologies() {return &fArrTopologies;}
-  void ExpandDB(const TBits* patt); 
-  
+  void ExpandDB(const TBits* patt);
+
 
 ClassDef(TopDatabase,1)
 
