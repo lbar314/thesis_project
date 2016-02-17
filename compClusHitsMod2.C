@@ -6,9 +6,9 @@
 #include "AliITSMFTClusterPix.h"
 #include "AliITSURecoLayer.h"
 #include "AliITSURecoDet.h"
-#include "AliITSUHit.h"
+#include "AliITSMFTHit.h"
 #include "AliITSUGeomTGeo.h"
-#include "AliITSsegmentation.h"
+#include "AliITSMFTSegmentationPix.h"
 #include "AliGeomManager.h"
 #include "AliStack.h"
 #include "AliLoader.h"
@@ -164,7 +164,7 @@ void compClusHitsMod2(int nev=-1)
   //
   TTree *cluTree = 0x0;
   TTree *hitTree = 0x0;
-  TClonesArray *hitList=new TClonesArray("AliITSUHit");
+  TClonesArray *hitList=new TClonesArray("AliITSMFTHit");
   //
   Float_t xyzClGloF[3];
   Double_t xyzClGlo[3],xyzClTr[3];
@@ -229,16 +229,16 @@ void compClusHitsMod2(int nev=-1)
       hitTree->GetEntry(iEnt);
       int nh = hitList->GetEntries();
       for(Int_t iHit=0; iHit<nh;iHit++){
-        AliITSUHit *pHit = (AliITSUHit*)hitList->At(iHit);
+        AliITSMFTHit *pHit = (AliITSMFTHit*)hitList->At(iHit);
         int mcID = pHit->GetTrack();
 	//printf("MCid: %d %d %d Ch %d\n",iEnt,iHit, mcID, pHit->GetChip());
         TClonesArray* harr = arrMCTracks.GetEntriesFast()>mcID ? (TClonesArray*)arrMCTracks.At(mcID) : 0;
         if (!harr) {
-          harr = new TClonesArray("AliITSUHit"); // 1st encounter of the MC track
+          harr = new TClonesArray("AliITSMFTHit"); // 1st encounter of the MC track
           arrMCTracks.AddAtAndExpand(harr,mcID);
         }
         //
-        new ( (*harr)[harr->GetEntriesFast()] ) AliITSUHit(*pHit);
+        new ( (*harr)[harr->GetEntriesFast()] ) AliITSMFTHit(*pHit);
       }
     }
     //    return;
@@ -288,7 +288,7 @@ void compClusHitsMod2(int nev=-1)
           }
         }
         //------------
-        const AliITSsegmentation* segm = gm->GetSegmentation(ilr);
+        const AliITSMFTSegmentationPix* segm = gm->GetSegmentation(ilr);
         //
         cl->GetGlobalXYZ(xyzClGloF);
         int clsize = cl->GetNPix();
@@ -311,9 +311,9 @@ void compClusHitsMod2(int nev=-1)
 	  if (!htArr) {printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
           //
           int nh = htArr->GetEntriesFast();
-          AliITSUHit *pHit=0;
+          AliITSMFTHit *pHit=0;
           for (int ih=nh;ih--;) {
-            AliITSUHit* tHit = (AliITSUHit*)htArr->At(ih);
+            AliITSMFTHit* tHit = (AliITSMFTHit*)htArr->At(ih);
             if (tHit->GetChip()!=modID) continue;
             pHit = tHit;
             break;
@@ -336,8 +336,8 @@ void compClusHitsMod2(int nev=-1)
           //
           //Angles determination
 
-          pHit->GetPositionL(xExit,yExit,zExit);
-          pHit->GetPositionL0(xEnt,yEnt,zEnt,tof1);
+          pHit->GetPositionL(xExit,yExit,zExit,gm);
+          pHit->GetPositionL0(xEnt,yEnt,zEnt,tof1,gm);
 
           Double_t dirHit[3]={(xExit-xEnt),(yExit-yEnt),(zExit-zEnt)};
 
