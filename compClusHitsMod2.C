@@ -21,8 +21,8 @@
 #include "TPaveStats.h"
 #include "TClonesArray.h"
 #include <Riostream.h>
-#include "./MyClasses/Topology.h"
-#include "./MyClasses/TopDatabase.h"
+#include "./Topology.h"
+#include "./TopDatabase.h"
 
 #endif
 
