@@ -23,7 +23,7 @@ class Topology :public TObject {
   Bool_t IsEqual(const TObject* obj) const;
   Bool_t IsSortable() const {return kTRUE;}
   Int_t Compare(const TObject* obj) const;
-  
+
   TBits GetPattern() const {return fPattern;};
   UInt_t GetUniqueID() const {return fUID;}
   Int_t GetRowSpan() const {return fRs;}
@@ -52,7 +52,7 @@ class Topology :public TObject {
   static void Word2Top(const UChar_t* Word, TBits &top);
   static void Top2Word(const TBits &top, UChar_t* Word);
   static Int_t Top2Int(const TBits &top);
-  static std::ostream& printTop(TBits top, std::ostream &out);
+  static std::ostream& printTop(const TBits &top, std::ostream &out);
   //Word: 1st byte = row span; 2nd = column span; others: pattern.
   //The length must be the minimum possible.
 
@@ -95,9 +95,9 @@ class Topology :public TObject {
   Int_t fFlag;
   Int_t fPartialTop;
   Int_t fPattID;
- 
+
   ClassDef(Topology,1)
-    
+
 };
 
 #endif

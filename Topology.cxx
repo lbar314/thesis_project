@@ -23,9 +23,9 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){//UniqueID of t
   fPattern.Clear();
   fRs = cluster.GetPatternRowSpan();
   fCs = cluster.GetPatternColSpan();
-  fUID = fRs<<16 + fCs;
+  fUID = (fRs<<16) + fCs;
   fPattern.SetUniqueID(fUID);
-  
+
   //Defining the topology
   Int_t tempxCOG = 0;
   Int_t tempzCOG = 0;
@@ -64,13 +64,14 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){//UniqueID of t
   nBytes+=2; //first byte: number of rows; second byte: number of columns;
   fWordLength = nBytes;
   fWord = new UChar_t[fWordLength];
+	for(int i=0; i<fWordLength; i++) fWord[i]=0;
   Top2Word(fPattern,fWord);
   fHash=(Int_t)FuncMurmurHash2(fWord, fWordLength);
-  
+
   fFreq=0.; //WARNING: it is to set in a second time
   fCounts=0; //WARNING: it is to set in a second time
   fGroupID=-1; //WARNING: it is to set in a second time
-  
+
   //Creating histograms
 
   fHxA = new TH2F("hXA","#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
@@ -82,7 +83,7 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){//UniqueID of t
   fHxB->SetDirectory(0);
   fHxB->GetXaxis()->SetTitle("#alpha");
   fHxB->GetYaxis()->SetTitle("#DeltaX (#mum)");
-  
+
   fHzA = new TH2F("hZA","#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
   fHzA->SetDirectory(0);
   fHzA->GetXaxis()->SetTitle("#alpha");
@@ -110,6 +111,7 @@ Topology::Topology(const TBits &top2copy):TObject(),fPattern(top2copy){//UniqueI
   nBytes+=2; //first byte: number of rows; second byte: number of columns;
   fWordLength = nBytes;
   fWord = new UChar_t[fWordLength];
+	for(Int_t i=0; i<fWordLength; i++) fWord[i]=0;
   Top2Word(fPattern,fWord);
 
   //Defining COG position
@@ -142,12 +144,12 @@ Topology::Topology(const TBits &top2copy):TObject(),fPattern(top2copy){//UniqueI
   fxCOGshift = xsh;
   fzCOGshift = zsh;
   fFiredPixels = tempFiredPixels;
-  
+
   fFreq=0.; //WARNING: it is to set in a second time
   fCounts=0; //WARNING: it is to set in a second time
   fGroupID=-1; //WARNING: it is to set in a second time
   fHash=(Int_t)FuncMurmurHash2(fWord, fWordLength);
-  
+
   //Creating histograms
 
   fHxA = new TH2F("hXA","#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
@@ -159,7 +161,7 @@ Topology::Topology(const TBits &top2copy):TObject(),fPattern(top2copy){//UniqueI
   fHxB->SetDirectory(0);
   fHxB->GetXaxis()->SetTitle("#alpha");
   fHxB->GetYaxis()->SetTitle("#DeltaX (#mum)");
-  
+
   fHzA = new TH2F("hXA","#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
   fHzA->SetDirectory(0);
   fHzA->GetXaxis()->SetTitle("#alpha");
@@ -186,6 +188,7 @@ Topology::Topology(const Topology &topo):TObject(),fPattern(topo.GetPattern()){
   nBytes+=2; //first byte: number of rows; second byte: number of columns;
   fWordLength = nBytes;
   fWord = new UChar_t[fWordLength];
+	for(Int_t i=0; i<fWordLength; i++) fWord[i]=0;
   Top2Word(fPattern,fWord);
   fFreq = topo.GetFreq();
   fCounts = topo.GetCounts();
@@ -230,7 +233,7 @@ void Topology::Top2Word(const TBits &top, UChar_t* Word){
 	tempChar=0;
 	BitCounter=7;
 	index++;
-      }	
+      }
       if(top.TestBitNumber(ir*cs+ic)) tempChar+=(1<<BitCounter);
       BitCounter--;
     }
@@ -258,12 +261,12 @@ void Topology::Word2Top(const UChar_t* Word, TBits &top){
   top.SetUniqueID((rs<<16)+cs);
 }
 
-std::ostream& Topology::printTop(TBits top, std::ostream &out){
+std::ostream& Topology::printTop(const TBits &top, std::ostream &out){
   UInt_t UID = top.GetUniqueID();
-  Int_t rs = UID>>16; 
+  Int_t rs = UID>>16;
   Int_t cs = UID&0xffff;
   for (Int_t ir=0;ir<rs;ir++){
-    out << "|"; 
+    out << "|";
     for (Int_t ic=0; ic<cs; ic++) {
       out << Form("%c",top.TestBitNumber(ir*cs+ic) ? '+':' ');
     }
@@ -309,7 +312,7 @@ UInt_t Topology::FuncMurmurHash2(const void* key, Int_t len){
 
 Int_t Topology::Compare(const TObject* obj) const{
   //Since Sort method of TObjArray sorts object in ascending order ( if +1 means higher and -1 lower),
-  //it is necessary to invert the frequency outputs 
+  //it is necessary to invert the frequency outputs
   const Topology* top = (const Topology*)obj;
   if(fMode==kFrequency){
     if(fFreq < top->GetFreq()) return +1;
@@ -319,7 +322,7 @@ Int_t Topology::Compare(const TObject* obj) const{
   if(fMode==kHashes){
     if(fHash < top->GetHash()) return -1;
     else if(fHash == top->GetHash()) return 0;
-    else return +1;    
+    else return +1;
   }
   AliFatal(Form("Unknown mode for sorting: %d",fMode));
   return 0;
@@ -333,7 +336,7 @@ Bool_t Topology::IsEqual(const TObject* obj) const{
   }
   if(fMode==kHashes){
     if(fHash == top->GetHash()) return kTRUE;
-    else return kFALSE;    
+    else return kFALSE;
   }
   AliFatal(Form("Unknown mode for sorting: %d",fMode));
   return kFALSE;
@@ -351,5 +354,5 @@ void Topology::DeleteHistos(){
   delete fHxA;
   delete fHxB;
   delete fHzA;
-  delete fHzB;  
+  delete fHzB;
 }

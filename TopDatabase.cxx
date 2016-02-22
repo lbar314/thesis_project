@@ -383,7 +383,7 @@ Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   nBytes+=2; //first byte: number of rows; second byte: number of columns;
   const Int_t length = nBytes;
   UChar_t Word[length];
-  for(int k=length; k--;) Word[k]=0;
+  for(int k=0; k<length; k++) Word[k]=0;
   Word[0]=rs;
   Word[1]=cs;
   UChar_t tempChar=0;
@@ -392,10 +392,10 @@ Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   for(Int_t ir=0; ir<rs; ir++){
     for(Int_t ic=0; ic<cs; ic++){
       if(BitCounter<0) {
-	Word[index]=tempChar;
-	tempChar=0;
-	BitCounter=7;
-	index++;
+	      Word[index]=tempChar;
+	      tempChar=0;
+	      BitCounter=7;
+	      index++;
       }
       if(cl.TestPixel(ir,ic)) tempChar+=(1<<BitCounter);
       BitCounter--;
@@ -486,7 +486,7 @@ Bool_t TopDatabase::TestChain2Ways(const AliITSMFTClusterPix &cl) const{
   nBytes+=2; //first byte: number of rows; second byte: number of columns;
   const Int_t length = nBytes;
   UChar_t Word[length];
-  for(int k=length; k--;) Word[k]=0;
+  for(int k=0; k<length; k++) Word[k]=0;
   Word[0]=rs;
   Word[1]=cs;
   UChar_t tempChar=0;
@@ -495,10 +495,10 @@ Bool_t TopDatabase::TestChain2Ways(const AliITSMFTClusterPix &cl) const{
   for(Int_t ir=0; ir<rs; ir++){
     for(Int_t ic=0; ic<cs; ic++){
       if(BitCounter<0) {
-	Word[index]=tempChar;
-	tempChar=0;
-	BitCounter=7;
-	index++;
+	      Word[index]=tempChar;
+	      tempChar=0;
+	      BitCounter=7;
+	      index++;
       }
       if(cl.TestPixel(ir,ic)) tempChar+=(1<<BitCounter);
       BitCounter--;
