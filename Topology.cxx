@@ -13,7 +13,7 @@ ClassImp(Topology)
 
 Int_t Topology::fMode = Topology::kHashes;
 
-Topology::Topology():TObject(), fPattern(), fUID(0), fRs(0), fCs(0), fFiredPixels(0),fxCOGPix(0.), fzCOGPix(0.), fxCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHxA(0), fHxB(0), fHzA(0), fHzB(0), fFlag(0), fPattID(-1){
+Topology::Topology():TObject(), fPattern(), fFiredPixels(0),fxCOGPix(0.), fzCOGPix(0.), fxCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHxA(0), fHxB(0), fHzA(0), fHzB(0), fFlag(0), fPattID(-1){
   for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=0;
 }
 
@@ -26,19 +26,18 @@ Topology::~Topology(){
 
 
 Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){
-  fRs = cluster.GetPatternRowSpan();
-  fCs = cluster.GetPatternColSpan();
-  fUID = (fRs<<16) + fCs;
+  Int_t rs = cluster.GetPatternRowSpan();
+  Int_t cs = cluster.GetPatternColSpan();
 	Int_t tempxCOG = 0;
   Int_t tempzCOG = 0;
   Int_t tempFiredPixels = 0;
 	//______________________________creating fPattern
-	fPattern.push_back(fRs);
-	fPattern.push_back(fCs);
+	fPattern.push_back(rs);
+	fPattern.push_back(cs);
   UChar_t tempChar=0;
   Int_t BitCounter=7;
-  for(Int_t ir=0; ir<fRs; ir++){
-    for(Int_t ic=0; ic<fCs; ic++){
+  for(Int_t ir=0; ir<rs; ir++){
+    for(Int_t ic=0; ic<cs; ic++){
       if(BitCounter<0) {
 	      fPattern.push_back(tempChar);
 	      tempChar=0;
@@ -104,9 +103,6 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){
 
 Topology::Topology(const Topology &topo):TObject(){
 	fPattern = topo.GetPattern();
-  fUID = topo.GetUniqueID();
-  fRs = topo.GetRowSpan();
-  fCs = topo.GetColumnSpan();
   fFreq = topo.GetFreq();
   fCounts = topo.GetCounts();
   fHash = topo.GetHash();

@@ -24,9 +24,8 @@ class Topology :public TObject {
   Bool_t IsSortable() const {return kTRUE;}
   Int_t Compare(const TObject* obj) const;
   string GetPattern() const {return fPattern;};
-  UInt_t GetUniqueID() const {return fUID;}
-  Int_t GetRowSpan() const {return fRs;}
-  Int_t GetColumnSpan() const {return fCs;}
+  Int_t GetRowSpan() const {return fPattern[0];}
+  Int_t GetColumnSpan() const {return fPattern[1];}
   Int_t GetHash() const {return fHash;}
   Float_t GetFreq() const {return fFreq;}
   Int_t GetCounts() const {return fCounts;}
@@ -65,9 +64,6 @@ class Topology :public TObject {
  private:
 
   string fPattern;
-  UInt_t fUID; //Unique ID
-  Int_t fRs; //row span
-  Int_t fCs; //column span
   Int_t fFiredPixels;
   Float_t fxCOGPix;
   Float_t fzCOGPix;
