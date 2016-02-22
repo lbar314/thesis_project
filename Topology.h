@@ -18,19 +18,15 @@ class Topology :public TObject {
   Topology();
   virtual ~Topology();
   Topology(const AliITSMFTClusterPix &cluster);
-  /*
-  Topology(const TBits &top2copy);//UniqueID of the argument must already have been set
   Topology(const Topology &topo);
 
   Bool_t IsEqual(const TObject* obj) const;
   Bool_t IsSortable() const {return kTRUE;}
   Int_t Compare(const TObject* obj) const;
-
-  TBits GetPattern() const {return fPattern;};
+  string GetPattern() const {return fPattern;};
   UInt_t GetUniqueID() const {return fUID;}
   Int_t GetRowSpan() const {return fRs;}
   Int_t GetColumnSpan() const {return fCs;}
-  Int_t GetWordLength() const {return fWordLength;}
   Int_t GetHash() const {return fHash;}
   Float_t GetFreq() const {return fFreq;}
   Int_t GetCounts() const {return fCounts;}
@@ -47,17 +43,11 @@ class Topology :public TObject {
   TH2F* GetHzB() const {return fHzB;}
   Float_t GetFitStuff(Int_t ind) const {return fArrFit[ind];}
   Int_t GetFlag() const {return fFlag;}
-  Int_t GetPartialTop() const {return fPartialTop;}
   Int_t GetPattID() const {return fPattID;}
-*/
+
   std::ostream& printTop(std::ostream &out);
-/*
   static UInt_t FuncMurmurHash2(const void * key, Int_t len);
-  static void Word2Top(const UChar_t* Word, TBits &top);
-  static void Top2Word(const TBits &top, UChar_t* Word);
-  static Int_t Top2Int(const TBits &top);
-  //Word: 1st byte = row span; 2nd = column span; others: pattern.
-  //The length must be the minimum possible.
+  static std::ostream& printCluster(const AliITSMFTClusterPix &cluster,std::ostream &out);
 
   void SetGroupID(Int_t num){fGroupID=num;}
   void SetFreq(Float_t num){fFreq=num;}
@@ -71,7 +61,6 @@ class Topology :public TObject {
   void SetHzA(TH2F* ptr) {fHzA=ptr;}
   void SetHxB(TH2F* ptr) {fHxB=ptr;}
   void SetHzB(TH2F* ptr) {fHzB=ptr;}
-  */
 
  private:
 

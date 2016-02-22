@@ -303,12 +303,16 @@ void debug(int nev=-1)
 	        //DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
 
           //***************************************************************************************************************************
-          if(primo==0){
+          if(primo<6){
             cout << "*****************************\n";
             Topology top(*cl);
+            Topology::printCluster(*cl,cout);
             cout << "Checking print\n";
             top.printTop(cout);
             primo++;
+            for(int i=0; i<10; i++){
+              cout << Topology::FuncMurmurHash2(top.GetPattern().data(),(Int_t)top.GetPattern().length()) << endl;
+            }
           }
 
           //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
