@@ -22,14 +22,13 @@
 #include "TClonesArray.h"
 #include <Riostream.h>
 #include "./Topology.h"
-#include "./TopDatabase.h"
+//#include "./TopDatabase.h"
 #include <map>
 
 #endif
 
 using namespace std;
 
-TObjArray histoArr;
 enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,kDTZSPL};
 
 typedef struct {
@@ -130,7 +129,7 @@ void debug(int nev=-1)
   printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
-  TopDatabase DB;
+  //TopDatabase DB;
 
   for (Int_t iEvent = 0; iEvent < ntotev; iEvent++) {
     if(iEvent>0) break;
@@ -301,57 +300,18 @@ void debug(int nev=-1)
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-	        DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
+	        //DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
 
           //***************************************************************************************************************************
-          /*
-          Topology top(*cl);
-          int hash = top.GetHash();
-          TBits refPattern = top.GetPattern();
-          */
-          TBits refPattern;
-          refPattern.Clear();
-          Int_t rs = cl->GetPatternRowSpan();
-          Int_t cs = cl->GetPatternColSpan();
-          for(Int_t ir=0;ir<rs;ir++)
-            for(Int_t ic=0;ic<cs;ic++)
-              if(cl->TestPixel(ir,ic)) refPattern.SetBitNumber(ir*cs+ic);
-          refPattern.SetUniqueID((rs<<16)+(cs));
-          Topology top(refPattern);
-          int hash = top.GetHash();
-
-          refPattern.SetUniqueID(top.GetUniqueID());
-
-          Int_t nBytes = rs*cs/8;
-          if((rs*cs)%8 != 0) nBytes++;
-          nBytes+=2; //first byte:
-          const Int_t lung = nBytes;
-          if(lung!=top.GetWordLength()) cout << "ERROR" << endl;
-          UChar_t* v[10];
-          for(int g=0; g<10; g++){
-            UChar_t* w = new UChar_t[lung];
-            for(int y=0; y<lung; y++) w[y]=0;
-            Topology::Top2Word(refPattern,w);
-            v[g]=w;
-            //v[g]=top.GetWord();
-          }
-          int diff = 0;
-          for(int k=0; k<10; k++){
-            for(int g=k+1;g<10;g++){
-              diff+=memcmp(v[k],v[g],lung);
-            }
-          }
-          if(diff!=0){
-            cout<<"hello!"<<endl;
-            b << "Error with convertion to word: iEvent" << iEvent << " ilr: " << ilr << " icl: " << icl << endl;
-            bitsArr.AddLast(new TBits(refPattern));
-            pippobaudo++;
-          }
-          for(int i=0; i<10; i++){
-            delete v[i];
+          if(primo==0){
+            cout << "*****************************\n";
+            Topology top(*cl);
+            cout << "Checking print\n";
+            top.printTop(cout);
+            primo++;
           }
 
-          a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
+          //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
           /*
           bool newTop = true;
           for (int i = 0; i < mappa.size(); ++i) {
@@ -419,16 +379,17 @@ void debug(int nev=-1)
   delete boh;
   arrMCTracks.Delete();
   //
-  DB.EndAndSort();
-  DB.SetThresholdCumulative(0.95);
-  cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-  DB.Grouping(10,10);
-  DB.PrintDB("Database1.txt");
-  TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
-  flDB->WriteObject(&DB,"DB","kSingleKey");
-  flDB->Close();
-  histoArr.Delete();
-  delete flDB;
+  /*
+    DB.EndAndSort();
+    DB.SetThresholdCumulative(0.95);
+    cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
+    DB.Grouping(10,10);
+    DB.PrintDB("Database1.txt");
+    TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
+    flDB->WriteObject(&DB,"DB","kSingleKey");
+    flDB->Close();
+    delete flDB;
+  */
   a.close();
   b.close();
 }

@@ -36,7 +36,7 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(), fFiredPixels(0
 	for (Int_t ir=0;ir<fRs;ir++){
 		cout << "|";
 		for (Int_t ic=0; ic<fCs; ic++) {
-			cout << Form("%c",top.TestPixel(ir,ic) ? '+':' ');
+			cout << Form("%c",cluster.TestPixel(ir,ic) ? '+':' ');
 		}
 		cout << ("|\n");
 	}
@@ -158,9 +158,9 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(), fFiredPixels(0
 	  for(Int_t ir=0;ir<fRs;ir++){
 	    for(Int_t ic=0;ic<fCs;ic++){
 	      if(fPattern.TestBitNumber(ir*fCs+ic)){
-		tempFiredPixels++;
-		tempxCOG+=ir;
-		tempzCOG+=ic;
+				tempFiredPixels++;
+				tempxCOG+=ir;
+				tempzCOG+=ic;
 	      }
 	    }
 	  }
@@ -290,16 +290,28 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(), fFiredPixels(0
 	  top.SetUniqueID((rs<<16)+cs);
 	}
 */
-	std::ostream& Topology::printTop(const TBits &top, std::ostream &out){
-	  UInt_t UID = top.GetUniqueID();
-	  Int_t rs = UID>>16;
-	  Int_t cs = UID&0xffff;
-	  for (Int_t ir=0;ir<rs;ir++){
-	    out << "|";
-	    for (Int_t ic=0; ic<cs; ic++) {
-	      out << Form("%c",top.TestBitNumber(ir*cs+ic) ? '+':' ');
+
+
+	std::ostream& Topology::printTop(std::ostream &out){
+
+		Int_t rs = fPattern[0];
+		Int_t cs = fPattern[1];
+		cout << "rs: " << rs << " cs: " << cs << " controllo: " << fPattern.length() << endl;
+		UChar_t tempChar = 0;
+		Int_t s=0;
+		Int_t ic = 0;
+	  for (Int_t i=2; i<fPattern.length(); i++){
+			tempChar = fPattern[i];
+			s=128; //0b10000000
+	    while(s>0){
+				if(ic%cs==0) out << "|";
+				ic++;
+	      out << Form("%c", (tempChar&s)!=0 ? '+':' ');
+	      s/=2;
+				if(ic%cs==0) out << "|" << endl;
+				if(ic==(rs*cs)) break;
 	    }
-	    out << ("|\n");
+			if(ic==(rs*cs)) break;
 	  }
 	  out<< endl;
 	}

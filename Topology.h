@@ -49,12 +49,13 @@ class Topology :public TObject {
   Int_t GetFlag() const {return fFlag;}
   Int_t GetPartialTop() const {return fPartialTop;}
   Int_t GetPattID() const {return fPattID;}
-
+*/
+  std::ostream& printTop(std::ostream &out);
+/*
   static UInt_t FuncMurmurHash2(const void * key, Int_t len);
   static void Word2Top(const UChar_t* Word, TBits &top);
   static void Top2Word(const TBits &top, UChar_t* Word);
   static Int_t Top2Int(const TBits &top);
-  static std::ostream& printTop(const TBits &top, std::ostream &out);
   //Word: 1st byte = row span; 2nd = column span; others: pattern.
   //The length must be the minimum possible.
 
