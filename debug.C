@@ -309,6 +309,7 @@ void debug(int nev=-1)
             Topology::printCluster(*cl,cout);
             cout << "Checking print\n";
             top.printTop(cout);
+            printf("xCOG: %f + (%f) xCOG: %f + (%f) fired: %d\n", top.GetxCOGPix(),top.GetxCOGshift(),top.GetzCOGPix(),top.GetzCOGshift(), top.GetFiredPixels());
             primo++;
             for(int i=0; i<10; i++){
               cout << Topology::FuncMurmurHash2(top.GetPattern().data(),(Int_t)top.GetPattern().length()) << endl;
