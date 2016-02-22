@@ -6,6 +6,7 @@
 #include "TH2F.h"
 #include "TH1F.h"
 #include <Riostream.h>
+#include <string>
 
 class Topology :public TObject {
 
@@ -15,10 +16,11 @@ class Topology :public TObject {
 		  kDeltaXsigma=6, kDeltaXsigmaErr=7, kChi2z=8, kChi2x=9, kNDFx=10, kNDFz=11, kFitLength=12}; //position in fArrFit
 
   Topology();
+  virtual ~Topology();
   Topology(const AliITSMFTClusterPix &cluster);
+  /*
   Topology(const TBits &top2copy);//UniqueID of the argument must already have been set
   Topology(const Topology &topo);
-  virtual ~Topology();
 
   Bool_t IsEqual(const TObject* obj) const;
   Bool_t IsSortable() const {return kTRUE;}
@@ -68,10 +70,11 @@ class Topology :public TObject {
   void SetHzA(TH2F* ptr) {fHzA=ptr;}
   void SetHxB(TH2F* ptr) {fHxB=ptr;}
   void SetHzB(TH2F* ptr) {fHzB=ptr;}
+  */
 
  private:
 
-  TBits fPattern;
+  string fPattern;
   UInt_t fUID; //Unique ID
   Int_t fRs; //row span
   Int_t fCs; //column span
@@ -81,8 +84,6 @@ class Topology :public TObject {
   Float_t fxCOGshift;
   Float_t fzCOGshift;
   Int_t fHash;
-  Int_t fWordLength;
-  UChar_t* fWord;//[fWordLength]
   Int_t fCounts;
   Float_t fFreq;
   Int_t fGroupID;
@@ -93,7 +94,6 @@ class Topology :public TObject {
   TH2F* fHzB;
   Float_t fArrFit[kFitLength];
   Int_t fFlag;
-  Int_t fPartialTop;
   Int_t fPattID;
 
   ClassDef(Topology,1)

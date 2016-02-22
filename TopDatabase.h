@@ -42,6 +42,7 @@ class TopDatabase : public TObject {
 
 
  private:
+  string fPattern;
   Int_t fN; //length of arrays
   TObjArray fArrTopologies;//array of topologies (class Topology)
   Int_t fTotClusters;

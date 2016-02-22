@@ -566,8 +566,8 @@ Bool_t TopDatabase::TestChain2Ways(const AliITSMFTClusterPix &cl) const{
     guessIndex = interIndex;
     while( ( (Topology*)fArrTopologies.At(guessIndex) )->GetHash()==hashcode && IndexFound==kFALSE){
       if(Part==( (Topology*)fArrTopologies.At(guessIndex) )->GetPartialTop() ){
-	IndexFound = kTRUE;
-	interIndex = guessIndex;
+	      IndexFound = kTRUE;
+	      interIndex = guessIndex;
       }
       guessIndex++;
     }
