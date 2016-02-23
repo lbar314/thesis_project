@@ -35,7 +35,7 @@ class TopDatabase : public TObject {
   void SetThreshold(Float_t thr);
   void EndAndSort(Int_t mode = kHashes);//to end the database and sort key wrt hashes, in ascending order
   void PrintDB(const char* output = "Database.txt") const; //print the database on a txt file
-  //void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
+  void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
   //Int_t FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
   //Bool_t TestChain2Ways(const AliITSMFTClusterPix &cl) const;
 

@@ -386,7 +386,7 @@ void debug(int nev=-1)
   DB.EndAndSort();
   DB.SetThresholdCumulative(0.95);
   cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-  //DB.Grouping(10,10);
+  DB.Grouping(10,10);
   DB.PrintDB("Database1.txt");
   TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
   flDB->WriteObject(&DB,"DB","kSingleKey");

@@ -36,10 +36,10 @@ class Topology :public TObject {
   Float_t GetxCOGshift() const {return fxCOGshift;}
   Float_t GetzCOGshift() const {return fzCOGshift;}
   Int_t GetMode() const {return fMode;}
-  TH2F GetHxA() const {return fHxA;}
-  TH2F GetHxB() const {return fHxB;}
-  TH2F GetHzA() const {return fHzA;}
-  TH2F GetHzB() const {return fHzB;}
+  TH2F& GetHxA() {return fHxA;}
+  TH2F& GetHxB() {return fHxB;}
+  TH2F& GetHzA() {return fHzA;}
+  TH2F& GetHzB() {return fHzB;}
   Float_t GetFitStuff(Int_t ind) const {return fArrFit[ind];}
   Int_t GetFlag() const {return fFlag;}
   Int_t GetPattID() const {return fPattID;}
@@ -53,6 +53,10 @@ class Topology :public TObject {
   void SetFitStuff(Float_t value, Int_t ind) {fArrFit[ind]=value;}
   void SetFlag(Int_t num) {fFlag=num;}
   void IncreaseCounts(){fCounts++;}
+  void SetHxA(TH2F &hist){fHxA=hist;}
+  void SetHxB(TH2F &hist){fHxB=hist;}
+  void SetHzA(TH2F &hist){fHzA=hist;}
+  void SetHzB(TH2F &hist){fHzB=hist;}
   void SetPattID(Int_t num) {fPattID=num;}
   static void SetMode(Int_t mode) {fMode=mode;}
 
