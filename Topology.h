@@ -17,8 +17,8 @@ class Topology :public TObject {
 
   Topology();
   virtual ~Topology();
-  Topology(const AliITSMFTClusterPix &cluster);
-  Topology(const Topology &topo);
+  Topology(const AliITSMFTClusterPix &cluster, Int_t ID=-1);
+  Topology(const Topology &topo, Int_t ID=-1);
 
   Bool_t IsEqual(const TObject* obj) const;
   Bool_t IsSortable() const {return kTRUE;}
@@ -36,10 +36,10 @@ class Topology :public TObject {
   Float_t GetxCOGshift() const {return fxCOGshift;}
   Float_t GetzCOGshift() const {return fzCOGshift;}
   Int_t GetMode() const {return fMode;}
-  TH2F* GetHxA() const {return fHxA;}
-  TH2F* GetHxB() const {return fHxB;}
-  TH2F* GetHzA() const {return fHzA;}
-  TH2F* GetHzB() const {return fHzB;}
+  TH2F GetHxA() const {return fHxA;}
+  TH2F GetHxB() const {return fHxB;}
+  TH2F GetHzA() const {return fHzA;}
+  TH2F GetHzB() const {return fHzB;}
   Float_t GetFitStuff(Int_t ind) const {return fArrFit[ind];}
   Int_t GetFlag() const {return fFlag;}
   Int_t GetPattID() const {return fPattID;}
@@ -55,11 +55,6 @@ class Topology :public TObject {
   void IncreaseCounts(){fCounts++;}
   void SetPattID(Int_t num) {fPattID=num;}
   static void SetMode(Int_t mode) {fMode=mode;}
-  void DeleteHistos();
-  void SetHxA(TH2F* ptr) {fHxA=ptr;}
-  void SetHzA(TH2F* ptr) {fHzA=ptr;}
-  void SetHxB(TH2F* ptr) {fHxB=ptr;}
-  void SetHzB(TH2F* ptr) {fHzB=ptr;}
 
  private:
 
@@ -74,10 +69,10 @@ class Topology :public TObject {
   Float_t fFreq;
   Int_t fGroupID;
   static Int_t fMode; //DEFAULT kHashes
-  TH2F* fHxA;
-  TH2F* fHxB;
-  TH2F* fHzA;
-  TH2F* fHzB;
+  TH2F fHxA;
+  TH2F fHxB;
+  TH2F fHzA;
+  TH2F fHzB;
   Float_t fArrFit[kFitLength];
   Int_t fFlag;
   Int_t fPattID;

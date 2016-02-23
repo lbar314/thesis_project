@@ -13,19 +13,19 @@ ClassImp(Topology)
 
 Int_t Topology::fMode = Topology::kHashes;
 
-Topology::Topology():TObject(), fPattern(), fFiredPixels(0),fxCOGPix(0.), fzCOGPix(0.), fxCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHxA(0), fHxB(0), fHzA(0), fHzB(0), fFlag(0), fPattID(-1){
+Topology::Topology():TObject(), fPattern(), fFiredPixels(0),fxCOGPix(0.), fzCOGPix(0.), fxCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHxA(), fHxB(), fHzA(), fHzB(), fFlag(0), fPattID(-1){
   for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=0;
 }
 
 Topology::~Topology(){
-  delete fHxA;
-  delete fHxB;
-  delete fHzA;
-  delete fHzB;
 }
 
 
-Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){
+Topology::Topology(const AliITSMFTClusterPix &cluster, Int_t ID):TObject()
+, fHxA(Form("hXA%d", ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
+, fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHzB(Form("hZB%d",ID),"#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30){
   Int_t rs = cluster.GetPatternRowSpan();
   Int_t cs = cluster.GetPatternColSpan();
 	Int_t tempxCOG = 0;
@@ -75,33 +75,29 @@ Topology::Topology(const AliITSMFTClusterPix &cluster):TObject(){
   fFreq=0.; //WARNING: it is to set in a second time
   fCounts=0; //WARNING: it is to set in a second time
   fGroupID=-1; //WARNING: it is to set in a second time
-	//_______________________________________________________Creating histograms
-  fHxA = new TH2F("hXA","#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
-  fHxA->SetDirectory(0);
-  fHxA->GetXaxis()->SetTitle("#alpha");
-  fHxA->GetYaxis()->SetTitle("#DeltaX (#mum)");
-
-  fHxB = new TH2F("hXB","#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30);
-  fHxB->SetDirectory(0);
-  fHxB->GetXaxis()->SetTitle("#alpha");
-  fHxB->GetYaxis()->SetTitle("#DeltaX (#mum)");
-
-  fHzA = new TH2F("hZA","#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
-  fHzA->SetDirectory(0);
-  fHzA->GetXaxis()->SetTitle("#alpha");
-  fHzA->GetYaxis()->SetTitle("#DeltaZ (#mum)");
-
-  fHzB = new TH2F("hZB","#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30);
-  fHzB->SetDirectory(0);
-  fHzB->GetXaxis()->SetTitle("#beta");
-  fHzB->GetYaxis()->SetTitle("#DeltaZ (#mum)");
-
+	//_______________________________________________________Setting histograms
+  fHxA.SetDirectory(0);
+  fHxA.GetXaxis()->SetTitle("#alpha");
+  fHxA.GetYaxis()->SetTitle("#DeltaX (#mum)");
+  fHxB.SetDirectory(0);
+  fHxB.GetXaxis()->SetTitle("#alpha");
+  fHxB.GetYaxis()->SetTitle("#DeltaX (#mum)");
+  fHzA.SetDirectory(0);
+  fHzA.GetXaxis()->SetTitle("#alpha");
+  fHzA.GetYaxis()->SetTitle("#DeltaZ (#mum)");
+  fHzB.SetDirectory(0);
+  fHzB.GetXaxis()->SetTitle("#beta");
+  fHzB.GetYaxis()->SetTitle("#DeltaZ (#mum)");
   for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=0;
   fFlag=0;
   fPattID = -1;
 }
 
-Topology::Topology(const Topology &topo):TObject(){
+Topology::Topology(const Topology &topo, Int_t ID):TObject()
+, fHxA(Form("hXA%d", ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
+, fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHzB(Form("hZB%d",ID),"#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30){
 	fPattern = topo.GetPattern();
   fFreq = topo.GetFreq();
   fCounts = topo.GetCounts();
@@ -112,10 +108,6 @@ Topology::Topology(const Topology &topo):TObject(){
   fzCOGPix = topo.GetzCOGPix();
   fxCOGshift = topo.GetxCOGshift();
   fzCOGshift = topo.GetzCOGshift();
-  fHxA = new TH2F(*topo.GetHxA());
-  fHxB = new TH2F(*topo.GetHxB());
-  fHzA = new TH2F(*topo.GetHzA());
-  fHzB = new TH2F(*topo.GetHzB());
   for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=topo.GetFitStuff(i);
   fFlag=0;
   fPattID=-1;
@@ -223,11 +215,4 @@ Bool_t Topology::IsEqual(const TObject* obj) const{
   }
   AliFatal(Form("Unknown mode for sorting: %d",fMode));
   return kFALSE;
-}
-
-void Topology::DeleteHistos(){
-  delete fHxA;
-  delete fHxB;
-  delete fHzA;
-  delete fHzB;
 }

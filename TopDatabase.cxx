@@ -52,13 +52,11 @@ void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX
     string pattOld = ((Topology*)fArrTopologies.At(ip))->GetPattern();
     if(top.GetPattern().length() == pattOld.length() && memcmp(top.GetPattern().data(),pattOld.data(),pattOld.length())==0){
       newPatt = kFALSE;
-      cout<< "old" << endl;
       indTop = ip;
       break;
     }
   }
   if(newPatt){
-    cout << "new" << endl;
     if(fN == fNmax){ //Junk bin
       Junk = kTRUE;
     }
@@ -69,20 +67,16 @@ void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX
   }
   if(Junk==kTRUE) return;
   ((Topology*)fArrTopologies.At(indTop))->IncreaseCounts();
-  TH2*  h0a = ((Topology*)fArrTopologies.At(indTop))->GetHxA();
-  h0a->Fill(alpha, dX);
-  TH2*  h1a = ((Topology*)fArrTopologies.At(indTop))->GetHzA();
-  h1a->Fill(alpha, dZ);
-  TH2*  h2a = ((Topology*)fArrTopologies.At(indTop))->GetHxB();
-  h2a->Fill(beta, dX);
-  TH2*  h3a = ((Topology*)fArrTopologies.At(indTop))->GetHzB();
-  h3a->Fill(beta, dZ);
+  ((Topology*)fArrTopologies.At(indTop))->GetHxA().Fill(alpha, dX);
+  ((Topology*)fArrTopologies.At(indTop))->GetHzA().Fill(alpha, dZ);
+  ((Topology*)fArrTopologies.At(indTop))->GetHxB().Fill(beta, dX);
+  ((Topology*)fArrTopologies.At(indTop))->GetHzB().Fill(beta, dZ);
 }
 
 void TopDatabase::ExpandDB(const Topology &top){
   fN++;
   fArrTopologies.Expand(fN);
-  Topology* top1 = new Topology(top);
+  Topology* top1 = new Topology(top,top.GetHash());
   fArrTopologies.AddAt(top1,fN-1);
 }
 
