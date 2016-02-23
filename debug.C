@@ -22,7 +22,7 @@
 #include "TClonesArray.h"
 #include <Riostream.h>
 #include "./Topology.h"
-//#include "./TopDatabase.h"
+#include "./TopDatabase.h"
 #include <map>
 
 #endif
@@ -129,7 +129,7 @@ void debug(int nev=-1)
   printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
-  //TopDatabase DB;
+  TopDatabase DB;
 
   for (Int_t iEvent = 0; iEvent < ntotev; iEvent++) {
     if(iEvent>0) break;
@@ -300,44 +300,43 @@ void debug(int nev=-1)
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-	        //DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
-
-          //***************************************************************************************************************************
-          if(primo<6){
-            cout << "*****************************\n";
+	        DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
+          /*
             Topology top(*cl);
+            Int_t hash = top.GetHash();
+            if(primo<6){
+            cout << "*****************************\n";
             Topology::printCluster(*cl,cout);
             cout << "Checking print\n";
             top.printTop(cout);
             printf("xCOG: %f + (%f) xCOG: %f + (%f) fired: %d\n", top.GetxCOGPix(),top.GetxCOGshift(),top.GetzCOGPix(),top.GetzCOGshift(), top.GetFiredPixels());
             primo++;
             for(int i=0; i<10; i++){
-              cout << Topology::FuncMurmurHash2(top.GetPattern().data(),(Int_t)top.GetPattern().length()) << endl;
-            }
-          }
-
-          //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
-          /*
-          bool newTop = true;
-          for (int i = 0; i < mappa.size(); ++i) {
-            if (mappa[i].first == hash) {
-              newTop = false;
-              if (mappa[i].second.GetPattern() != top.GetPattern() || mappa[i].second.GetUniqueID() != top.GetUniqueID()) {
-                bool newClash = true;
-          for (int j = 0; j < clashes.size(); ++j) {
-            if(clashes[j].first == hash) {
-              clashes[j].second++;
-              newClash = false;
-              break;
-            }
-          }
-          if (newClash) clashes.push_back(pair<int,int>(hash,1));
+                cout << Topology::FuncMurmurHash2(top.GetPattern().data(),(Int_t)top.GetPattern().length()) << endl;
               }
             }
-          }
-          if (newTop) mappa.push_back(pair<int,Topology>(hash,top));
+            //
+            a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
+            //
+            bool newTop = true;
+            for (int i = 0; i < mappa.size(); ++i) {
+              if (mappa[i].first == hash) {
+                newTop = false;
+                if (mappa[i].second.GetPattern() != top.GetPattern() || mappa[i].second.GetUniqueID() != top.GetUniqueID()) {
+                  bool newClash = true;
+                  for (int j = 0; j < clashes.size(); ++j) {
+                    if(clashes[j].first == hash) {
+                      clashes[j].second++;
+                      newClash = false;
+                      break;
+                    }
+                  }
+                  if (newClash) clashes.push_back(pair<int,int>(hash,1));
+                }
+              }
+            }
+            if (newTop) mappa.push_back(pair<int,Topology>(hash,top));
           */
-          //***************************************************************************************************************
           int label = cl->GetLabel(0);
           TParticle* part = 0;
           if (label>=0 && (part=stack->Particle(label)) ) {
@@ -384,17 +383,16 @@ void debug(int nev=-1)
   delete boh;
   arrMCTracks.Delete();
   //
-  /*
-    DB.EndAndSort();
-    DB.SetThresholdCumulative(0.95);
-    cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-    DB.Grouping(10,10);
-    DB.PrintDB("Database1.txt");
-    TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
-    flDB->WriteObject(&DB,"DB","kSingleKey");
-    flDB->Close();
-    delete flDB;
-  */
+  DB.EndAndSort();
+  DB.SetThresholdCumulative(0.95);
+  cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
+  //DB.Grouping(10,10);
+  DB.PrintDB("Database1.txt");
+  TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
+  flDB->WriteObject(&DB,"DB","kSingleKey");
+  flDB->Close();
+  delete flDB;
+
   a.close();
   b.close();
 }

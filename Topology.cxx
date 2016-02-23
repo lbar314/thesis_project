@@ -125,7 +125,7 @@ std::ostream& Topology::printTop(std::ostream &out){
 
 	Int_t rs = fPattern[0];
 	Int_t cs = fPattern[1];
-	cout << "rs: " << rs << " cs: " << cs << " controllo: " << fPattern.length() << endl;
+	out << "rs: " << rs << " cs: " << cs << " control: " << fPattern.length() << endl;
 	UChar_t tempChar = 0;
 	Int_t s=0;
 	Int_t ic = 0;

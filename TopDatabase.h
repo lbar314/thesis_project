@@ -30,15 +30,14 @@ class TopDatabase : public TObject {
   Int_t GetNGroups() const {return fNGroups;}
   Int_t GetNmax() const {return fNmax;}
 
+  void SetNmax(Int_t a) { fNmax = a;}
+  void SetThresholdCumulative(Float_t cumulative);//Threshold is the frequency for which you have a fraction = cumulative of topology not in groups
+  void SetThreshold(Float_t thr);
   void EndAndSort(Int_t mode = kHashes);//to end the database and sort key wrt hashes, in ascending order
   void PrintDB(const char* output = "Database.txt") const; //print the database on a txt file
-  void SetThresholdCumulative(Float_t cumulative);
-  //Threshold is the frequency for which you have a fraction = cumulative of topology not in groups
-  void SetThreshold(Float_t thr);
-  void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
-  void SetNmax(Int_t a) { fNmax = a;}
-  Int_t FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
-  Bool_t TestChain2Ways(const AliITSMFTClusterPix &cl) const;
+  //void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
+  //Int_t FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
+  //Bool_t TestChain2Ways(const AliITSMFTClusterPix &cl) const;
 
 
  private:
@@ -52,7 +51,8 @@ class TopDatabase : public TObject {
   Int_t fNmax;//patterns above this number (included) belong to a "junk" bin
   TObjArray fArrHisto;
   TObjArray* GetArrTopologies() {return &fArrTopologies;}
-  void ExpandDB(const TBits* patt);
+  TObjArray* GetArrHisto() {return &fArrHisto;}
+  void ExpandDB(const Topology &top);
 
 
 ClassDef(TopDatabase,1)
