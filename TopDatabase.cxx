@@ -52,11 +52,13 @@ void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX
     string pattOld = ((Topology*)fArrTopologies.At(ip))->GetPattern();
     if(top.GetPattern().length() == pattOld.length() && memcmp(top.GetPattern().data(),pattOld.data(),pattOld.length())==0){
       newPatt = kFALSE;
+      cout<< "old" << endl;
       indTop = ip;
       break;
     }
   }
   if(newPatt){
+    cout << "new" << endl;
     if(fN == fNmax){ //Junk bin
       Junk = kTRUE;
     }
@@ -76,7 +78,7 @@ void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX
 void TopDatabase::ExpandDB(const Topology &top){
   fN++;
   fArrTopologies.Expand(fN);
-  Topology* top1 = new Topology(top,top.GetHash());
+  Topology* top1 = new Topology(top);
   fArrTopologies.AddAt(top1,fN-1);
 }
 

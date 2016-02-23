@@ -22,7 +22,7 @@ Topology::~Topology(){
 
 
 Topology::Topology(const AliITSMFTClusterPix &cluster, Int_t ID):TObject()
-, fHxA(Form("hXA%d", ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHxA(Form("hXA%d",ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
 , fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHzB(Form("hZB%d",ID),"#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30){
