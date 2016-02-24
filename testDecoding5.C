@@ -59,18 +59,20 @@ typedef struct {
 
 TObjArray arrMCTracks; // array of hit arrays for each particle
 
-void debug(int nev=-1)
+void testDecoding5(int nev=-1)
 {
-  TFile* boh = TFile::Open("boh.root","recreate");
-  TObjArray bitsArr;
   vector<pair<int,Topology> > mappa;
   vector<pair<int,int> > clashes;
-  ofstream a("list.txt");
-  ofstream b("prova.txt");
   clSumm cSum;
-  int pippobaudo=0;
-  int primo=0;
 
+  TopDatabase DB;
+  TFile* fl = TFile::Open("TopologyDatabase.root");
+  DB = *((TopDatabase*)fl->Get("DB"));
+  fl->Close();
+  delete fl;
+  DB.PrintDB("check.txt");
+
+  //
   const int kSplit=0x1<<22;
   const int kSplCheck=0x1<<23;
   //
@@ -129,7 +131,6 @@ void debug(int nev=-1)
   printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
-  TopDatabase DB;
 
   for (Int_t iEvent = 0; iEvent < ntotev; iEvent++) {
     if(iEvent>0) break;
@@ -267,123 +268,12 @@ void debug(int nev=-1)
 
           Double_t dirHit[3]={(xExit-xEnt),(yExit-yEnt),(zExit-zEnt)};
 
-          /*double PG[3] = {(double)pHit->GetPXG(), (double)pHit->GetPYG(), (double)pHit->GetPZG()}; //Momentum at hit-point in Global Frame
-          double PL[3];
-          if (TMath::Abs(PG[0])<10e-7 && TMath::Abs(PG[1])<10e-7) {
-            pHit->Dump();
-            int lb = pHit->GetTrack();
-            stack->Particle(lb)->Print();
-            continue;
+          Topology top(*cl);
+          if(top.GetHash()==-2142478390){
+            cout << "Something wrong" << endl;
+            exit(1);
           }
-          mat->MasterToLocalVect(PG,PL); //Momentum in local Frame
-          //printf(">> %e %e   %e %e   %e %e\n",PG[0],PL[0],PG[1],PL[1],PG[2],PL[2]);*/
-
-          Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[1])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2])); //Polar Angle
-          Float_t alpha2 = (Float_t) alpha1; //convert to float
-          cSum.alpha = alpha2;
-
-          Double_t beta1;
-          beta1 = TMath::ATan2(dirHit[0],dirHit[2]); //Azimuthal angle, values from -Pi to Pi
-          Float_t beta2 = (Float_t) beta1;
-          cSum.beta = beta2;
-
-          cSum.evID = iEvent;
-          cSum.volID = cl->GetVolumeId();
-          cSum.lrID = ilr;
-          cSum.clID = icl;
-          cSum.nPix = cl->GetNPix();
-          cSum.nX   = cl->GetNx();
-          cSum.nZ   = cl->GetNz();
-          cSum.q    = cl->GetQ();
-          cSum.split = cl->TestBit(kSplit);
-          cSum.dX = (txyzH[0]-xyzClTr[0])*1e4;
-          cSum.dY = (txyzH[1]-xyzClTr[1])*1e4;
-          cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
-          cSum.nRowPatt = cl-> GetPatternRowSpan();
-          cSum.nColPatt = cl-> GetPatternColSpan();
-	        DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
-
-          /*
-            Topology top(*cl);
-            Int_t hash = top.GetHash();
-            if(primo<6){
-              cout << "*****************************\n";
-              Topology::printCluster(*cl,cout);
-              cout << "Checking print\n";
-              top.printTop(cout);
-              printf("xCOG: %f + (%f) xCOG: %f + (%f) fired: %d\n", top.GetxCOGPix(),top.GetxCOGshift(),top.GetzCOGPix(),top.GetzCOGshift(), top.GetFiredPixels());
-              primo++;
-            }
-          */
-          vector<int> v;
-          for(int i=0; i<10; i++){
-            Topology top(*cl);
-            if(top.GetHash()==-2142478390){
-              cout << "Something wrong" << endl;
-              exit(1);
-            }
-            v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(Int_t)top.GetPattern().length()));
-          }
-          bool er = false;
-          for(int j=0; j<v.size(); j++){
-            for(int k=j+1; k<v.size(); k++){
-              if(v[j]!=v[k]) er = true;
-            }
-          }
-          if(er) for(int d=0; d<v.size(); d++) cout << v[d] << endl;
-          //
-          //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
-          /*
-            bool newTop = true;
-            for (int i = 0; i < mappa.size(); ++i) {
-              if (mappa[i].first == hash) {
-                newTop = false;
-                if (mappa[i].second.GetPattern() != top.GetPattern() || mappa[i].second.GetUniqueID() != top.GetUniqueID()) {
-                  bool newClash = true;
-                  for (int j = 0; j < clashes.size(); ++j) {
-                    if(clashes[j].first == hash) {
-                      clashes[j].second++;
-                      newClash = false;
-                      break;
-                    }
-                  }
-                  if (newClash) clashes.push_back(pair<int,int>(hash,1));
-                }
-              }
-            }
-            if (newTop) mappa.push_back(pair<int,Topology>(hash,top));
-          */
-          int label = cl->GetLabel(0);
-          TParticle* part = 0;
-          if (label>=0 && (part=stack->Particle(label)) ) {
-            cSum.pdg = part->GetPdgCode();
-            cSum.eta = part->Eta();
-            cSum.pt  = part->Pt();
-            cSum.phi = part->Phi();
-            cSum.prim = stack->IsPhysicalPrimary(label);
-          }
-          cSum.ntr = 0;
-          for (int ilb=0;ilb<3;ilb++) if (cl->GetLabel(ilb)>=0) cSum.ntr++;
-          for (int i=0;i<3;i++) cSum.xyz[i] = xyzClGloF[i];
-          //
-          /*
-          if (clsize==5) {
-            printf("\nL%d(%c) Mod%d, Cl:%d | %+5.1f %+5.1f (%d/%d)|H:%e %e %e | C:%e %e %e\n",ilr,cl->TestBit(kSplit) ? 'S':'N',
-             modID,icl,(txyzH[0]-xyzClTr[0])*1e4,(txyzH[2]-xyzClTr[2])*1e4, row,col,
-             gxyzH[0],gxyzH[1],gxyzH[2],xyzClGlo[0],xyzClGlo[1],xyzClGlo[2]);
-            cl->Print();
-            pHit->Print();
-            //
-            double a0,b0,c0,a1,b1,c1,e0;
-            pHit->GetPositionL0(a0,b0,c0,e0);
-            pHit->GetPositionL(a1,b1,c1);
-            float cloc[3];
-            cl->GetLocalXYZ(cloc);
-            printf("LocH: %e %e %e | %e %e %e\n",a0,b0,c0,a1,b1,c1);
-            printf("LocC: %e %e %e | %e %e %e\n",cloc[0],cloc[1],cloc[2],xyzClTr[0],xyzClTr[1],xyzClTr[2]);
-          }
-          */
-          //
+      	  Int_t num = DB.FromCluster2GroupID(*cl);
         }
       }
     }
@@ -392,23 +282,5 @@ void debug(int nev=-1)
     //
     arrMCTracks.Delete();
   }//event loop
-  cout<<"Number of errors in conversion from topology to word: " << pippobaudo << endl;
-  boh->cd();
-  boh->WriteObject(&bitsArr,"bitsArr","kSingleKey");
-  boh->Close();
-  delete boh;
   arrMCTracks.Delete();
-  //
-  DB.EndAndSort();
-  DB.SetThresholdCumulative(0.95);
-  cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-  DB.Grouping(10,10);
-  DB.PrintDB("Database1.txt");
-  TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
-  flDB->WriteObject(&DB,"DB","kSingleKey");
-  flDB->Close();
-  delete flDB;
-
-  a.close();
-  b.close();
 }

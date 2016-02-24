@@ -81,7 +81,7 @@ class Topology :public TObject {
   Int_t fFlag;
   Int_t fPattID;
 
-  ClassDef(Topology,1)
+  ClassDef(Topology,2)
 
 };
 

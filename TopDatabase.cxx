@@ -369,214 +369,71 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
     }
   }
 }
-/*
-  Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
 
-    //Passing from cluster to UChar_t*
-    Int_t rs = cl.GetPatternRowSpan();
-    Int_t cs = cl.GetPatternColSpan();
-    Int_t nBytes = rs*cs/8;
-    if((rs*cs)%8 != 0) nBytes++;
-    nBytes+=2; //first byte: number of rows; second byte: number of columns;
-    const Int_t length = nBytes;
-    UChar_t Word[length];
-    for(int k=0; k<length; k++) Word[k]=0;
-    Word[0]=rs;
-    Word[1]=cs;
-    UChar_t tempChar=0;
-    Int_t index=2;
-    Int_t BitCounter=7;
-    for(Int_t ir=0; ir<rs; ir++){
-      for(Int_t ic=0; ic<cs; ic++){
-        if(BitCounter<0) {
-  	      Word[index]=tempChar;
-  	      tempChar=0;
-  	      BitCounter=7;
-  	      index++;
-        }
-        if(cl.TestPixel(ir,ic)) tempChar+=(1<<BitCounter);
-        BitCounter--;
-      }
+Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
+  Topology top(cl);
+  Int_t hashcode = top.GetHash();
+  //Looking up in the database with intepolation search
+  Int_t low = 0;
+  Int_t high = fN-1;
+  Int_t interIndex=-1;
+  Int_t min=-2147483648;//minimum Int_t value
+  Int_t max=2147483647;
+  while(1){
+    if(low>high || hashcode<min || hashcode>max){
+      interIndex=-1;
+      break;
     }
-    Word[index]=tempChar;
-    //Creating Hash
-    Int_t hashcode = (Int_t)Topology::FuncMurmurHash2(Word,length);
-    //Looking up in the database with intepolation search
-    Int_t low = 0;
-    Int_t high = fN-1;
-    Int_t interIndex=-1;
-    Int_t min=-2147483648;//minimum Int_t value
-    Int_t max=2147483647;
-    while(1){
-      if(low>high || hashcode<min || hashcode>max){
-        interIndex=-1;
-        break;
-      }
-      Int_t guess;
-      if(high==low) guess=high;
-      else{
-        Int_t size = high-low;
-        Int_t offset = (Int_t)(((size-1)*((Long_t)hashcode-(Long_t)min))/((Long_t)max-(Long_t)min));
-        guess = low+offset;
-      }
-      if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()==hashcode){
-        interIndex=guess;
-        break;
-      }
-      else if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()>hashcode){
-        high = guess-1;
-        max = ( (Topology*)fArrTopologies.At(guess-1) )->GetHash();
-      }
-      else{
-        low = guess+1;
-        min = ( (Topology*)fArrTopologies.At(guess+1) )->GetHash();
-      }
+    Int_t guess;
+    if(high==low) guess=high;
+    else{
+      Int_t size = high-low;
+      Int_t offset = (Int_t)(((size-1)*((Long_t)hashcode-(Long_t)min))/((Long_t)max-(Long_t)min));
+      guess = low+offset;
     }
-    if(interIndex==-1){//junk case
-      return -1;
+    if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()==hashcode){
+      interIndex=guess;
+      break;
     }
-    //Solving clashes if necessary
-    if(( (Topology*)fArrTopologies.At(interIndex) )->GetFlag()==1){
-      //printf("Clash found.\n");
-      Int_t Part = 0;
-      Int_t BitPosition = 0;
-      for(Int_t ir=0; ir<rs;ir++){
-        for(Int_t ic=0; ic<cs; ic++){
-  	if(cl.TestPixel(ir,ic)) Part+=(1<<(31-BitPosition));
-  	BitPosition++;
-  	if(BitPosition==32) break;
-        }
-        if(BitPosition==32) break;
-      }
-      Bool_t IndexFound = kFALSE;
-      Int_t guessIndex = interIndex;
-      while( ( (Topology*)fArrTopologies.At(guessIndex) )->GetHash()==hashcode && IndexFound==kFALSE){
-        if(Part==( (Topology*)fArrTopologies.At(guessIndex) )->GetPartialTop()){
-  	IndexFound = kTRUE;
-  	interIndex = guessIndex;
-        }
-        guessIndex--;
-      }
-      guessIndex = interIndex;
-      while( ( (Topology*)fArrTopologies.At(guessIndex) )->GetHash()==hashcode && IndexFound==kFALSE){
-        if(Part==( (Topology*)fArrTopologies.At(guessIndex) )->GetPartialTop() ){
-  	IndexFound = kTRUE;
-  	interIndex = guessIndex;
-        }
-        guessIndex++;
-      }
-      if(IndexFound==kFALSE){
-        printf("Index not found after clash\n");
-        exit(1);
-      }
+    else if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()>hashcode){
+      high = guess-1;
+      if(high==-1) cout << "hashcode: " << hashcode << endl;
+      max = ( (Topology*)fArrTopologies.At(guess-1) )->GetHash();
     }
-    return ( (Topology*)fArrTopologies.At(interIndex) )->GetGroupID();
+    else{
+      low = guess+1;
+      min = ( (Topology*)fArrTopologies.At(guess+1) )->GetHash();
+    }
   }
-/*
-  Bool_t TopDatabase::TestChain2Ways(const AliITSMFTClusterPix &cl) const{
-
-    //Passing from cluster to UChar_t*
-    Int_t rs = cl.GetPatternRowSpan();
-    Int_t cs = cl.GetPatternColSpan();
-    Int_t nBytes = rs*cs/8;
-    if((rs*cs)%8 != 0) nBytes++;
-    nBytes+=2; //first byte: number of rows; second byte: number of columns;
-    const Int_t length = nBytes;
-    UChar_t Word[length];
-    for(int k=0; k<length; k++) Word[k]=0;
-    Word[0]=rs;
-    Word[1]=cs;
-    UChar_t tempChar=0;
-    Int_t index=2;
-    Int_t BitCounter=7;
-    for(Int_t ir=0; ir<rs; ir++){
-      for(Int_t ic=0; ic<cs; ic++){
-        if(BitCounter<0) {
-  	      Word[index]=tempChar;
-  	      tempChar=0;
-  	      BitCounter=7;
-  	      index++;
-        }
-        if(cl.TestPixel(ir,ic)) tempChar+=(1<<BitCounter);
-        BitCounter--;
-      }
-    }
-    Word[index]=tempChar;
-    //Creating Hash
-    Int_t hashcode = (Int_t)Topology::FuncMurmurHash2(Word,length);
-    //Looking up in the database with intepolation search
-    Int_t low = 0;
-    Int_t high = fN-1;
-    Int_t interIndex=-1;
-    Int_t min=-2147483648;//minimum Int_t value
-    Int_t max=2147483647;
-    while(1){
-      if(low>high || hashcode<min || hashcode>max){
-        interIndex=-1;
-        break;
-      }
-      Int_t guess;
-      if(high==low) guess=high;
-      else{
-        Int_t size = high-low;
-        Int_t offset = (Int_t)(((size-1)*((Long_t)hashcode-(Long_t)min))/((Long_t)max-(Long_t)min));
-        guess = low+offset;
-      }
-      if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()==hashcode){
-        interIndex=guess;
-        break;
-      }
-      else if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()>hashcode){
-        high = guess-1;
-        max = ( (Topology*)fArrTopologies.At(guess-1) )->GetHash();
-      }
-      else{
-        low = guess+1;
-        min = ( (Topology*)fArrTopologies.At(guess+1) )->GetHash();
-      }
-    }
-    if(interIndex==-1){//junk case
-      return -1;
-    }
-    //Solving clashes if necessary
-    if(( (Topology*)fArrTopologies.At(interIndex) )->GetFlag()==1){
-      //printf("Clash found.\n");
-      Int_t Part = 0;
-      Int_t BitPosition = 0;
-      for(Int_t ir=0; ir<rs;ir++){
-        for(Int_t ic=0; ic<cs; ic++){
-  	if(cl.TestPixel(ir,ic)) Part+=(1<<(31-BitPosition));
-  	BitPosition++;
-  	if(BitPosition==32) break;
-        }
-        if(BitPosition==32) break;
-      }
-      Bool_t IndexFound = kFALSE;
-      Int_t guessIndex = interIndex;
-      while( ( (Topology*)fArrTopologies.At(guessIndex) )->GetHash()==hashcode && IndexFound==kFALSE){
-        if(Part==( (Topology*)fArrTopologies.At(guessIndex) )->GetPartialTop()){
-  	IndexFound = kTRUE;
-  	interIndex = guessIndex;
-        }
-        guessIndex--;
-      }
-      guessIndex = interIndex;
-      while( ( (Topology*)fArrTopologies.At(guessIndex) )->GetHash()==hashcode && IndexFound==kFALSE){
-        if(Part==( (Topology*)fArrTopologies.At(guessIndex) )->GetPartialTop() ){
-  	      IndexFound = kTRUE;
-  	      interIndex = guessIndex;
-        }
-        guessIndex++;
-      }
-      if(IndexFound==kFALSE){
-        printf("Index not found after clash\n");
-        exit(1);
-      }
-    }
-    TBits result = ( (Topology*)fArrTopologies.At(interIndex) )->GetPattern();
-    TBits original;
-    Topology::Word2Top(Word,original);
-    if(result == original && result.GetUniqueID()==original.GetUniqueID()) return kTRUE;
-    else return kFALSE;
+  if(interIndex==-1){//junk case
+    return -1;
   }
-*/
+  //Solving clashes if necessary
+  if(( (Topology*)fArrTopologies.At(interIndex) )->GetFlag()==1){
+    //printf("Clash found.\n");
+    Bool_t IndexFound = kFALSE;
+    Int_t guessIndex = interIndex;
+    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==kFALSE){
+      string str = ((Topology*)fArrTopologies.At(guessIndex))->GetPattern();
+      if(top.GetPattern().compare(2,4,str,2,4)==0){
+      	IndexFound = kTRUE;
+      	interIndex = guessIndex;
+      }
+      guessIndex--;
+    }
+    guessIndex = interIndex;
+    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==kFALSE){
+      string str = ((Topology*)fArrTopologies.At(guessIndex))->GetPattern();
+      if(top.GetPattern().compare(2,4,str,2,4)==0){
+      	IndexFound = kTRUE;
+      	interIndex = guessIndex;
+      }
+      guessIndex++;
+    }
+    if(IndexFound==kFALSE){
+      printf("Index not found after clash\n");
+      exit(1);
+    }
+  }
+  return ( (Topology*)fArrTopologies.At(interIndex) )->GetGroupID();
+}

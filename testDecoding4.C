@@ -36,13 +36,7 @@ TObjArray histoArr;
 enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,kDTZSPL};
 
 void LoadDB(const char* fname);
-void Top2Word(const TBits* top, UChar_t* Word);
-UInt_t FuncMurmurHash2(const void * key, Int_t len);
-std::ostream& printTop(TBits top, std::ostream &out);
-void testDecoding4(int nev=-1, int nRepetintions=100, Bool_t checkflag=kFALSE);
-Int_t Top2Int(const TBits* top);
-
-TBits clTop;
+void testDecoding4(int nev=-1, int nRepetintions=1, Bool_t checkflag=kFALSE);
 
 void testDecoding4(int nev, int nRepetintions, Bool_t checkflag){
   const int kSplit=0x1<<22;
@@ -142,9 +136,9 @@ void testDecoding4(int nev, int nRepetintions, Bool_t checkflag){
       //
       // read clusters
       for (int ilr=nlr;ilr--;) {
-	TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
-	if (!br) {printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
-	br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
+      	TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
+      	if (!br) {printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
+      	br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
       }
       cluTree->GetEntry(0);
       its->ProcessClusters();
@@ -152,25 +146,24 @@ void testDecoding4(int nev, int nRepetintions, Bool_t checkflag){
       //printf(" tree entries: %lld\n",cluTree->GetEntries());
       //
       for (int ilr=0;ilr<nlr;ilr++) {
-	AliITSURecoLayer* lr = its->GetLayerActive(ilr);
-	TClonesArray* clr = lr->GetClusters();
-	int nClu = clr->GetEntries();
-	//printf("Layer %d : %d clusters\n",ilr,nClu);
-	//
-	for (int icl=0;icl<nClu;icl++){
-	  //if(icl%1000==0)printf("%d / %d\n", icl, nClu);
-	  AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
-    if(irep==0 && checkflag==kTRUE){
-      if(!DB.TestChain2Ways(*cl)){
-        cout << "ERROR: the chain does not work!"<<endl;
-        exit(1);
-      }
-    }
-	  Timer.Start(!totClusters);
-	  Int_t num = DB.FromCluster2GroupID(*cl);
-	  Timer.Stop();
-	  totClusters++;
-	}
+      	AliITSURecoLayer* lr = its->GetLayerActive(ilr);
+      	TClonesArray* clr = lr->GetClusters();
+      	int nClu = clr->GetEntries();
+      	//printf("Layer %d : %d clusters\n",ilr,nClu);
+      	//
+      	for (int icl=0;icl<nClu;icl++){
+      	  //if(icl%1000==0)printf("%d / %d\n", icl, nClu);
+      	  AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
+          Topology top(*cl);
+          if(top.GetHash()==-2142478390){
+            cout << "Something wrong" << endl;
+            exit(1);
+          }
+      	  Timer.Start(!totClusters);
+      	  Int_t num = DB.FromCluster2GroupID(*cl);
+      	  Timer.Stop();
+      	  totClusters++;
+      	}
       }
       //layerClus.Clear();
       //
@@ -193,92 +186,4 @@ void LoadDB(const char* fname)
   // load database
   TFile* fl = TFile::Open(fname);
   DB = *((TopDatabase*)fl->Get("DB"));
-}
-
-void Top2Word(const TBits* top, UChar_t* Word){
-  UInt_t UID = top->GetUniqueID();
-  Int_t rs = UID>>16;
-  Int_t cs = UID&0xffff;
-  Word[0]=rs;
-  Word[1]=cs;
-  UChar_t tempChar=0;
-  Int_t index=2;
-  Int_t BitCounter=7;
-  for(Int_t ir=0; ir<rs; ir++){
-    for(Int_t ic=0; ic<cs; ic++){
-      if(BitCounter<0) {
-	Word[index]=tempChar;
-	tempChar=0;
-	BitCounter=7;
-	index++;
-      }
-      if(top->TestBitNumber(ir*cs+ic)) tempChar+=(1<<BitCounter);
-      BitCounter--;
-    }
-  }
-  Word[index]=tempChar;
-}
-
-UInt_t FuncMurmurHash2(const void* key, Int_t len){
-  // 'm' and 'r' are mixing constants generated offline.
-  const UInt_t m =0x5bd1e995;
-  const Int_t r = 24;
-  // Initialize the hash
-  UInt_t h = 0;
-  // Mix 4 bytes at a time into the hash
-  const UChar_t* data = (const UChar_t *)key;
-  /*________________DEBUG____________________
-    TBits verifica;
-    Word2Top(data,verifica);
-    printf("Topology in the hash scope:\n\n");
-    printTop(verifica,cout);
-  *///_________________________________________
-  //Int_t recIndex=0;
-  while(len >= 4){
-    UInt_t k = *(UInt_t*)data;
-    //if(recIndex==0) printf("first vale of k: %u\n", k);
-    k *= m;
-    k ^= k >> r;
-    k *= m;
-    h *= m;
-    h ^= k;
-    data += 4;
-    len -= 4;
-    //recIndex++;
-  }
-  // Handle the last few bytes of the input array
-  switch(len){
-  case 3: h ^= data[2] << 16;
-  case 2: h ^= data[1] << 8;
-  case 1: h ^= data[0];
-    h *= m;
-  };
-  // Do a few final mixes of the hash to ensure the last few
-  // bytes are well-incorporated.
-  h ^= h >> 13;
-  h *= m;
-  h ^= h >> 15;
-  return h;
-}
-
-std::ostream& printTop(TBits top, std::ostream &out){
-  UInt_t UID = top.GetUniqueID();
-  Int_t rs = UID>>16;
-  Int_t cs = UID&0xffff;
-  for (Int_t ir=0;ir<rs;ir++){
-    out << "|";
-    for (Int_t ic=0; ic<cs; ic++) {
-      out << Form("%c",top.TestBitNumber(ir*cs+ic) ? '+':' ');
-    }
-    out << ("|\n");
-  }
-  out<< endl;
-}
-
-Int_t Top2Int(const TBits* top){
-  Int_t output=0;
-  for(Int_t i=0; i<32; i++){
-    if(top->TestBitNumber(i)) output+=(1<<(31-i));
-  }
-  return output;
 }
