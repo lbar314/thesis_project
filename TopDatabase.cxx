@@ -13,6 +13,8 @@
 #include "./TopDatabase.h"
 #include "AliITSMFTClusterPix.h"
 
+using namespace std;
+
 ClassImp(TopDatabase)
 
 TopDatabase::TopDatabase():TObject(),fN(0),fTotClusters(0),fThreshold(0),
@@ -41,17 +43,17 @@ TopDatabase::~TopDatabase(){
   fArrTopologies.Delete();
 }
 
-void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta){
+void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ, float alpha, float beta){
 
   Topology top(cluster);
-  Bool_t newPatt = kTRUE;
-  Bool_t Junk = kFALSE;
+  bool newPatt = true;
+  bool Junk = false;
   fTotClusters++;
-  Int_t indTop = -1;
-  for(Int_t ip=0;ip<fN;ip++) {
+  int indTop = -1;
+  for(int ip=0;ip<fN;ip++) {
     string pattOld = ((Topology*)fArrTopologies.At(ip))->GetPattern();
     if(top.GetPattern().length() == pattOld.length() && memcmp(top.GetPattern().data(),pattOld.data(),pattOld.length())==0){
-      newPatt = kFALSE;
+      newPatt = false;
       //cout<< "old" << endl;
       indTop = ip;
       break;
@@ -60,14 +62,14 @@ void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX
   if(newPatt){
     //cout << "new" << endl;
     if(fN == fNmax){ //Junk bin
-      Junk = kTRUE;
+      Junk = true;
     }
     else {
       this->ExpandDB(top);
       indTop=fN-1;
     }
   }
-  if(Junk==kTRUE) return;
+  if(Junk==true) return;
   ((Topology*)fArrTopologies.At(indTop))->IncreaseCounts();
   ((Topology*)fArrTopologies.At(indTop))->GetHxA().Fill(alpha, dX);
   ((Topology*)fArrTopologies.At(indTop))->GetHzA().Fill(alpha, dZ);
@@ -82,22 +84,22 @@ void TopDatabase::ExpandDB(const Topology &top){
   fArrTopologies.AddAt(top1,fN-1);
 }
 
-void TopDatabase::SetThreshold(Float_t thr){
+void TopDatabase::SetThreshold(float thr){
   fThreshold=thr;
-  Int_t nPatterns = fN;
+  int nPatterns = fN;
   TArrayF arrFreq;
   arrFreq.Set(nPatterns);
   TArrayI sortIndex;
   sortIndex.Set(nPatterns);
-  for(Int_t i=0; i<nPatterns; i++){
+  for(int i=0; i<nPatterns; i++){
     Topology* top = (Topology*)fArrTopologies.At(i);
-    Float_t tempFreq = top->GetFreq();
+    float tempFreq = top->GetFreq();
     arrFreq[i] = tempFreq;
   }
   TMath::Sort(nPatterns,arrFreq.GetArray(),sortIndex.GetArray());
-  Int_t over=0;
-  Float_t fr=0;
-  for(Int_t j=0; j<fN; j++){
+  int over=0;
+  float fr=0;
+  for(int j=0; j<fN; j++){
     fr=arrFreq[sortIndex[j]];
     if(fr<thr) break;
     else over++;
@@ -105,26 +107,26 @@ void TopDatabase::SetThreshold(Float_t thr){
   fOverThr=over;
 }
 
-void TopDatabase::SetThresholdCumulative(Float_t cumulative){
+void TopDatabase::SetThresholdCumulative(float cumulative){
   if(cumulative<=0 || cumulative >=1) cumulative = 0.99;
-  Float_t totFreq = 0.;
-  Int_t nPatterns = fN;
+  float totFreq = 0.;
+  int nPatterns = fN;
   TArrayF arrFreq;
   arrFreq.Set(nPatterns);
   TArrayI sortIndex;
   sortIndex.Set(nPatterns);
-  for(Int_t i=0; i<nPatterns; i++){
+  for(int i=0; i<nPatterns; i++){
     Topology* top = (Topology*)fArrTopologies.At(i);
-    Float_t tempFreq = top->GetFreq();
+    float tempFreq = top->GetFreq();
     arrFreq[i] = tempFreq;
   }
   TArrayF provvFreq;
   provvFreq.Set(fN);
   TMath::Sort(fN,arrFreq.GetArray(),sortIndex.GetArray());
-  for(Int_t j=0; j<fN; j++){
+  for(int j=0; j<fN; j++){
     provvFreq[j]=arrFreq[sortIndex[j]];
   }
-  Int_t over=0;
+  int over=0;
   while(totFreq < cumulative){
     totFreq+=provvFreq[over++];
   }
@@ -134,36 +136,36 @@ void TopDatabase::SetThresholdCumulative(Float_t cumulative){
   fOverThr = over;
 }
 
-void TopDatabase::EndAndSort(Int_t mode){
+void TopDatabase::EndAndSort(int mode){
   Topology::SetMode(mode);
-  Int_t nPatterns = fN;
+  int nPatterns = fN;
   fArrTopologies.Sort();
-  Bool_t alreadyProcessed[nPatterns];
+  bool alreadyProcessed[nPatterns];
   TArrayF arrFreq;
   arrFreq.Set(nPatterns);
   TArrayI sortIndex;
   sortIndex.Set(nPatterns);
-  for(Int_t i=0; i<nPatterns; i++){
+  for(int i=0; i<nPatterns; i++){
     Topology* top = (Topology*)fArrTopologies.At(i);
-    Float_t tempFreq = ((Float_t)(top->GetCounts()))/fTotClusters;
+    float tempFreq = ((float)(top->GetCounts()))/fTotClusters;
     top->SetFreq(tempFreq);
     arrFreq[i] = tempFreq;
     top->SetFlag(0);
-    alreadyProcessed[i]=kFALSE;
+    alreadyProcessed[i]=false;
   }
   TMath::Sort(nPatterns,arrFreq.GetArray(),sortIndex.GetArray());
-  for(Int_t i=0; i<nPatterns; i++){
-    if(alreadyProcessed[i]==kTRUE) continue;
-    else alreadyProcessed[i]=kTRUE;
+  for(int i=0; i<nPatterns; i++){
+    if(alreadyProcessed[i]==true) continue;
+    else alreadyProcessed[i]=true;
     Topology* topFreq = (Topology*)fArrTopologies.At(sortIndex[i]);
     topFreq->SetPattID(i);
     Topology* top = (Topology*)fArrTopologies.At(i);
-    Int_t refHash = top->GetHash();
-    for(Int_t j=i+1; j<nPatterns; j++){
+    unsigned int refHash = top->GetHash();
+    for(int j=i+1; j<nPatterns; j++){
       Topology* top2comp = (Topology*)fArrTopologies.At(j);
-      Int_t counter = 0;
+      int counter = 0;
       if(top2comp->GetHash()==refHash){
-      	alreadyProcessed[j]=kTRUE;
+      	alreadyProcessed[j]=true;
       	if(counter==0){
       	  counter++;
       	  top->SetFlag(1);
@@ -177,10 +179,10 @@ void TopDatabase::EndAndSort(Int_t mode){
 void TopDatabase::PrintDB(const char* output) const{
   ofstream o(output);
   o << "Number of topologies: " << fN << endl << endl;
-  for(Int_t i=0; i<fN; i++){
+  for(int i=0; i<fN; i++){
     Topology* top = (Topology*)fArrTopologies.At(i);
     o << "               POSITION " << i << endl;
-    o << Form("\nPattID %4d R:%d C: %d Freq:%f Hash:%d\n\n", top->GetPattID(),top->GetRowSpan(),top->GetColumnSpan(),top->GetFreq(),top->GetHash());
+    o << Form("\nPattID %4d R:%d C: %d Freq:%f Hash:%lu\n\n", top->GetPattID(),top->GetRowSpan(),top->GetColumnSpan(),top->GetFreq(),top->GetHash());
     top->printTop(o);
     o << "\nxCentre: " << top->GetxCOGPix() << " + " << top->GetxCOGshift()
       <<" zCentre: " << top->GetzCOGPix() << " + " << top->GetzCOGshift()
@@ -189,17 +191,17 @@ void TopDatabase::PrintDB(const char* output) const{
   o.close();
 }
 
-void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
+void TopDatabase::Grouping(int NumberofShiftXbins, int NumberofShiftZbins){
   printf("\nGROUPING\n\n");
-  Float_t threshold=fThreshold;
-  Int_t nPatterns=fN;
+  float threshold=fThreshold;
+  int nPatterns=fN;
   TArrayI shiftXID;
   TArrayI shiftZID;
-  Int_t notINgorups=0;
-  Float_t shiftXwidth=1./NumberofShiftXbins; //(fraction of the pitch)
-  Float_t shiftZwidth=1./NumberofShiftZbins; //(fraction of the pitch)
-  Float_t xOffset = shiftXwidth/2;
-  Float_t zOffset = shiftZwidth/2;
+  int notINgorups=0;
+  float shiftXwidth=1./NumberofShiftXbins; //(fraction of the pitch)
+  float shiftZwidth=1./NumberofShiftZbins; //(fraction of the pitch)
+  float xOffset = shiftXwidth/2;
+  float zOffset = shiftZwidth/2;
 
   shiftXID.Set(nPatterns);
   shiftZID.Set(nPatterns);
@@ -211,7 +213,7 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   zShiftDistro.SetDirectory(0);
 
   printf("Assigning shift-IDs:\n");
-  for(Int_t i=0; i<nPatterns; i++){
+  for(int i=0; i<nPatterns; i++){
     Topology* top = (Topology*)fArrTopologies.At(i);
     if(i%100==0)printf("%d / %d\n ", i, nPatterns);
     xShiftDistro.Fill(top->GetxCOGshift());
@@ -219,10 +221,10 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
     zShiftDistro.Fill(top->GetzCOGshift());
     shiftZID[i]=zShiftDistro.FindBin(top->GetzCOGshift());
   }
-  Int_t tempgroupID=0;
+  int tempgroupID=0;
   printf("Processing patterns over threshold:\n");
   //first assigning groupID to patterns whose frequency is above the treshold
-  for(Int_t t=0; t<nPatterns;t++){
+  for(int t=0; t<nPatterns;t++){
     if(t%100==0)printf("%d / %d\n ", t, nPatterns);
     Topology* top = (Topology*)fArrTopologies.At(t);
     if(top->GetFreq()>=threshold){
@@ -232,13 +234,13 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
     }
   }
   printf("Processing patterns under threshold:\n");
-  for(Int_t i=0; i<nPatterns; i++){
+  for(int i=0; i<nPatterns; i++){
     if(i%100==0)printf("%d / %d\n ", i, nPatterns);
     Topology* top = (Topology*)fArrTopologies.At(i);
     if(top->GetGroupID()!=-1) continue;
     top->SetGroupID(tempgroupID);
     //if(i%10000==0)printf("Assigning group ID %d / %d\n ", i, nPatterns);
-    for(Int_t j=i+1; j<nPatterns; j++){
+    for(int j=i+1; j<nPatterns; j++){
       Topology* top1 = (Topology*)fArrTopologies.At(j);
       if(top1->GetGroupID()!=-1) continue;
       else {
@@ -257,19 +259,19 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   printf("Number of groups: %d\n", fNGroups);
 
   printf("Summing group-histograms:\n");
-  for(Int_t iGroup=0; iGroup<fNGroups; iGroup++){
+  for(int iGroup=0; iGroup<fNGroups; iGroup++){
     TH2F tempXa(Form("hXA%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
     TH2F tempXb(Form("hXB%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
     TH2F tempZa(Form("hZA%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
     TH2F tempZb(Form("hZB%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
     if(iGroup%1000==0) printf("%d / %d\n", iGroup, fNGroups);
-    Bool_t FirstMatch = kTRUE;
-    for(Int_t i=0; i<nPatterns; i++){
+    bool FirstMatch = true;
+    for(int i=0; i<nPatterns; i++){
       // printf("iGroup: %d i: %d\n", iGroup, i);
       Topology* top = (Topology*)fArrTopologies.At(i);
       if(top->GetGroupID()==iGroup){
-      	if(FirstMatch==kTRUE){
-      	  FirstMatch==kFALSE;
+      	if(FirstMatch==true){
+      	  FirstMatch==false;
           tempXa = top->GetHxA();
           tempXb = top->GetHxB();
           tempZa = top->GetHzA();
@@ -296,24 +298,24 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   static TF1* gs = new TF1("gs","gaus",-50,50);
   static TF1* gs2 = new TF1("gs2","gaus",-50,50);
   printf("Taking data from histograms:\n");
-  for(Int_t iGroup=0; iGroup<fNGroups; iGroup++){
+  for(int iGroup=0; iGroup<fNGroups; iGroup++){
     if(iGroup%1000==0) printf("%d / %d\n", iGroup, fNGroups);
     //X projection
-    Int_t fitStatusX=0;
+    int fitStatusX=0;
     TH2* hXA = (TH2F*)fArrHisto.At(iGroup*4);
     TH1* hdx = hXA->ProjectionY("hdx");
     gs->SetParameters(hdx->GetMaximum(),hdx->GetMean(),hdx->GetRMS());
     if((hdx->GetEntries())<100) fitStatusX = hdx->Fit("gs","ql");
     else fitStatusX = hdx->Fit("gs","q");
     //Z projection
-    Int_t fitStatusZ=0;
+    int fitStatusZ=0;
     TH2* hZA = (TH2F*)fArrHisto.At(iGroup*4+2);
     TH1* hdz = hZA->ProjectionY("hdz");
     gs2->SetParameters(hdz->GetMaximum(),hdz->GetMean(),hdz->GetRMS());
     if((hdz->GetEntries())<100) fitStatusZ = hdz->Fit("gs2","ql");
     else fitStatusZ = hdz->Fit("gs2","q");
     //*******************************************
-    for(Int_t i=0; i<nPatterns; i++){
+    for(int i=0; i<nPatterns; i++){
       Topology* top = (Topology*)fArrTopologies.At(i);
       if(top->GetGroupID()==iGroup){
       	//
@@ -328,7 +330,7 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
       	  top->SetFitStuff(gs->GetParameter(2),Topology::kDeltaXsigma);
       	  top->SetFitStuff(gs->GetParError(2),Topology::kDeltaXsigmaErr);
       	  top->SetFitStuff(gs->GetChisquare(),Topology::kChi2x);
-      	  Int_t varNDFx = gs->GetNDF();
+      	  int varNDFx = gs->GetNDF();
       	  if(varNDFx>=0){
       	    top->SetFitStuff(varNDFx,Topology::kNDFx);
       	  }
@@ -350,7 +352,7 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
       	  top->SetFitStuff(gs2->GetParameter(2),Topology::kDeltaZsigma);
       	  top->SetFitStuff(gs2->GetParError(2),Topology::kDeltaZsigmaErr);
       	  top->SetFitStuff(gs2->GetChisquare(),Topology::kChi2z);
-      	  Int_t varNDFz = gs2->GetNDF();
+      	  int varNDFz = gs2->GetNDF();
       	  if(varNDFz>=0){
       	    top->SetFitStuff(varNDFz,Topology::kNDFz);
       	  }
@@ -370,25 +372,26 @@ void TopDatabase::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   }
 }
 
-Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
+int TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   Topology top(cl);
-  Int_t hashcode = top.GetHash();
+  unsigned int hashcode = top.GetHash();
   //Looking up in the database with intepolation search
-  Int_t low = 0;
-  Int_t high = fN-1;
-  Int_t interIndex=-1;
-  Int_t min=-2147483648;//minimum Int_t value
-  Int_t max=2147483647;
+  int low = 0;
+  int high = fN-1;
+  int interIndex=-1;
+  unsigned int min=0;//minimum int value
+  unsigned int max=4294967295;
   while(1){
     if(low>high || hashcode<min || hashcode>max){
       interIndex=-1;
       break;
     }
-    Int_t guess;
+    int guess;
     if(high==low) guess=high;
     else{
-      Int_t size = high-low;
-      Int_t offset = (Int_t)(((size-1)*((Long_t)hashcode-(Long_t)min))/((Long_t)max-(Long_t)min));
+      int size = high-low;
+      int offset = (int)(((size-1)*((unsigned long)hashcode-(unsigned long)min))
+      /((unsigned long)max-(unsigned long)min));
       guess = low+offset;
     }
     if( ( (Topology*)fArrTopologies.At(guess) )->GetHash()==hashcode){
@@ -411,29 +414,108 @@ Int_t TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   //Solving clashes if necessary
   if(( (Topology*)fArrTopologies.At(interIndex) )->GetFlag()==1){
     //printf("Clash found.\n");
-    Bool_t IndexFound = kFALSE;
-    Int_t guessIndex = interIndex;
-    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==kFALSE){
+    bool IndexFound = false;
+    int guessIndex = interIndex;
+    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==false){
       string str = ((Topology*)fArrTopologies.At(guessIndex))->GetPattern();
       if(top.GetPattern().compare(2,4,str,2,4)==0){
-      	IndexFound = kTRUE;
+      	IndexFound = true;
       	interIndex = guessIndex;
       }
       guessIndex--;
     }
     guessIndex = interIndex;
-    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==kFALSE){
+    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==false){
       string str = ((Topology*)fArrTopologies.At(guessIndex))->GetPattern();
       if(top.GetPattern().compare(2,4,str,2,4)==0){
-      	IndexFound = kTRUE;
+      	IndexFound = true;
       	interIndex = guessIndex;
       }
       guessIndex++;
     }
-    if(IndexFound==kFALSE){
+    if(IndexFound==false){
       printf("Index not found after clash\n");
       exit(1);
     }
   }
+  string str = top.GetPattern();
+  string str1 = ((Topology*)fArrTopologies.At(interIndex))->GetPattern();
+  if(str.length()!=str1.length() || str.compare(0,str1.length()-1,str1,0,str1.length()-1)!=0) cout << "Error during research" << endl;
+
   return ( (Topology*)fArrTopologies.At(interIndex) )->GetGroupID();
+}
+
+void TopDatabase::BuildMap(){
+  fMap.clear();
+  for(int i=0; i<fN; i++){
+    string &str = ((Topology*)fArrTopologies.At(i))->GetPattern();
+    unsigned long hash = (unsigned long)((Topology*)fArrTopologies.At(i))->GetHash();
+    int groupID = ((Topology*)fArrTopologies.At(i))->GetGroupID();
+    unsigned long ExteHash = (hash<<32);
+    int nBytes = str.length()-2;
+    if(nBytes>=4){
+      ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8) + ((unsigned long)str[5]));
+    }
+    else if(nBytes==3){
+      ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8));
+    }
+    else if(nBytes==2){
+      ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16));
+    }
+    else if(nBytes==1){
+      ExteHash += ((((unsigned long)str[2])<<24));
+    }
+    else{
+      cout << "ERROR: no fired pixels\n";
+      exit(1);
+    }
+    if(!fMap.insert(pair<unsigned long, int>(ExteHash,groupID)).second) cout << "errore" << endl;
+  }
+}
+
+int TopDatabase::FromCluster2GroupIDMap(const AliITSMFTClusterPix &cl) const{
+  Topology top(cl);
+  string &str = top.GetPattern();
+  unsigned long hash = (unsigned long)top.GetHash();
+  unsigned long ExteHash = (hash<<32);
+  int nBytes = str.length()-2;
+  if(nBytes>=4){
+    ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8) + ((unsigned long)str[5]));
+  }
+  else if(nBytes==3){
+    ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8));
+  }
+  else if(nBytes==2){
+    ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16));
+  }
+  else if(nBytes==1){
+    ExteHash += ((((unsigned long)str[2])<<24));
+  }
+  else{
+    cout << "ERROR: no fired pixels\n";
+    exit(1);
+  }
+  return fMap.find(ExteHash)->second;
+}
+
+std::ostream& TopDatabase::showMap(std::ostream &out){
+  typedef map<unsigned long, int>::const_iterator MapIterator;
+  for(MapIterator iter = fMap.begin(); iter != fMap.end(); iter++){
+    out << "ExteHash: " << iter->first << " GroupID: " << iter->second << endl;
+  }
+}
+
+void TopDatabase::CompareMap(){
+  int i=0;
+  for(auto &p : fMap){
+    unsigned long MapHash = ((p.first)>>32);
+    unsigned long TopHash = ((unsigned long)((Topology*)fArrTopologies.At(i))->GetHash());
+    if(MapHash!=TopHash) printf("%d)  Different Values: %lu %lu\n",i,MapHash,TopHash);
+    //cout << i << ")  Different Values: " << MapHash << " " << TopHash << endl;
+    //else cout << i << ")  " << MapHash << " " << TopHash << endl;
+    else printf("%d)  %lu %lu\n",i,MapHash,TopHash);
+    ((Topology*)fArrTopologies.At(i))->printTop(cout);
+    i++;
+
+  }
 }

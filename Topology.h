@@ -17,69 +17,70 @@ class Topology :public TObject {
 
   Topology();
   virtual ~Topology();
-  Topology(const AliITSMFTClusterPix &cluster, Int_t ID=-1);
-  Topology(const Topology &topo, Int_t ID=-1);
+  Topology(const AliITSMFTClusterPix &cluster, int ID=-1);
+  Topology(const Topology &topo, int ID=-1);
 
-  Bool_t IsEqual(const TObject* obj) const;
-  Bool_t IsSortable() const {return kTRUE;}
-  Int_t Compare(const TObject* obj) const;
-  string GetPattern() const {return fPattern;};
-  Int_t GetRowSpan() const {return fPattern[0];}
-  Int_t GetColumnSpan() const {return fPattern[1];}
-  Int_t GetHash() const {return fHash;}
-  Float_t GetFreq() const {return fFreq;}
-  Int_t GetCounts() const {return fCounts;}
-  Int_t GetGroupID() const {return fGroupID;}
-  Int_t GetFiredPixels() const {return fFiredPixels;}
-  Float_t GetxCOGPix() const {return fxCOGPix;}
-  Float_t GetzCOGPix() const {return fzCOGPix;}
-  Float_t GetxCOGshift() const {return fxCOGshift;}
-  Float_t GetzCOGshift() const {return fzCOGshift;}
-  Int_t GetMode() const {return fMode;}
+  bool IsEqual(const TObject* obj) const;
+  bool IsSortable() const {return true;}
+  int Compare(const TObject* obj) const;
+  string& GetPattern() {return fPattern;};
+  string  GetPattern() const {return fPattern;};
+  int GetRowSpan() const {return fPattern[0];}
+  int GetColumnSpan() const {return fPattern[1];}
+  unsigned long GetHash() const {return fHash;}
+  float GetFreq() const {return fFreq;}
+  int GetCounts() const {return fCounts;}
+  int GetGroupID() const {return fGroupID;}
+  int GetFiredPixels() const {return fFiredPixels;}
+  float GetxCOGPix() const {return fxCOGPix;}
+  float GetzCOGPix() const {return fzCOGPix;}
+  float GetxCOGshift() const {return fxCOGshift;}
+  float GetzCOGshift() const {return fzCOGshift;}
+  int GetMode() const {return fMode;}
   TH2F& GetHxA() {return fHxA;}
   TH2F& GetHxB() {return fHxB;}
   TH2F& GetHzA() {return fHzA;}
   TH2F& GetHzB() {return fHzB;}
-  Float_t GetFitStuff(Int_t ind) const {return fArrFit[ind];}
-  Int_t GetFlag() const {return fFlag;}
-  Int_t GetPattID() const {return fPattID;}
+  float GetFitStuff(int ind) const {return fArrFit[ind];}
+  int GetFlag() const {return fFlag;}
+  int GetPattID() const {return fPattID;}
 
   std::ostream& printTop(std::ostream &out);
-  static UInt_t FuncMurmurHash2(const void * key, Int_t len);
+  static unsigned int FuncMurmurHash2(const void * key, int len);
   static std::ostream& printCluster(const AliITSMFTClusterPix &cluster,std::ostream &out);
 
-  void SetGroupID(Int_t num){fGroupID=num;}
-  void SetFreq(Float_t num){fFreq=num;}
-  void SetFitStuff(Float_t value, Int_t ind) {fArrFit[ind]=value;}
-  void SetFlag(Int_t num) {fFlag=num;}
+  void SetGroupID(int num){fGroupID=num;}
+  void SetFreq(float num){fFreq=num;}
+  void SetFitStuff(float value, int ind) {fArrFit[ind]=value;}
+  void SetFlag(int num) {fFlag=num;}
   void IncreaseCounts(){fCounts++;}
   void SetHxA(TH2F &hist){fHxA=hist;}
   void SetHxB(TH2F &hist){fHxB=hist;}
   void SetHzA(TH2F &hist){fHzA=hist;}
   void SetHzB(TH2F &hist){fHzB=hist;}
-  void SetPattID(Int_t num) {fPattID=num;}
-  static void SetMode(Int_t mode) {fMode=mode;}
+  void SetPattID(int num) {fPattID=num;}
+  static void SetMode(int mode) {fMode=mode;}
 
  private:
 
   string fPattern;
-  Int_t fFiredPixels;
-  Float_t fxCOGPix;
-  Float_t fzCOGPix;
-  Float_t fxCOGshift;
-  Float_t fzCOGshift;
-  Int_t fHash;
-  Int_t fCounts;
-  Float_t fFreq;
-  Int_t fGroupID;
-  static Int_t fMode; //DEFAULT kHashes
+  int fFiredPixels;
+  float fxCOGPix;
+  float fzCOGPix;
+  float fxCOGshift;
+  float fzCOGshift;
+  unsigned int fHash;
+  int fCounts;
+  float fFreq;
+  int fGroupID;
+  static int fMode; //DEFAULT kHashes
   TH2F fHxA;
   TH2F fHxB;
   TH2F fHzA;
   TH2F fHzB;
-  Float_t fArrFit[kFitLength];
-  Int_t fFlag;
-  Int_t fPattID;
+  float fArrFit[kFitLength];
+  int fFlag;
+  int fPattID;
 
   ClassDef(Topology,2)
 

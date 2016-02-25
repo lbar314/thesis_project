@@ -8,7 +8,9 @@
 #include "TArrayF.h"
 #include "TObjArray.h"
 #include "AliITSMFTClusterPix.h"
+#include <map>
 
+using namespace std;
 
 class TopDatabase : public TObject {
 
@@ -21,32 +23,37 @@ class TopDatabase : public TObject {
   TopDatabase();
   TopDatabase(TopDatabase &ogg);
   ~TopDatabase();
-  void AccountTopology(const AliITSMFTClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta);
+  void AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ, float alpha, float beta);
 
-  Int_t GetN() const {return fN;}
-  Int_t GetTotClusters() const {return fTotClusters;}
-  Float_t GetThreshold() const {return fThreshold;}
-  Int_t GetOverThr() const {return fOverThr;}
-  Int_t GetNGroups() const {return fNGroups;}
-  Int_t GetNmax() const {return fNmax;}
+  int GetN() const {return fN;}
+  int GetTotClusters() const {return fTotClusters;}
+  float GetThreshold() const {return fThreshold;}
+  int GetOverThr() const {return fOverThr;}
+  int GetNGroups() const {return fNGroups;}
+  int GetNmax() const {return fNmax;}
 
-  void SetNmax(Int_t a) { fNmax = a;}
-  void SetThresholdCumulative(Float_t cumulative);//Threshold is the frequency for which you have a fraction = cumulative of topology not in groups
-  void SetThreshold(Float_t thr);
-  void EndAndSort(Int_t mode = kHashes);//to end the database and sort key wrt hashes, in ascending order
+  void SetNmax(int a) { fNmax = a;}
+  void SetThresholdCumulative(float cumulative);//Threshold is the frequency for which you have a fraction = cumulative of topology not in groups
+  void SetThreshold(float thr);
+  void EndAndSort(int mode = kHashes);//to end the database and sort key wrt hashes, in ascending order
   void PrintDB(const char* output = "Database.txt") const; //print the database on a txt file
-  void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
-  Int_t FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
+  void Grouping(int NumberofShiftXbins, int NumberofShiftZbins);//return patterns over threshold
+  void BuildMap();
+  int FromCluster2GroupID(const AliITSMFTClusterPix &cl) const;
+  int FromCluster2GroupIDMap(const AliITSMFTClusterPix &cl) const;
+  std::ostream& showMap(std::ostream &out);
+  void CompareMap();
 
- private:
+private:
   string fPattern;
-  Int_t fN; //length of arrays
+  int fN; //length of arrays
   TObjArray fArrTopologies;//array of topologies (class Topology)
-  Int_t fTotClusters;
-  Float_t fThreshold;//frequency threshold
-  Int_t fOverThr;//number of patterns topologies over threshold
-  Int_t fNGroups;
-  Int_t fNmax;//patterns above this number (included) belong to a "junk" bin
+  int fTotClusters;
+  float fThreshold;//frequency threshold
+  int fOverThr;//number of patterns topologies over threshold
+  int fNGroups;
+  int fNmax;//patterns above this number (included) belong to a "junk" bin
+  map<unsigned long,int> fMap;
   TObjArray fArrHisto;
   TObjArray* GetArrTopologies() {return &fArrTopologies;}
   TObjArray* GetArrHisto() {return &fArrHisto;}

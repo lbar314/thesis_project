@@ -32,29 +32,29 @@ using namespace std;
 enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,kDTZSPL};
 
 typedef struct {
-  Int_t evID;
-  Int_t volID;
-  Int_t lrID;
-  Int_t clID;
-  Int_t nPix;
-  Int_t nX;
-  Int_t nZ;
-  Int_t q;
-  Float_t pt;
-  Float_t eta;
-  Float_t phi;
-  Float_t xyz[3];
-  Float_t dX;
-  Float_t dY;
-  Float_t dZ;
-  Bool_t split;
-  Bool_t prim;
-  Int_t  pdg;
-  Int_t  ntr;
-  Float_t alpha; // alpha is the angle in y-radius plane in local frame
-  Float_t beta;  // beta is the angle in xz plane, taken from z axis, growing counterclockwise
-  Int_t nRowPatt;
-  Int_t nColPatt;
+  int evID;
+  int volID;
+  int lrID;
+  int clID;
+  int nPix;
+  int nX;
+  int nZ;
+  int q;
+  float pt;
+  float eta;
+  float phi;
+  float xyz[3];
+  float dX;
+  float dY;
+  float dZ;
+  bool split;
+  bool prim;
+  int  pdg;
+  int  ntr;
+  float alpha; // alpha is the angle in y-radius plane in local frame
+  float beta;  // beta is the angle in xz plane, taken from z axis, growing counterclockwise
+  int nRowPatt;
+  int nColPatt;
 } clSumm;
 
 TObjArray arrMCTracks; // array of hit arrays for each particle
@@ -105,7 +105,7 @@ void debug(int nev=-1)
   AliGeomManager::LoadAlignObjsFromCDBSingleDet("ITS",algITS);
   AliGeomManager::ApplyAlignObjsToGeom(algITS);
   //
-  AliITSUGeomTGeo* gm = new AliITSUGeomTGeo(kTRUE);
+  AliITSUGeomTGeo* gm = new AliITSUGeomTGeo(true);
   AliITSMFTClusterPix::SetGeom(gm);
   //
   AliITSURecoDet *its = new AliITSURecoDet(gm, "ITSinterface");
@@ -119,20 +119,19 @@ void debug(int nev=-1)
   TTree *hitTree = 0x0;
   TClonesArray *hitList=new TClonesArray("AliITSMFTHit");
   //
-  Float_t xyzClGloF[3];
+  float xyzClGloF[3];
   Double_t xyzClGlo[3],xyzClTr[3];
-  Int_t labels[3];
+  int labels[3];
   int nLab = 0;
   int nlr=its->GetNLayersActive();
-  int ntotev = (Int_t)runLoader->GetNumberOfEvents();
+  int ntotev = (int)runLoader->GetNumberOfEvents();
 
   printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
   TopDatabase DB;
 
-  for (Int_t iEvent = 0; iEvent < ntotev; iEvent++) {
-    if(iEvent>0) break;
+  for (int iEvent = 0; iEvent < ntotev; iEvent++) {
     printf("\n Event %i \n",iEvent);
     runLoader->GetEvent(iEvent);
     AliStack *stack = runLoader->Stack();
@@ -150,10 +149,10 @@ void debug(int nev=-1)
     its->ProcessClusters();
     //
     // read hits
-    for(Int_t iEnt=0;iEnt<hitTree->GetEntries();iEnt++){//entries loop of the hits
+    for(int iEnt=0;iEnt<hitTree->GetEntries();iEnt++){//entries loop of the hits
       hitTree->GetEntry(iEnt);
       int nh = hitList->GetEntries();
-      for(Int_t iHit=0; iHit<nh;iHit++){
+      for(int iHit=0; iHit<nh;iHit++){
         AliITSMFTHit *pHit = (AliITSMFTHit*)hitList->At(iHit);
         int mcID = pHit->GetTrack();
 	      //printf("MCid: %d %d %d Ch %d\n",iEnt,iHit, mcID, pHit->GetChip());
@@ -279,12 +278,12 @@ void debug(int nev=-1)
           //printf(">> %e %e   %e %e   %e %e\n",PG[0],PL[0],PG[1],PL[1],PG[2],PL[2]);*/
 
           Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[1])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2])); //Polar Angle
-          Float_t alpha2 = (Float_t) alpha1; //convert to float
+          float alpha2 = (float) alpha1; //convert to float
           cSum.alpha = alpha2;
 
           Double_t beta1;
           beta1 = TMath::ATan2(dirHit[0],dirHit[2]); //Azimuthal angle, values from -Pi to Pi
-          Float_t beta2 = (Float_t) beta1;
+          float beta2 = (float) beta1;
           cSum.beta = beta2;
 
           cSum.evID = iEvent;
@@ -305,7 +304,7 @@ void debug(int nev=-1)
 
           /*
             Topology top(*cl);
-            Int_t hash = top.GetHash();
+            int hash = top.GetHash();
             if(primo<6){
               cout << "*****************************\n";
               Topology::printCluster(*cl,cout);
@@ -322,7 +321,7 @@ void debug(int nev=-1)
               cout << "Something wrong" << endl;
               exit(1);
             }
-            v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(Int_t)top.GetPattern().length()));
+            v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(int)top.GetPattern().length()));
           }
           bool er = false;
           for(int j=0; j<v.size(); j++){
@@ -403,6 +402,7 @@ void debug(int nev=-1)
   DB.SetThresholdCumulative(0.95);
   cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
   DB.Grouping(10,10);
+  DB.BuildMap();
   DB.PrintDB("Database1.txt");
   TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
   flDB->WriteObject(&DB,"DB","kSingleKey");

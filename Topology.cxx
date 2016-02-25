@@ -11,33 +11,33 @@
 
 ClassImp(Topology)
 
-Int_t Topology::fMode = Topology::kHashes;
+int Topology::fMode = Topology::kHashes;
 
 Topology::Topology():TObject(), fPattern(), fFiredPixels(0),fxCOGPix(0.), fzCOGPix(0.), fxCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHxA(), fHxB(), fHzA(), fHzB(), fFlag(0), fPattID(-1){
-  for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=0;
+  for(int i=0; i<kFitLength; i++) fArrFit[i]=0;
 }
 
 Topology::~Topology(){
 }
 
 
-Topology::Topology(const AliITSMFTClusterPix &cluster, Int_t ID):TObject()
+Topology::Topology(const AliITSMFTClusterPix &cluster, int ID):TObject()
 , fHxA(Form("hXA%d",ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
 , fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHzB(Form("hZB%d",ID),"#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30){
-  Int_t rs = cluster.GetPatternRowSpan();
-  Int_t cs = cluster.GetPatternColSpan();
-	Int_t tempxCOG = 0;
-  Int_t tempzCOG = 0;
-  Int_t tempFiredPixels = 0;
+  int rs = cluster.GetPatternRowSpan();
+  int cs = cluster.GetPatternColSpan();
+	int tempxCOG = 0;
+  int tempzCOG = 0;
+  int tempFiredPixels = 0;
 	//______________________________creating fPattern
 	fPattern.push_back(rs);
 	fPattern.push_back(cs);
   UChar_t tempChar=0;
-  Int_t BitCounter=7;
-  for(Int_t ir=0; ir<rs; ir++){
-    for(Int_t ic=0; ic<cs; ic++){
+  int BitCounter=7;
+  for(int ir=0; ir<rs; ir++){
+    for(int ic=0; ic<cs; ic++){
       if(BitCounter<0) {
 	      fPattern.push_back(tempChar);
 	      tempChar=0;
@@ -53,8 +53,8 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, Int_t ID):TObject()
     }
   }
 	fPattern.push_back(tempChar);
-  Float_t xsh=Float_t((tempxCOG%tempFiredPixels))/tempFiredPixels; //distance between COG end centre of the pixel containing COG
-  Float_t zsh=Float_t((tempzCOG%tempFiredPixels))/tempFiredPixels;
+  float xsh=float((tempxCOG%tempFiredPixels))/tempFiredPixels; //distance between COG end centre of the pixel containing COG
+  float zsh=float((tempzCOG%tempFiredPixels))/tempFiredPixels;
   tempxCOG/=tempFiredPixels;
   tempzCOG/=tempFiredPixels;
   if(xsh>0.5){
@@ -65,13 +65,13 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, Int_t ID):TObject()
     tempzCOG+=1;
     zsh-=1;
   }
-  fxCOGPix = (Float_t) tempxCOG+0.5;
-  fzCOGPix = (Float_t) tempzCOG+0.5;
+  fxCOGPix = (float) tempxCOG+0.5;
+  fzCOGPix = (float) tempzCOG+0.5;
   fxCOGshift = xsh;
   fzCOGshift = zsh;
   fFiredPixels = tempFiredPixels;
   //__________________________________________________________Creating hash
-  fHash=(Int_t)FuncMurmurHash2(fPattern.data(),fPattern.length());
+  fHash=FuncMurmurHash2(fPattern.data(),fPattern.length());
   fFreq=0.; //WARNING: it is to set in a second time
   fCounts=0; //WARNING: it is to set in a second time
   fGroupID=-1; //WARNING: it is to set in a second time
@@ -88,12 +88,12 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, Int_t ID):TObject()
   fHzB.SetDirectory(0);
   fHzB.GetXaxis()->SetTitle("#beta");
   fHzB.GetYaxis()->SetTitle("#DeltaZ (#mum)");
-  for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=0;
+  for(int i=0; i<kFitLength; i++) fArrFit[i]=0;
   fFlag=0;
   fPattID = -1;
 }
 
-Topology::Topology(const Topology &topo, Int_t ID):TObject()
+Topology::Topology(const Topology &topo, int ID):TObject()
 , fHxA(Form("hXA%d", ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
 , fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
@@ -108,20 +108,19 @@ Topology::Topology(const Topology &topo, Int_t ID):TObject()
   fzCOGPix = topo.GetzCOGPix();
   fxCOGshift = topo.GetxCOGshift();
   fzCOGshift = topo.GetzCOGshift();
-  for(Int_t i=0; i<kFitLength; i++) fArrFit[i]=topo.GetFitStuff(i);
+  for(int i=0; i<kFitLength; i++) fArrFit[i]=topo.GetFitStuff(i);
   fFlag=0;
   fPattID=-1;
 }
 
 std::ostream& Topology::printTop(std::ostream &out){
-
-	Int_t rs = fPattern[0];
-	Int_t cs = fPattern[1];
+	int rs = fPattern[0];
+	int cs = fPattern[1];
 	out << "rs: " << rs << " cs: " << cs << " control: " << fPattern.length() << endl;
 	UChar_t tempChar = 0;
-	Int_t s=0;
-	Int_t ic = 0;
-  for (Int_t i=2; i<fPattern.length(); i++){
+	int s=0;
+	int ic = 0;
+  for (int i=2; i<fPattern.length(); i++){
 		tempChar = fPattern[i];
 		s=128; //0b10000000
     while(s>0){
@@ -138,11 +137,11 @@ std::ostream& Topology::printTop(std::ostream &out){
 }
 
 std::ostream& Topology::printCluster(const AliITSMFTClusterPix &cluster, std::ostream &out){
-	Int_t rs = cluster.GetPatternRowSpan();
-	Int_t cs = cluster.GetPatternColSpan();
-	for (Int_t ir=0;ir<rs;ir++){
+	int rs = cluster.GetPatternRowSpan();
+	int cs = cluster.GetPatternColSpan();
+	for (int ir=0;ir<rs;ir++){
 		out << "|";
-		for (Int_t ic=0; ic<cs; ic++) {
+		for (int ic=0; ic<cs; ic++) {
 			out << Form("%c",cluster.TestPixel(ir,ic) ? '+':' ');
 		}
 		out << ("|\n");
@@ -150,17 +149,17 @@ std::ostream& Topology::printCluster(const AliITSMFTClusterPix &cluster, std::os
 	out<< endl;
 }
 
-UInt_t Topology::FuncMurmurHash2(const void* key, Int_t len){
+unsigned int Topology::FuncMurmurHash2(const void* key, int len){
   // 'm' and 'r' are mixing constants generated offline.
-  const UInt_t m =0x5bd1e995;
-  const Int_t r = 24;
+  const unsigned int m =0x5bd1e995;
+  const int r = 24;
   // Initialize the hash
-  UInt_t h = len^0xdeadbeef;
+  unsigned int h = len^0xdeadbeef;
   // Mix 4 bytes at a time into the hash
   const UChar_t* data = (const UChar_t *)key;
-  //Int_t recIndex=0;
+  //int recIndex=0;
   while(len >= 4){
-    UInt_t k = *(UInt_t*)data;
+    unsigned int k = *(unsigned int*)data;
     k *= m;
     k ^= k >> r;
     k *= m;
@@ -185,7 +184,7 @@ UInt_t Topology::FuncMurmurHash2(const void* key, Int_t len){
 }
 
 
-Int_t Topology::Compare(const TObject* obj) const{
+int Topology::Compare(const TObject* obj) const{
   //Since Sort method of TObjArray sorts object in ascending order ( if +1 means higher and -1 lower),
   //it is necessary to invert the frequency outputs
   const Topology* top = (const Topology*)obj;
@@ -203,14 +202,14 @@ Int_t Topology::Compare(const TObject* obj) const{
   return 0;
 }
 
-Bool_t Topology::IsEqual(const TObject* obj) const{
+bool Topology::IsEqual(const TObject* obj) const{
   const Topology* top = (const Topology*)obj;
   if(fMode==kFrequency){
-    if(fFreq == top->GetFreq()) return kTRUE;
+    if(fFreq == top->GetFreq()) return true;
     else return kFALSE;
   }
   if(fMode==kHashes){
-    if(fHash == top->GetHash()) return kTRUE;
+    if(fHash == top->GetHash()) return true;
     else return kFALSE;
   }
   AliFatal(Form("Unknown mode for sorting: %d",fMode));
