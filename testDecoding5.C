@@ -56,27 +56,27 @@ void testDecoding5(int nev=-1,int nRepetintions=100){
   TCanvas* c = new TCanvas("c","cTime");
   c->Divide(2,2);
 
-  TH1F* RealOld = new TH1F("RealOld","Real time with the old method",50,1e-5,2.5e-5);
+  TH1F* RealOld = new TH1F("RealOld","Real time with the old method",50,0,1e-1);
   RealOld->SetDirectory(0);
   RealOld->GetXaxis()->SetTitle("t (s)");
   RealOld->SetFillColor(kBlue);
   RealOld->SetFillStyle(3005);
   RealOld->SetNdivisions(505,"X");
 
-  TH1F* CPUOld = new TH1F("CPUOld","CPU time with the old method",50,0,2.5e-5);
+  TH1F* CPUOld = new TH1F("CPUOld","CPU time with the old method",50,0,1e-1);
   CPUOld->SetDirectory(0);
   CPUOld->GetXaxis()->SetTitle("t (s)");
   CPUOld->SetFillColor(kRed);
   CPUOld->SetFillStyle(3005);
 
-  TH1F* RealNew = new TH1F("RealOld","Real time with map method",50,1e-5,2.5e-5);
+  TH1F* RealNew = new TH1F("RealOld","Real time with map method",50,0,1e-1);
   RealNew->SetDirectory(0);
   RealNew->GetXaxis()->SetTitle("t (s)");
   RealNew->SetFillColor(kBlue);
   RealNew->SetFillStyle(3005);
   RealNew->SetNdivisions(505,"X");
 
-  TH1F* CPUNew = new TH1F("CPUOld","CPU time with map method",50,0,2.5e-5);
+  TH1F* CPUNew = new TH1F("CPUOld","CPU time with map method",50,0,1e-1);
   CPUNew->SetDirectory(0);
   CPUNew->GetXaxis()->SetTitle("t (s)");
   CPUNew->SetFillColor(kRed);
@@ -240,68 +240,26 @@ void testDecoding5(int nev=-1,int nRepetintions=100){
             if (cl->GetLabel(il)>=0) labels[nLab++] = cl->GetLabel(il);
             else break;
           }
-          // find hit info
-          for (int il=0;il<nLab;il++) {
-            TClonesArray* htArr = (TClonesArray*)arrMCTracks.At(labels[il]);
-  	        //printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
-  	        if (!htArr) {printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
-            //
-            int nh = htArr->GetEntriesFast();
-            AliITSMFTHit *pHit=0;
-            for (int ih=nh;ih--;) {
-              AliITSMFTHit* tHit = (AliITSMFTHit*)htArr->At(ih);
-              if (tHit->GetChip()!=modID) continue;
-              pHit = tHit;
-              break;
-            }
-            if (!pHit) {
-              printf("did not find MChit for label %d on module %d ",il,modID);
-              cl->Print();
-              htArr->Print();
-              continue;
-            }
-            //
-            pHit->GetPositionG(xg1,yg1,zg1);
-            pHit->GetPositionG0(xg0,yg0,zg0,tg0);
-            //
-            double txyzH[3],gxyzH[3] = { (xg1+xg0)/2, (yg1+yg0)/2, (zg1+zg0)/2 };
-            mat->MasterToLocal(gxyzH,txyzH);
-
-            double rcl = TMath::Sqrt(xyzClTr[0]*xyzClTr[0]+xyzClTr[1]*xyzClTr[1]);
-            double rht = TMath::Sqrt(txyzH[0]*txyzH[0]+txyzH[1]*txyzH[1]);
-            //
-            //Angles determination
-
-            pHit->GetPositionL(xExit,yExit,zExit,gm);
-            pHit->GetPositionL0(xEnt,yEnt,zEnt,tof1,gm);
-
-            Double_t dirHit[3]={(xExit-xEnt),(yExit-yEnt),(zExit-zEnt)};
-
-            Topology top(*cl);
-            if(top.GetHash()==-2142478390){
-              cout << "Something wrong" << endl;
-              exit(1);
-            }
-            TimerOld.Start(!totClusters);
-        	  int num1 = DB.FromCluster2GroupID(*cl);
-            TimerOld.Stop();
-            TimerNew.Start(!totClusters);
-            int num2 = DB.FromCluster2GroupIDMap(*cl);
-            TimerNew.Stop();
-            if(num1!=num2) cout << "Different results from different methods: " << num1 << " " << num2 << endl;
-            totClusters++;
-          }
+          Topology top(*cl);
+          TimerOld.Start(!totClusters);
+      	  int num1 = DB.FromCluster2GroupID(*cl);
+          TimerOld.Stop();
+          TimerNew.Start(!totClusters);
+          int num2 = DB.FromCluster2GroupIDMap(*cl);
+          TimerNew.Stop();
+          if(num1!=num2) cout << "Different results from different methods: " << num1 << " " << num2 << endl;
+          totClusters++;
         }
       }
       //    layerClus.Clear();
       //
       arrMCTracks.Delete();
-      Double_t oldCPUTime = (TimerOld.CpuTime())/totClusters;
-      Double_t oldRealTime = (TimerOld.RealTime())/totClusters;
+      Double_t oldCPUTime = TimerOld.CpuTime();
+      Double_t oldRealTime = TimerOld.RealTime();
       CPUOld->Fill(oldCPUTime);
       RealOld->Fill(oldRealTime);
-      Double_t newCPUTime = (TimerNew.CpuTime())/totClusters;
-      Double_t newRealTime = (TimerNew.RealTime())/totClusters;
+      Double_t newCPUTime = TimerNew.CpuTime();
+      Double_t newRealTime = TimerNew.RealTime();
       CPUNew->Fill(newCPUTime);
       RealNew->Fill(newRealTime);
 
