@@ -29,6 +29,9 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
     freqv.push_back(make_pair(p.second.second,p.first));
   }
   std::sort(freqv.begin(),freqv.end(), MinimDatabase::countsCompare);
+  fNotInGroups = 0;
+  fNGroups = 0;
+  fFinalMap.clear();
   for(auto &q : freqv){
     totFreq += (q.first)/fTotClusters;
     if(totFreq<cumulative){
@@ -36,31 +39,4 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
       fFinalMap.insert(make_pair(q.second,fNGroups++));
     }
   }
-
-
-
-  // int nPatterns = fN;
-  // TArrayF arrFreq;
-  // arrFreq.Set(nPatterns);
-  // TArrayI sortIndex;
-  // sortIndex.Set(nPatterns);
-  // for(int i=0; i<nPatterns; i++){
-  //   Topology* top = (Topology*)fArrTopologies.At(i);
-  //   float tempFreq = top->GetFreq();
-  //   arrFreq[i] = tempFreq;
-  // }
-  // TArrayF provvFreq;
-  // provvFreq.Set(fN);
-  // TMath::Sort(fN,arrFreq.GetArray(),sortIndex.GetArray());
-  // for(int j=0; j<fN; j++){
-  //   provvFreq[j]=arrFreq[sortIndex[j]];
-  // }
-  // int over=0;
-  // while(totFreq < cumulative){
-  //   totFreq+=provvFreq[over++];
-  // }
-  // fThreshold=provvFreq[--over];
-  // while(provvFreq[over]==fThreshold) over++;
-  // over++;
-  // fOverThr = over;
 }
