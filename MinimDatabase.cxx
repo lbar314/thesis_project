@@ -28,7 +28,7 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
   for(auto &&p : fMapTop){
     freqv.push_back(make_pair(p.second.second,p.first));
   }
-  std::sort(freqv.begin(),freqv.end(), MinimDatabase::countsCompare);
+  std::sort(freqv.begin(),freqv.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
   fNotInGroups = 0;
   fNGroups = 0;
   fFinalMap.clear();

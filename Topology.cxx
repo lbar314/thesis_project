@@ -13,7 +13,7 @@ ClassImp(Topology)
 
 int Topology::fMode = Topology::kHashes;
 
-Topology::Topology():TObject(), fPattern(), fFiredPixels(0),fxCOGPix(0.), fzCOGPix(0.), fxCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHxA(), fHxB(), fHzA(), fHzB(), fFlag(0), fPattID(-1){
+Topology::Topology():TObject(), fPattern(), fFiredPixels(0),fyCOGPix(0.), fzCOGPix(0.), fyCOGshift(0.), fzCOGshift(0.), fHash(0), fFreq(0.), fCounts(0),fGroupID(-1), fHyA(), fHyB(), fHzA(), fHzB(), fFlag(0), fPattID(-1){
   for(int i=0; i<kFitLength; i++) fArrFit[i]=0;
 }
 
@@ -22,13 +22,13 @@ Topology::~Topology(){
 
 
 Topology::Topology(const AliITSMFTClusterPix &cluster, int ID):TObject()
-, fHxA(Form("hXA%d",ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
-, fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
+, fHyA(Form("hYA%d",ID),"#DeltaY vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHyB(Form("hYB%d",ID),"#DeltaY vs #beta",10,0,TMath::Pi()/2,50,-30,30)
 , fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHzB(Form("hZB%d",ID),"#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30){
   int rs = cluster.GetPatternRowSpan();
   int cs = cluster.GetPatternColSpan();
-	int tempxCOG = 0;
+	int tempyCOG = 0;
   int tempzCOG = 0;
   int tempFiredPixels = 0;
 	//______________________________creating fPattern
@@ -46,28 +46,28 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, int ID):TObject()
       if(cluster.TestPixel(ir,ic)){
 				tempChar+=(1<<BitCounter);
 				tempFiredPixels++;
-				tempxCOG+=ir;
+				tempyCOG+=ir;
 				tempzCOG+=ic;
 			}
       BitCounter--;
     }
   }
 	fPattern.push_back(tempChar);
-  float xsh=float((tempxCOG%tempFiredPixels))/tempFiredPixels; //distance between COG end centre of the pixel containing COG
+  float ysh=float((tempyCOG%tempFiredPixels))/tempFiredPixels; //distance between COG end centre of the pixel containing COG
   float zsh=float((tempzCOG%tempFiredPixels))/tempFiredPixels;
-  tempxCOG/=tempFiredPixels;
+  tempyCOG/=tempFiredPixels;
   tempzCOG/=tempFiredPixels;
-  if(xsh>0.5){
-    tempxCOG+=1;
-    xsh-=1;
+  if(ysh>0.5){
+    tempyCOG+=1;
+    ysh-=1;
   }
   if(zsh>0.5){
     tempzCOG+=1;
     zsh-=1;
   }
-  fxCOGPix = (float) tempxCOG+0.5;
+  fyCOGPix = (float) tempyCOG+0.5;
   fzCOGPix = (float) tempzCOG+0.5;
-  fxCOGshift = xsh;
+  fyCOGshift = ysh;
   fzCOGshift = zsh;
   fFiredPixels = tempFiredPixels;
   //__________________________________________________________Creating hash
@@ -76,12 +76,12 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, int ID):TObject()
   fCounts=0; //WARNING: it is to set in a second time
   fGroupID=-1; //WARNING: it is to set in a second time
 	//_______________________________________________________Setting histograms
-  fHxA.SetDirectory(0);
-  fHxA.GetXaxis()->SetTitle("#alpha");
-  fHxA.GetYaxis()->SetTitle("#DeltaX (#mum)");
-  fHxB.SetDirectory(0);
-  fHxB.GetXaxis()->SetTitle("#alpha");
-  fHxB.GetYaxis()->SetTitle("#DeltaX (#mum)");
+  fHyA.SetDirectory(0);
+  fHyA.GetXaxis()->SetTitle("#alpha");
+  fHyA.GetYaxis()->SetTitle("#DeltaY (#mum)");
+  fHyB.SetDirectory(0);
+  fHyB.GetXaxis()->SetTitle("#alpha");
+  fHyB.GetYaxis()->SetTitle("#DeltaY (#mum)");
   fHzA.SetDirectory(0);
   fHzA.GetXaxis()->SetTitle("#alpha");
   fHzA.GetYaxis()->SetTitle("#DeltaZ (#mum)");
@@ -94,8 +94,8 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, int ID):TObject()
 }
 
 Topology::Topology(const Topology &topo, int ID):TObject()
-, fHxA(Form("hXA%d", ID),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
-, fHxB(Form("hXB%d",ID),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30)
+, fHyA(Form("hYA%d", ID),"#DeltaY vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
+, fHyB(Form("hYB%d",ID),"#DeltaY vs #beta",10,0,TMath::Pi()/2,50,-30,30)
 , fHzA(Form("hZA%d",ID),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30)
 , fHzB(Form("hZB%d",ID),"#DeltaZ vs beta",10,0,TMath::Pi()/2,50,-30,30){
 	fPattern = topo.GetPattern();
@@ -104,9 +104,9 @@ Topology::Topology(const Topology &topo, int ID):TObject()
   fHash = topo.GetHash();
   fGroupID = topo.GetGroupID();
   fFiredPixels = topo.GetFiredPixels();
-  fxCOGPix = topo.GetxCOGPix();
+  fyCOGPix = topo.GetyCOGPix();
   fzCOGPix = topo.GetzCOGPix();
-  fxCOGshift = topo.GetxCOGshift();
+  fyCOGshift = topo.GetyCOGshift();
   fzCOGshift = topo.GetzCOGshift();
   for(int i=0; i<kFitLength; i++) fArrFit[i]=topo.GetFitStuff(i);
   fFlag=0;

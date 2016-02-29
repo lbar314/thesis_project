@@ -50,8 +50,8 @@ typedef struct {
   Float_t xyz[3];
   Float_t dX;
   Float_t dY;
-  Float_t dZ;  
-  Bool_t split;  
+  Float_t dZ;
+  Bool_t split;
   Bool_t prim;
   Int_t  pdg;
   Int_t  ntr;
@@ -65,7 +65,7 @@ TObjArray arrMCTracks; // array of hit arrays for each particle
 
 void compClusHitsMod2(int nev=-1)
 {
-  
+
   const int kSplit=0x1<<22;
   const int kSplCheck=0x1<<23;
   //
@@ -176,26 +176,26 @@ void compClusHitsMod2(int nev=-1)
   printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
-  
+
   // output tree
   TFile* flOut = TFile::Open("clInfo.root","recreate");
   TTree* trOut = new TTree("clitsu","clitsu");
   clSumm cSum;
   trOut->Branch("evID", &cSum.evID ,"evID/I");
   trOut->Branch("volID",&cSum.volID,"volID/I");
-  trOut->Branch("lrID", &cSum.lrID ,"lrID/I");  
-  trOut->Branch("clID", &cSum.clID ,"clID/I");  
+  trOut->Branch("lrID", &cSum.lrID ,"lrID/I");
+  trOut->Branch("clID", &cSum.clID ,"clID/I");
   trOut->Branch("nPix", &cSum.nPix ,"nPix/I");
   trOut->Branch("nX"  , &cSum.nX   ,"nX/I");
   trOut->Branch("nZ"  , &cSum.nZ   ,"nZ/I");
   trOut->Branch("q"   , &cSum.q    ,"q/I");
-  trOut->Branch("pt"  , &cSum.pt   ,"pt/F");  
-  trOut->Branch("eta"  ,&cSum.eta  ,"eta/F");  
-  trOut->Branch("phi"  , &cSum.phi  ,"phi/F");  
-  trOut->Branch("xyz",   cSum.xyz,  "xyz[3]/F");  
+  trOut->Branch("pt"  , &cSum.pt   ,"pt/F");
+  trOut->Branch("eta"  ,&cSum.eta  ,"eta/F");
+  trOut->Branch("phi"  , &cSum.phi  ,"phi/F");
+  trOut->Branch("xyz",   cSum.xyz,  "xyz[3]/F");
   trOut->Branch("dX"  , &cSum.dX   ,"dX/F");
   trOut->Branch("dY"  , &cSum.dY   ,"dY/F");
-  trOut->Branch("dZ"  , &cSum.dZ   ,"dZ/F");  
+  trOut->Branch("dZ"  , &cSum.dZ   ,"dZ/F");
   trOut->Branch("split",&cSum.split,"split/O");
   trOut->Branch("prim", &cSum.prim, "prim/O");
   trOut->Branch("pdg",  &cSum.pdg,  "pdg/I");
@@ -206,7 +206,7 @@ void compClusHitsMod2(int nev=-1)
   trOut->Branch("nColPatt", &cSum.nColPatt, "nColPatt/I");
 
   TopDatabase DB;
-  
+
   for (Int_t iEvent = 0; iEvent < ntotev; iEvent++) {
     printf("\n Event %i \n",iEvent);
     runLoader->GetEvent(iEvent);
@@ -214,7 +214,7 @@ void compClusHitsMod2(int nev=-1)
     cluTree=dl->TreeR();
     hitTree=dl->TreeH();
     hitTree->SetBranchAddress("ITS",&hitList);
-    // 
+    //
     // read clusters
     for (int ilr=nlr;ilr--;) {
       TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
@@ -307,8 +307,8 @@ void compClusHitsMod2(int nev=-1)
         // find hit info
         for (int il=0;il<nLab;il++) {
           TClonesArray* htArr = (TClonesArray*)arrMCTracks.At(labels[il]);
-	  //printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
-	  if (!htArr) {printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
+      	  //printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
+      	  if (!htArr) {printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
           //
           int nh = htArr->GetEntriesFast();
           AliITSMFTHit *pHit=0;
@@ -319,8 +319,8 @@ void compClusHitsMod2(int nev=-1)
             break;
           }
           if (!pHit) {
-            printf("did not find MChit for label %d on module %d ",il,modID); 
-            cl->Print(); 
+            printf("did not find MChit for label %d on module %d ",il,modID);
+            cl->Print();
             htArr->Print();
             continue;
           }
@@ -352,50 +352,50 @@ void compClusHitsMod2(int nev=-1)
           mat->MasterToLocalVect(PG,PL); //Momentum in local Frame
           //printf(">> %e %e   %e %e   %e %e\n",PG[0],PL[0],PG[1],PL[1],PG[2],PL[2]);*/
 
-          Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[1])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2])); //Polar Angle
+          Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[0])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2])); //Polar Angle
           Float_t alpha2 = (Float_t) alpha1; //convert to float
           cSum.alpha = alpha2;
 
           Double_t beta1;
-          beta1 = TMath::ATan2(dirHit[0],dirHit[2]); //Azimuthal angle, values from -Pi to Pi
+          beta1 = TMath::ATan2(dirHit[1],dirHit[2]); //Azimuthal angle, values from -Pi to Pi
           Float_t beta2 = (Float_t) beta1;
           cSum.beta = beta2;
 
-	  if(ilr==0){
-	    hL0A->Fill(alpha2);
-	    hL0B->Fill(beta2);
-	  }
-	  
-	  if(ilr==1){
-	    hL1A->Fill(alpha2);
-	    hL1B->Fill(beta2);
-	  }
+      	  if(ilr==0){
+      	    hL0A->Fill(alpha2);
+      	    hL0B->Fill(beta2);
+      	  }
 
-	  if(ilr==2){
-	    hL2A->Fill(alpha2);
-	    hL2B->Fill(beta2);
-	  }
+      	  if(ilr==1){
+      	    hL1A->Fill(alpha2);
+      	    hL1B->Fill(beta2);
+      	  }
 
-	  if(ilr==3){
-	    hL3A->Fill(alpha2);
-	    hL3B->Fill(beta2);
-	  }
+      	  if(ilr==2){
+      	    hL2A->Fill(alpha2);
+      	    hL2B->Fill(beta2);
+      	  }
 
-	  if(ilr==4){
-	    hL4A->Fill(alpha2);
-	    hL4B->Fill(beta2);
-	  }
+      	  if(ilr==3){
+      	    hL3A->Fill(alpha2);
+      	    hL3B->Fill(beta2);
+      	  }
 
-	  if(ilr==5){
-	    hL5A->Fill(alpha2);
-	    hL5B->Fill(beta2);
-	  }
+      	  if(ilr==4){
+      	    hL4A->Fill(alpha2);
+      	    hL4B->Fill(beta2);
+      	  }
 
-	  if(ilr==6){
-	    hL6A->Fill(alpha2);
-	    hL6B->Fill(beta2);
-	  }
-          
+      	  if(ilr==5){
+      	    hL5A->Fill(alpha2);
+      	    hL5B->Fill(beta2);
+      	  }
+
+      	  if(ilr==6){
+      	    hL6A->Fill(alpha2);
+      	    hL6B->Fill(beta2);
+      	  }
+
           GetHistoClSize(clsize,kDR,&histoArr)->Fill((rht-rcl)*1e4);
           if (cl->TestBit(kSplit)) {
             if (col%2) GetHistoClSize(clsize,kDTXoddSPL,&histoArr)->Fill((txyzH[0]-xyzClTr[0])*1e4);
@@ -422,36 +422,8 @@ void compClusHitsMod2(int nev=-1)
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-	  DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
-          
-          GetHistoClSize(clsize,kDR,&histoArr)->Fill((rht-rcl)*1e4);
-          if (cl->TestBit(kSplit)) {
-            if (col%2) GetHistoClSize(clsize,kDTXoddSPL,&histoArr)->Fill((txyzH[0]-xyzClTr[0])*1e4);
-            else       GetHistoClSize(clsize,kDTXevenSPL,&histoArr)->Fill((txyzH[0]-xyzClTr[0])*1e4);
-            GetHistoClSize(clsize,kDTZSPL,&histoArr)->Fill((txyzH[2]-xyzClTr[2])*1e4);
-            GetHistoClSize(0,kNPixSPL,&histoArr)->Fill(clsize);
-          }
-          if (col%2) GetHistoClSize(clsize,kDTXodd,&histoArr)->Fill((txyzH[0]-xyzClTr[0])*1e4);
-          else       GetHistoClSize(clsize,kDTXeven,&histoArr)->Fill((txyzH[0]-xyzClTr[0])*1e4);
-          GetHistoClSize(clsize,kDTZ,&histoArr)->Fill((txyzH[2]-xyzClTr[2])*1e4);
-          GetHistoClSize(0,kNPixAll,&histoArr)->Fill(clsize);
-          //
-          cSum.evID = iEvent;
-          cSum.volID = cl->GetVolumeId();
-          cSum.lrID = ilr;
-          cSum.clID = icl;
-          cSum.nPix = cl->GetNPix();
-          cSum.nX   = cl->GetNx();
-          cSum.nZ   = cl->GetNz();
-          cSum.q    = cl->GetQ();
-          cSum.split = cl->TestBit(kSplit);
-          cSum.dX = (txyzH[0]-xyzClTr[0])*1e4;
-          cSum.dY = (txyzH[1]-xyzClTr[1])*1e4;
-          cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
-          cSum.nRowPatt = cl-> GetPatternRowSpan();
-          cSum.nColPatt = cl-> GetPatternColSpan();
- 
-                    
+	        DB.AccountTopology(*cl, cSum.dY, cSum.dZ, cSum.alpha, cSum.beta);
+
           int label = cl->GetLabel(0);
           TParticle* part = 0;
           if (label>=0 && (part=stack->Particle(label)) ) {
@@ -460,7 +432,7 @@ void compClusHitsMod2(int nev=-1)
             cSum.pt  = part->Pt();
             cSum.phi = part->Phi();
             cSum.prim = stack->IsPhysicalPrimary(label);
-          } 
+          }
           cSum.ntr = 0;
           for (int ilb=0;ilb<3;ilb++) if (cl->GetLabel(ilb)>=0) cSum.ntr++;
           for (int i=0;i<3;i++) cSum.xyz[i] = xyzClGloF[i];
@@ -487,7 +459,7 @@ void compClusHitsMod2(int nev=-1)
         }
       }
     }
-    
+
     //    layerClus.Clear();
     //
     arrMCTracks.Delete();
@@ -497,7 +469,7 @@ void compClusHitsMod2(int nev=-1)
   DB.SetThresholdCumulative(0.95);
   cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
   DB.Grouping(10,10);
-  DB.PrintDB("Database1.txt"); 
+  DB.PrintDB("Database1.txt");
   flOut->cd();
   trOut->Write();
   delete trOut;
@@ -551,7 +523,7 @@ void compClusHitsMod2(int nev=-1)
   //
 }
 
-void DrawReport(const char* psname, TObjArray* harr) 
+void DrawReport(const char* psname, TObjArray* harr)
 {
   gStyle->SetOptFit(1);
   if (!harr) harr = &histoArr;
@@ -559,9 +531,9 @@ void DrawReport(const char* psname, TObjArray* harr)
   //
   TString psnm1 = psname;
   if (psnm1.IsNull()) psnm1 = "clusters.ps";
-  TString psnm0 = psnm1.Data(); 
+  TString psnm0 = psnm1.Data();
   psnm0 += "[";
-  TString psnm2 = psnm1.Data(); 
+  TString psnm2 = psnm1.Data();
   psnm2 += "]";
   cnv->Print(psnm0.Data());
   //
@@ -600,7 +572,7 @@ TH1* GetHistoClSize(int npix,int id,TObjArray* harr)
   //
   if (npix<1) {
     if (harr->GetEntriesFast()>=id && (h=(TH1*)harr->At(id))) return h;
-    h = new TH1F("npixAll","npixAll",150,0.5,54.5); 
+    h = new TH1F("npixAll","npixAll",150,0.5,54.5);
     h->SetDirectory(0);
     h->SetLineColor(kRed);
     harr->AddAtAndExpand(h, kNPixAll);
@@ -644,7 +616,7 @@ TH1* GetHistoClSize(int npix,int id,TObjArray* harr)
   h  = new TH1F(Form("SPL_dtxODD_npix%d",npix),Form("SPL_dtxODD_npix%d",npix),nbin,-kdiff,kdiff);
   h->SetLineColor(kMagenta);
   h->SetFillColor(kMagenta);
-  h->SetFillStyle(3001);  
+  h->SetFillStyle(3001);
   h->SetLineStyle(2);
   h->SetDirectory(0);
 
@@ -652,7 +624,7 @@ TH1* GetHistoClSize(int npix,int id,TObjArray* harr)
   h  = new TH1F(Form("SPL_dtxEVN_npix%d",npix),Form("SPL_dtxEVN_npix%d",npix),nbin,-kdiff,kdiff);
   h->SetLineColor(kCyan);
   h->SetFillColor(kCyan);
-  h->SetFillStyle(3006);  
+  h->SetFillStyle(3006);
   h->SetLineStyle(2);
   h->SetDirectory(0);
   harr->AddAtAndExpand(h, npix*10 + kDTXevenSPL);

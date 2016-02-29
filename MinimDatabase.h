@@ -17,9 +17,6 @@ class MinimDatabase {
     ~MinimDatabase();
     void AccountTopology(const AliITSMFTClusterPix &cluster);
     void SetThresholdCumulative(float cumulative);
-    static bool countsCompare(const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){
-      return (couple1.first > couple2.first);
-    }
 
   private:
     map<unsigned long,pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
@@ -30,7 +27,8 @@ class MinimDatabase {
     int fNotInGroups;
 
   #ifdef _STUDY_
-    struct fTopInfo{
+
+    struct TopologyInfo{
       int sizeX;
       int sizeY;
       float X;
@@ -38,7 +36,9 @@ class MinimDatabase {
       float sigmaX;
       float sigmaY;
       int nPixels;
-    };
+    } fTopInfo;
+    map<long unsigned,TopologyInfo> fMapInfo;
+
   #endif
 
 };

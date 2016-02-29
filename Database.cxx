@@ -87,14 +87,14 @@ void Database::ExpandDB(){
 
   //Creating histograms
   Int_t ind = fN-1;
- 
+
   TH2* h0 = new TH2F(Form("hXalpha%d", ind),
 		     Form("#DeltaX vs #alpha"),10,-1.1*TMath::Pi()/2, 1.1*TMath::Pi()/2,50,-30,30);
   h0->SetDirectory(0);
   h0->GetXaxis()->SetTitle("#alpha");
   h0->GetYaxis()->SetTitle("#DeltaX (#mum)");
   fArrHisto.AddAt(h0, ind*4);//This histogram is the first of the 4-histos series
-    
+
   TH2* h1 = new TH2F(Form("hZalpha%d", ind),
 		     Form("#DeltaZ vs #alpha"),10, -1.1* TMath::Pi()/2, 1.1* TMath::Pi()/2,50,-30,30);
   h1->SetDirectory(0);
@@ -159,14 +159,14 @@ Database& Database::operator=(const Database &ogg){
   return *this;
 }
 
-void Database::AccountTopology(const AliITSUClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta){
+void Database::AccountTopology(const AliITSUClusterPix &cluster, Float_t dY, Float_t dZ, Float_t alpha, Float_t beta){
 
   TBits Top;
   Top.Clear();
   Int_t rs = cluster.GetPatternRowSpan();
   Int_t cs = cluster.GetPatternColSpan();
   for(Int_t ir=0;ir<rs;ir++)
-    for(Int_t ic=0;ic<cs;ic++) 
+    for(Int_t ic=0;ic<cs;ic++)
       if(cluster.TestPixel(ir,ic)) Top.SetBitNumber(ir*cs+ic);
   Top.SetUniqueID((rs<<16)+cs);
   Bool_t newPatt = kTRUE;
@@ -191,7 +191,7 @@ void Database::AccountTopology(const AliITSUClusterPix &cluster, Float_t dX, Flo
       this->ExpandDB();
       indTop=fN-1;
       fArrStore.AddAt(pt,indTop);
-      fArrCount[indTop]=1; 
+      fArrCount[indTop]=1;
       //Defining Hash
       Int_t nBytes = rs*cs/8;
       if((rs*cs)%8 != 0) nBytes++;
@@ -206,11 +206,11 @@ void Database::AccountTopology(const AliITSUClusterPix &cluster, Float_t dX, Flo
   }
   if(Junk==kTRUE) return;
   TH2*  h0a = (TH2*)fArrHisto.At(indTop*4);
-  h0a->Fill(alpha, dX);
+  h0a->Fill(alpha, dY);
   TH2*  h1a = (TH2*)fArrHisto.At(indTop*4+1);
   h1a->Fill(alpha, dZ);
   TH2*  h2a = (TH2*)fArrHisto.At(indTop*4+2);
-  h2a->Fill(beta, dX);
+  h2a->Fill(beta, dY);
   TH2*  h3a = (TH2*)fArrHisto.At(indTop*4+3);
   h3a->Fill(beta, dZ);
 }
@@ -231,7 +231,7 @@ void Database::Top2Word(const TBits* top, UChar_t* Word){
 	tempChar=0;
 	BitCounter=7;
 	index++;
-      }	
+      }
       if(top->TestBitNumber(ir*cs+ic)) tempChar+=(1<<BitCounter);
       BitCounter--;
     }
@@ -308,10 +308,10 @@ Bool_t Database::compTop(TBits top1, TBits top2){
 
 std::ostream& Database::printTop(TBits top, std::ostream &out){
   UInt_t UID = top.GetUniqueID();
-  Int_t rs = UID>>16; 
+  Int_t rs = UID>>16;
   Int_t cs = UID&0xffff;
   for (Int_t ir=0;ir<rs;ir++){
-    out << "|"; 
+    out << "|";
     for (Int_t ic=0; ic<cs; ic++) {
       out << Form("%c",top.TestBitNumber(ir*cs+ic) ? '+':' ');
     }
@@ -476,7 +476,7 @@ void Database::Grouping(Float_t threshold, Int_t NumberofShiftXbins, Int_t Numbe
 
   TH1F zShiftDistro("zShiftDistro", "z position", NumberofShiftZbins+1, -0.5-zOffset, 0.5+zOffset);
   zShiftDistro.SetDirectory(0);
-  
+
   printf("Assigning shift-IDs:\n");
   for(Int_t i=0; i<nPatterns; i++){
     if(i%100==0)printf("%d / %d\n ", i, nPatterns);
@@ -485,12 +485,12 @@ void Database::Grouping(Float_t threshold, Int_t NumberofShiftXbins, Int_t Numbe
     zShiftDistro.Fill(fArrzCOGshift[i]);
     shiftZID[i]=zShiftDistro.FindBin(fArrzCOGshift[i]);
   }
-  for(Int_t ID=0; ID<nPatterns; ID++){ 
+  for(Int_t ID=0; ID<nPatterns; ID++){
     fArrGroupID[ID]=-1;
   }
   Int_t tempgroupID=0;
   printf("Processing patterns over threshold:\n");
-  //first assigning groupID to patterns whose frequency is above the treshold 
+  //first assigning groupID to patterns whose frequency is above the treshold
   for(Int_t t=0; t<nPatterns;t++){
     if(t%100==0)printf("%d / %d\n ", t, nPatterns);
     if(fArrFreq[t]>=threshold){
@@ -502,13 +502,13 @@ void Database::Grouping(Float_t threshold, Int_t NumberofShiftXbins, Int_t Numbe
   printf("Processing patterns under threshold:\n");
   for(Int_t i=0; i<nPatterns; i++){
     if(i%100==0)printf("%d / %d\n ", i, nPatterns);
-    if(fArrGroupID[i]!=-1) continue;	
+    if(fArrGroupID[i]!=-1) continue;
     fArrGroupID[i]=tempgroupID;
     //if(i%10000==0)printf("Assigning group ID %d / %d\n ", i, nPatterns);
     for(Int_t j=i+1; j<nPatterns; j++){
       if(fArrGroupID[j]!=-1) continue;
       else {
-	if(shiftXID[j]==shiftXID[i] && shiftZID[j]==shiftZID[i] && 
+	if(shiftXID[j]==shiftXID[i] && shiftZID[j]==shiftZID[i] &&
 	   fArrNrow[i]==fArrNrow[j] && fArrNcol[i]==fArrNcol[j]) fArrGroupID[j]=tempgroupID;
       }
     }
@@ -523,9 +523,9 @@ void Database::Grouping(Float_t threshold, Int_t NumberofShiftXbins, Int_t Numbe
   //**********************************************************//
   TObjArray NewHistoArr=fArrHisto;
   fArrHisto.Clear();
-  
+
   printf("Number of groups: %d\n", fNGroups);
-  
+
   printf("Summing group-histograms:\n");
   for(Int_t iGroup=0; iGroup<fNGroups; iGroup++){
     if(iGroup%1000==0) printf("%d / %d\n", iGroup, fNGroups);
@@ -590,7 +590,7 @@ void Database::Grouping(Float_t threshold, Int_t NumberofShiftXbins, Int_t Numbe
 	  fArrDeltaXmeanErr[i]=0;
 	  fArrDeltaXsigma[i]=0;
 	  fArrDeltaXsigmaErr[i]=0;
-	  fArrChi2x[i] = -1;   
+	  fArrChi2x[i] = -1;
 	}
 	//z chunk
 	if(fitStatusZ==0){
@@ -611,7 +611,7 @@ void Database::Grouping(Float_t threshold, Int_t NumberofShiftXbins, Int_t Numbe
 	  fArrDeltaZmeanErr[i]=0;
 	  fArrDeltaZsigma[i]=0;
 	  fArrDeltaZsigmaErr[i]=0;
-	  fArrChi2z[i] = -1;   
+	  fArrChi2z[i] = -1;
 	}
       }
     }
@@ -638,7 +638,7 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
 
   TH1F zShiftDistro("zShiftDistro", "z position", NumberofShiftZbins+1, -0.5-zOffset, 0.5+zOffset);
   zShiftDistro.SetDirectory(0);
-  
+
   printf("Assigning shift-IDs:\n");
   for(Int_t i=0; i<nPatterns; i++){
     if(i%100==0)printf("%d / %d\n ", i, nPatterns);
@@ -647,12 +647,12 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
     zShiftDistro.Fill(fArrzCOGshift[i]);
     shiftZID[i]=zShiftDistro.FindBin(fArrzCOGshift[i]);
   }
-  for(Int_t ID=0; ID<nPatterns; ID++){ 
+  for(Int_t ID=0; ID<nPatterns; ID++){
     fArrGroupID[ID]=-1;
   }
   Int_t tempgroupID=0;
   printf("Processing patterns over threshold:\n");
-  //first assigning groupID to patterns whose frequency is above the treshold 
+  //first assigning groupID to patterns whose frequency is above the treshold
   for(Int_t t=0; t<nPatterns;t++){
     if(t%100==0)printf("%d / %d\n ", t, nPatterns);
     if(fArrFreq[t]>=threshold){
@@ -664,13 +664,13 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   printf("Processing patterns under threshold:\n");
   for(Int_t i=0; i<nPatterns; i++){
     if(i%100==0)printf("%d / %d\n ", i, nPatterns);
-    if(fArrGroupID[i]!=-1) continue;	
+    if(fArrGroupID[i]!=-1) continue;
     fArrGroupID[i]=tempgroupID;
     //if(i%10000==0)printf("Assigning group ID %d / %d\n ", i, nPatterns);
     for(Int_t j=i+1; j<nPatterns; j++){
       if(fArrGroupID[j]!=-1) continue;
       else {
-	if(shiftXID[j]==shiftXID[i] && shiftZID[j]==shiftZID[i] && 
+	if(shiftXID[j]==shiftXID[i] && shiftZID[j]==shiftZID[i] &&
 	   fArrNrow[i]==fArrNrow[j] && fArrNcol[i]==fArrNcol[j]) fArrGroupID[j]=tempgroupID;
       }
     }
@@ -686,7 +686,7 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
   TObjArray NewHistoArr=fArrHisto;
   fArrHisto.Clear();
   printf("Number of groups: %d\n", fNGroups);
-  
+
   printf("Summing group-histograms:\n");
   for(Int_t iGroup=0; iGroup<fNGroups; iGroup++){
     if(iGroup%1000==0) printf("%d / %d\n", iGroup, fNGroups);
@@ -751,7 +751,7 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
 	  fArrDeltaXmeanErr[i]=0;
 	  fArrDeltaXsigma[i]=0;
 	  fArrDeltaXsigmaErr[i]=0;
-	  fArrChi2x[i] = -1;   
+	  fArrChi2x[i] = -1;
 	}
 	//z chunk
 	if(fitStatusZ==0){
@@ -772,7 +772,7 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
 	  fArrDeltaZmeanErr[i]=0;
 	  fArrDeltaZsigma[i]=0;
 	  fArrDeltaZsigmaErr[i]=0;
-	  fArrChi2z[i] = -1;   
+	  fArrChi2z[i] = -1;
 	}
       }
     }
@@ -780,7 +780,7 @@ void Database::Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins){
 }
 
 Int_t Database::FromCluster2GroupID(const AliITSUClusterPix &cl) const{
-  
+
   //Passing from cluster to UChar_t*
   Int_t rs = cl.GetPatternRowSpan();
   Int_t cs = cl.GetPatternColSpan();
@@ -802,7 +802,7 @@ Int_t Database::FromCluster2GroupID(const AliITSUClusterPix &cl) const{
 	tempChar=0;
 	BitCounter=7;
 	index++;
-      }	
+      }
       if(cl.TestPixel(ir,ic)) tempChar+=(1<<BitCounter);
       BitCounter--;
     }
@@ -835,11 +835,11 @@ Int_t Database::FromCluster2GroupID(const AliITSUClusterPix &cl) const{
     else if(fArrHash[guess]>hashcode){
       high = guess-1;
       max = fArrHash[guess-1];
-    } 
+    }
     else{
       low = guess+1;
       min = fArrHash[guess+1];
-    }  
+    }
   }
   if(interIndex==-1){//junk case
     return -1;
@@ -879,7 +879,7 @@ Int_t Database::FromCluster2GroupID(const AliITSUClusterPix &cl) const{
       exit(1);
     }
   }
-  return fArrGroupID[interIndex]; 
+  return fArrGroupID[interIndex];
 }
 
 void Database::SetThreshold(Float_t thr){

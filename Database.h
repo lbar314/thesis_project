@@ -15,8 +15,8 @@ class Database :public TObject {
   Database(const Database &ogg);
   ~Database();
   Database& operator=(const Database &ogg);
-  void AccountTopology(const AliITSUClusterPix &cluster, Float_t dX, Float_t dZ, Float_t alpha, Float_t beta);  
-  
+  void AccountTopology(const AliITSUClusterPix &cluster, Float_t dY, Float_t dZ, Float_t alpha, Float_t beta);  
+
   //________________getters___________________
 
   Int_t GetN() const {return fN;}
@@ -55,9 +55,9 @@ class Database :public TObject {
   TObjArray GetArrHisto() const {return fArrHisto;}
   void LoadDB(const char* fname);
   void SaveDB(const char* fname);
-  
+
   //*************************************************************
-  
+
   void EndAndSort();//to end the database and sort key wrt hashes, in ascending order
   void PrintDB(const char* output = "Database.txt") const; //print the database on a txt file
   void SetThresholdCumulative(Float_t cumulative);
@@ -66,9 +66,9 @@ class Database :public TObject {
   void Grouping(Int_t NumberofShiftXbins, Int_t NumberofShiftZbins);//return patterns over threshold
   void Grouping(Float_t threshold, Int_t NumberofShiftXbins=10, Int_t NumberofShiftZbins=10);
   void SetNmax(Int_t a) { fNmax = a;}
-  
+
   //*************************************************************
-  
+
   static void Top2Word(const TBits* top, UChar_t* Word);
   //Word: 1st byte = row span; 2nd = column span; others: pattern.
   //The length must be the minimum possible.
@@ -78,15 +78,15 @@ class Database :public TObject {
   static Bool_t compTop(TBits top1, TBits top2);
   static UInt_t FuncMurmurHash2(const void * key, Int_t len);
   Int_t FromCluster2GroupID(const AliITSUClusterPix &cl) const;
-  
- 
+
+
  private:
   Int_t fN; //length of arrays
   TArrayI fArrPattID; //array ofpattern IDs according to frequency ( 0-> most frequent)
   TObjArray fArrStore; //array of patterns (TBits* format, unique ID = rs<<16 + cs)
   TArrayF fArrFreq; //array of frequencies
   TArrayF fArrzCOGPix; //z position of the centre of the pixel containing COG
-  TArrayF fArrxCOGPix; 
+  TArrayF fArrxCOGPix;
   TArrayF fArrzCOGshift; //z distance between COG and center of pixel containig it
   TArrayF fArrxCOGshift;
   TArrayI fArrNpix; //number of fired pixels
@@ -106,7 +106,7 @@ class Database :public TObject {
   TArrayI fArrNDFx; //Number of degrees of fredom of previous fits
   TArrayI fArrNDFz;
   TArrayI fArrGroupID; //array of group-IDs
-  TArrayI fArrFlag; //0 if the hash is unique to that topology, 1 there is a clash 
+  TArrayI fArrFlag; //0 if the hash is unique to that topology, 1 there is a clash
   TArrayI fArrPartialTop; //first 32 pixels of the topology
   Int_t fTotClusters; //number of clusters on wich DB has been constructed
   TArrayI fArrCount; //array of topologies counts
@@ -115,10 +115,9 @@ class Database :public TObject {
   Int_t fNGroups;//number of groups
   TObjArray fArrHisto;
   Int_t fNmax;//patterns above this number (included) belong to a "junk" bin
-  void ExpandDB(); 
+  void ExpandDB();
 
   ClassDef(Database,6)
 };
 
 #endif
-

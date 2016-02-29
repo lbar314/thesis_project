@@ -12,8 +12,8 @@ class Topology :public TObject {
 
  public:
   enum SortMode_t{kFrequency=0, kHashes=1};//fMode
-  enum FitIndex_t{kDeltaZmean=0, kDeltaZmeanErr=1, kDeltaXmean=2, kDeltaXmeanErr=3, kDeltaZsigma=4, kDeltaZsigmaErr=5,
-		  kDeltaXsigma=6, kDeltaXsigmaErr=7, kChi2z=8, kChi2x=9, kNDFx=10, kNDFz=11, kFitLength=12}; //position in fArrFit
+  enum FitIndex_t{kDeltaZmean=0, kDeltaZmeanErr=1, kDeltaYmean=2, kDeltaYmeanErr=3, kDeltaZsigma=4, kDeltaZsigmaErr=5,
+		  kDeltaYsigma=6, kDeltaYsigmaErr=7, kChi2z=8, kChi2y=9, kNDFy=10, kNDFz=11, kFitLength=12}; //position in fArrFit
 
   Topology();
   virtual ~Topology();
@@ -32,13 +32,13 @@ class Topology :public TObject {
   int GetCounts() const {return fCounts;}
   int GetGroupID() const {return fGroupID;}
   int GetFiredPixels() const {return fFiredPixels;}
-  float GetxCOGPix() const {return fxCOGPix;}
+  float GetyCOGPix() const {return fyCOGPix;}
   float GetzCOGPix() const {return fzCOGPix;}
-  float GetxCOGshift() const {return fxCOGshift;}
+  float GetyCOGshift() const {return fyCOGshift;}
   float GetzCOGshift() const {return fzCOGshift;}
   int GetMode() const {return fMode;}
-  TH2F& GetHxA() {return fHxA;}
-  TH2F& GetHxB() {return fHxB;}
+  TH2F& GetHyA() {return fHyA;}
+  TH2F& GetHyB() {return fHyB;}
   TH2F& GetHzA() {return fHzA;}
   TH2F& GetHzB() {return fHzB;}
   float GetFitStuff(int ind) const {return fArrFit[ind];}
@@ -54,8 +54,8 @@ class Topology :public TObject {
   void SetFitStuff(float value, int ind) {fArrFit[ind]=value;}
   void SetFlag(int num) {fFlag=num;}
   void IncreaseCounts(){fCounts++;}
-  void SetHxA(TH2F &hist){fHxA=hist;}
-  void SetHxB(TH2F &hist){fHxB=hist;}
+  void SetHyA(TH2F &hist){fHyA=hist;}
+  void SetHyB(TH2F &hist){fHyB=hist;}
   void SetHzA(TH2F &hist){fHzA=hist;}
   void SetHzB(TH2F &hist){fHzB=hist;}
   void SetPattID(int num) {fPattID=num;}
@@ -65,17 +65,17 @@ class Topology :public TObject {
 
   string fPattern;
   int fFiredPixels;
-  float fxCOGPix;
+  float fyCOGPix;
   float fzCOGPix;
-  float fxCOGshift;
+  float fyCOGshift;
   float fzCOGshift;
   unsigned int fHash;
   int fCounts;
   float fFreq;
   int fGroupID;
   static int fMode; //DEFAULT kHashes
-  TH2F fHxA;
-  TH2F fHxB;
+  TH2F fHyA;
+  TH2F fHyB;
   TH2F fHzA;
   TH2F fHzB;
   float fArrFit[kFitLength];
