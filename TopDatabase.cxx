@@ -261,9 +261,9 @@ void TopDatabase::Grouping(int NumberofShiftXbins, int NumberofShiftZbins){
   printf("Summing group-histograms:\n");
   for(int iGroup=0; iGroup<fNGroups; iGroup++){
     TH2F tempXa(Form("hXA%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
-    TH2F tempXb(Form("hXB%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
-    TH2F tempZa(Form("hZA%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
-    TH2F tempZb(Form("hZB%d",iGroup),"#DeltaX vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
+    TH2F tempXb(Form("hXB%d",iGroup),"#DeltaX vs #beta",10,0,TMath::Pi()/2,50,-30,30);
+    TH2F tempZa(Form("hZA%d",iGroup),"#DeltaZ vs #alpha",10,0,TMath::Pi()/2,50,-30,30);
+    TH2F tempZb(Form("hZB%d",iGroup),"#DeltaZ vs #beta",10,0,TMath::Pi()/2,50,-30,30);
     if(iGroup%1000==0) printf("%d / %d\n", iGroup, fNGroups);
     bool FirstMatch = true;
     for(int i=0; i<nPatterns; i++){
@@ -275,7 +275,7 @@ void TopDatabase::Grouping(int NumberofShiftXbins, int NumberofShiftZbins){
           tempXa = top->GetHxA();
           tempXb = top->GetHxB();
           tempZa = top->GetHzA();
-          tempZb = top->GetHxA();
+          tempZb = top->GetHzB();
       	}
       	else{
           tempXa.Add(&(top->GetHxA()));
@@ -288,7 +288,6 @@ void TopDatabase::Grouping(int NumberofShiftXbins, int NumberofShiftZbins){
       tempXb.SetName(Form("hXB%d",iGroup));
       tempZa.SetName(Form("hZA%d",iGroup));
       tempZb.SetName(Form("hZB%d",iGroup));
-
     }
     fArrHisto.AddAt(new TH2F(tempXa),iGroup*4);
     fArrHisto.AddAt(new TH2F(tempXb),iGroup*4+1);

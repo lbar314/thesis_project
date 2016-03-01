@@ -317,19 +317,15 @@ void debug(int nev=-1)
           vector<int> v;
           for(int i=0; i<10; i++){
             Topology top(*cl);
-            if(top.GetHash()==-2142478390){
-              cout << "Something wrong" << endl;
-              exit(1);
-            }
             v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(int)top.GetPattern().length()));
           }
           bool er = false;
-          for(int j=0; j<v.size(); j++){
-            for(int k=j+1; k<v.size(); k++){
+          for(unsigned int j=0; j<v.size(); j++){
+            for(unsigned int k=j+1; k<v.size(); k++){
               if(v[j]!=v[k]) er = true;
             }
           }
-          if(er) for(int d=0; d<v.size(); d++) cout << v[d] << endl;
+          if(er) for(unsigned int d=0; d<v.size(); d++) cout << v[d] << endl;
           //
           //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
           /*

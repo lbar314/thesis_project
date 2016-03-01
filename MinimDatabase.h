@@ -8,15 +8,16 @@
 #include "AliITSMFTClusterPix.h"
 #include "./MinimTopology.h"
 
-#define _STUDY_
+//#define _STUDY_
 
 class MinimDatabase {
 
   public:
     MinimDatabase();
     ~MinimDatabase();
-    void AccountTopology(const AliITSMFTClusterPix &cluster);
+    void AccountTopology(const AliITSMFTClusterPix &cluster/*, ostream& output=cout*/);
     void SetThresholdCumulative(float cumulative);
+    std::ostream& showMap(std::ostream &out);
 
   private:
     map<unsigned long,pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
@@ -30,17 +31,17 @@ class MinimDatabase {
 
     struct TopologyInfo{
       int sizeX;
-      int sizeY;
+      int sizeZ;
       float X;
-      float Y;
-      float sigmaX;
-      float sigmaY;
+      float Z;
+      float sigmaY2;
+      float sigmaZ2;
+      float sigmaYZ;
       int nPixels;
-    } fTopInfo;
+    };
     map<long unsigned,TopologyInfo> fMapInfo;
 
   #endif
-
 };
 
 #endif

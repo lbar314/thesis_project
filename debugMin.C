@@ -24,6 +24,7 @@
 #include "./Topology.h"
 #include "./TopDatabase.h"
 #include "./MinimTopology.h"
+#include "./MinimDatabase.h"
 #include <map>
 
 #endif
@@ -52,7 +53,7 @@ typedef struct {
   bool prim;
   int  pdg;
   int  ntr;
-  float alpha; // alpha is the angle in y-radius plane in local frame
+  float alpha; // alpha is the angleTopDat in y-radius plane in local frame
   float beta;  // beta is the angle in xz plane, taken from z axis, growing counterclockwise
   int nRowPatt;
   int nColPatt;
@@ -66,7 +67,7 @@ void debugMin(int nev=-1)
   TObjArray bitsArr;
   vector<pair<int,Topology> > mappa;
   vector<pair<int,int> > clashes;
-  ofstream a("list.txt");
+  ofstream a("Check_map.txt");
   ofstream b("prova.txt");
   clSumm cSum;
   int pippobaudo=0;
@@ -131,6 +132,7 @@ void debugMin(int nev=-1)
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
   TopDatabase DB;
+  MinimDatabase minDB;
 
   for (int iEvent = 0; iEvent < ntotev; iEvent++) {
     printf("\n Event %i \n",iEvent);
@@ -182,7 +184,6 @@ void debugMin(int nev=-1)
         if(icl%100 == 0) printf("ilr: %d icl: %d / %d\n", ilr, icl, nClu);
         AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
         int modID = cl->GetVolumeId();
-
         //------------ check if this is a split cluster
         int sInL = modID - gm->GetFirstChipIndex(ilr);
         if (!cl->TestBit(kSplCheck)) {
@@ -301,64 +302,51 @@ void debugMin(int nev=-1)
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-	        DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
-
-          /*
-            Topology top(*cl);
-            int hash = top.GetHash();
-            if(primo<6){
-              cout << "*****************************\n";
-              Topology::printCluster(*cl,cout);
-              cout << "Checking print\n";
-              top.printTop(cout);
-              printf("xCOG: %f + (%f) xCOG: %f + (%f) fired: %d\n", top.GetxCOGPix(),top.GetxCOGshift(),top.GetzCOGPix(),top.GetzCOGshift(), top.GetFiredPixels());
-              primo++;
-            }
-          */
-          vector<int> v;
-          for(int i=0; i<10; i++){
-            Topology top(*cl);
-            MinimTopology top1(*cl);
-            if(top.GetPattern()!=top1.GetPattern()){
-              cout << "Error: different outputs" << endl << endl;
-              cout << "Cluster output" << endl;
-              Topology::printCluster(*cl,cout);
-              cout << "Topology output" << endl;
-              top.printTop(cout);
-              cout << "MinimTopology output" << endl;
-              top1.printTop(cout);
-            }
-            v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(int)top.GetPattern().length()));
-          }
-          bool er = false;
-          for(int j=0; j<v.size(); j++){
-            for(int k=j+1; k<v.size(); k++){
-              if(v[j]!=v[k]) er = true;
-            }
-          }
-          if(er) for(int d=0; d<v.size(); d++) cout << v[d] << endl;
+	        DB.AccountTopology(*cl, cSum.dY, cSum.dZ, cSum.alpha, cSum.beta);
+          minDB.AccountTopology(*cl);
+          //________________________TESTING_MINIMAL_TOPOLOGY________________________________
+          // vector<int> v;
+          // for(int i=0; i<10; i++){
+          //   Topology top(*cl);
+          //   MinimTopology top1(*cl);
+          //   if(top.GetPattern()!=top1.GetPattern()){
+          //     cout << "Error: different outputs" << endl << endl;
+          //     cout << "Cluster output" << endl;
+          //     Topology::printCluster(*cl,cout);
+          //     cout << "Topology output" << endl;
+          //     top.printTop(cout);
+          //     cout << "MinimTopology output" << endl;
+          //     top1.printTop(cout);
+          //   }
+          //   v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(int)top.GetPattern().length()));
+          // }
+          // bool er = false;
+          // for(int j=0; j<v.size(); j++){
+          //   for(int k=j+1; k<v.size(); k++){
+          //     if(v[j]!=v[k]) er = true;
+          //   }
+          // }
+          // if(er) for(int d=0; d<v.size(); d++) cout << v[d] << endl;
           //
           //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
-          /*
-            bool newTop = true;
-            for (int i = 0; i < mappa.size(); ++i) {
-              if (mappa[i].first == hash) {
-                newTop = false;
-                if (mappa[i].second.GetPattern() != top.GetPattern() || mappa[i].second.GetUniqueID() != top.GetUniqueID()) {
-                  bool newClash = true;
-                  for (int j = 0; j < clashes.size(); ++j) {
-                    if(clashes[j].first == hash) {
-                      clashes[j].second++;
-                      newClash = false;
-                      break;
-                    }
-                  }
-                  if (newClash) clashes.push_back(pair<int,int>(hash,1));
-                }
-              }
-            }
-            if (newTop) mappa.push_back(pair<int,Topology>(hash,top));
-          */
+          //________________________________LOOKING_FOR_CLASHES___________________________
+          // bool newTop = true;
+          // for (int i = 0; i < mappa.size(); ++i) {
+          //   if (mappa[i].first == hash) {
+          //     newTop = false;
+          //     if (mappa[i].second.GetPattern() != top.GetPattern() || mappa[i].second.GetUniqueID() != top.GetUniqueID()) {
+          //       bool newClash = true;
+          //       for (int j = 0; j < clashes.size(); ++j) {
+          //         if(clashes[j].first == hash) {
+          //           clashes[j].second++;
+          //           newClash = false;
+          //           break;
+          //         }
+          //       }
+          //       if (newClash) clashes.push_back(pair<int,int>(hash,1));
+          //     }
+          //   }
+          // }
           int label = cl->GetLabel(0);
           TParticle* part = 0;
           if (label>=0 && (part=stack->Particle(label)) ) {
@@ -411,6 +399,12 @@ void debugMin(int nev=-1)
   DB.Grouping(10,10);
   DB.BuildMap();
   DB.PrintDB("Database1.txt");
+  ofstream c("Check_Old_map.txt");
+  DB.showMap(c);
+  c.close();
+  ofstream d("Check_Min_map.txt");
+  minDB.showMap(d);
+  d.close();
   TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
   flDB->WriteObject(&DB,"DB","kSingleKey");
   flDB->Close();

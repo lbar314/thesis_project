@@ -59,9 +59,7 @@ private:
   TObjArray* GetArrHisto() {return &fArrHisto;}
   void ExpandDB(const Topology &top);
 
-
 ClassDef(TopDatabase,2)
-
 };
 
 #endif

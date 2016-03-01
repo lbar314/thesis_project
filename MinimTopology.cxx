@@ -1,7 +1,7 @@
 #include "AliITSUClusterPix.h"
 #include <iostream>
 #include <string>
-#include <MinimTopology.h>
+#include "./MinimTopology.h"
 
 using namespace std;
 
@@ -11,7 +11,7 @@ MinimTopology::MinimTopology():fPattern(),fHash(0){
 MinimTopology::~MinimTopology(){
 }
 
-MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster){
+MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster) : fHash(0) {
   int rs = cluster.GetPatternRowSpan();
   int cs = cluster.GetPatternColSpan();
   fPattern.push_back(rs);
@@ -31,23 +31,23 @@ MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster){
   }
   fPattern.push_back(tempChar);
   int nBytes = fPattern.length()-2;
-  unsigned long fHash = ((unsigned long)(hashFunction(fPattern.data(),fPattern.length())))<<32;
-    if(nBytes>=4){
-      fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8) + ((unsigned long)fPattern[5]));
-    }
-    else if(nBytes==3){
-      fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8));
-    }
-    else if(nBytes==2){
-      fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16));
-    }
-    else if(nBytes==1){
-      fHash += ((((unsigned long)fPattern[2])<<24));
-    }
-    else{
-      cout << "ERROR: no fired pixels\n";
-      exit(1);
-    }
+  fHash = ((unsigned long)(hashFunction(fPattern.data(),fPattern.length())))<<32;
+  if(nBytes>=4){
+    fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8) + ((unsigned long)fPattern[5]));
+  }
+  else if(nBytes==3){
+    fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8));
+  }
+  else if(nBytes==2){
+    fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16));
+  }
+  else if(nBytes==1){
+    fHash += ((((unsigned long)fPattern[2])<<24));
+  }
+  else{
+    cout << "ERROR: no fired pixels\n";
+    exit(1);
+  }
 }
 
 unsigned int MinimTopology::hashFunction(const void* key, int len){
@@ -60,7 +60,7 @@ unsigned int MinimTopology::hashFunction(const void* key, int len){
   // Initialize the hash
   unsigned int h = len^0xdeadbeef;
   // Mix 4 bytes at a time into the hash
-  const UChar_t* data = (const UChar_t *)key;
+  const unsigned char* data = (const unsigned char *)key;
   //int recIndex=0;
   while(len >= 4){
     unsigned int k = *(unsigned int*)data;
@@ -94,7 +94,7 @@ std::ostream& MinimTopology::printTop(std::ostream &out){
 	unsigned char tempChar = 0;
 	int s=0;
 	int ic = 0;
-  for (int i=2; i<fPattern.length(); i++){
+  for (unsigned int i=2; i<fPattern.length(); i++){
 		tempChar = fPattern[i];
 		s=128; //0b10000000
     while(s>0){

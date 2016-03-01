@@ -23,7 +23,7 @@ class MinimTopology {
 
   private:
     string fPattern;
-    long unsigned fHash;
+    unsigned long fHash;
 
 };
 
