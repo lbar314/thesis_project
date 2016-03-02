@@ -63,6 +63,10 @@ TObjArray arrMCTracks; // array of hit arrays for each particle
 
 void debugMin(int nev=-1)
 {
+  TH1F* testX = new TH1F("testX","testX", 1000,-3e-3 ,3e-3);
+  TH1F* testY = new TH1F("testY","testY", 1000,-3e-3 ,3e-3);
+  TH1F* testZ = new TH1F("testZ","testZ", 1000,-5e-3 ,5e-3);
+
   TFile* boh = TFile::Open("boh.root","recreate");
   TObjArray bitsArr;
   vector<pair<int,Topology> > mappa;
@@ -268,6 +272,10 @@ void debugMin(int nev=-1)
 
           Double_t dirHit[3]={(xExit-xEnt),(yExit-yEnt),(zExit-zEnt)};
 
+          testX->Fill(xEnt);
+          testY->Fill(yEnt);
+          testZ->Fill(zEnt);
+
           /*double PG[3] = {(double)pHit->GetPXG(), (double)pHit->GetPYG(), (double)pHit->GetPZG()}; //Momentum at hit-point in Global Frame
           double PL[3];
           if (TMath::Abs(PG[0])<10e-7 && TMath::Abs(PG[1])<10e-7) {
@@ -302,8 +310,8 @@ void debugMin(int nev=-1)
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-	        DB.AccountTopology(*cl, cSum.dY, cSum.dZ, cSum.alpha, cSum.beta);
-          minDB.AccountTopology(*cl);
+	        DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
+          minDB.AccountTopology(*cl,cSum.dX, cSum.dZ);
           //________________________TESTING_MINIMAL_TOPOLOGY________________________________
           // vector<int> v;
           // for(int i=0; i<10; i++){
@@ -396,8 +404,8 @@ void debugMin(int nev=-1)
   DB.EndAndSort();
   DB.SetThresholdCumulative(0.95);
   cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-  DB.Grouping(10,10);
-  DB.BuildMap();
+  //DB.Grouping(10,10);
+  //DB.BuildMap();
   DB.PrintDB("Database1.txt");
   ofstream c("Check_Old_map.txt");
   DB.showMap(c);
@@ -409,6 +417,15 @@ void debugMin(int nev=-1)
   flDB->WriteObject(&DB,"DB","kSingleKey");
   flDB->Close();
   delete flDB;
+
+  TCanvas* canvy = new TCanvas("canvy","canvy");
+  canvy->Divide(3,1);
+  canvy->cd(1);
+  testX->Draw();
+  canvy->cd(2);
+  testY->Draw();
+  canvy->cd(3);
+  testZ->Draw();
 
   a.close();
   b.close();

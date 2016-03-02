@@ -19,77 +19,74 @@ MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0)
 MinimDatabase::~MinimDatabase(){
 }
 
-void MinimDatabase::AccountTopology(const AliITSMFTClusterPix &cluster/*, ostream& output*/){
-  fTotClusters++;
-  MinimTopology top(cluster);
-  top.GetHash();
-  //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
-  auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
-  if(ret.second==false) ret.first->second.second++;
+#ifndef _STUDY_
 
-  #ifdef _STUDY_
-    TopologyInfo topInf;
-    int &rs = topInf.sizeX = top.GetRowSpan();
-    int &cs = topInf.sizeZ = top.GetColumnSpan();
-    //__________________COG_Deterrmination_____________
-    int tempyCOG = 0;
-    int tempzCOG = 0;
-    int tempFiredPixels = 0;
-    unsigned char tempChar = 0;
-  	int s = 0;
-  	int ic = 0;
-    int ir = 0;
-    for(int i=2; i<top.GetPattern().length(); i++){
-  		tempChar = top.GetPattern()[i];
-  		s=128;//0b10000000
-      while(s>0){
-        if((tempChar&s)!=0){
-          tempFiredPixels++;
-				  tempyCOG+=ir;
-          tempzCOG+=ic;
+  void MinimDatabase::AccountTopology(const AliITSMFTClusterPix &cluster){
+    fTotClusters++;
+    MinimTopology top(cluster);
+    top.GetHash();
+    //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
+    auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
+    if(ret.second==false) ret.first->second.second++;
+  }
+#endif
+
+#ifdef _STUDY_
+  void MinimDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ){
+    fTotClusters++;
+    MinimTopology top(cluster);
+    //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
+    auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
+    if(ret.second==false) ret.first->second.second++;
+    if(ret.second==true){
+      //___________________DEFINING_TOPOLOGY_CHARACTERISTICS__________________
+      TopologyInfo topInf;
+      int &rs = topInf.sizeX = top.GetRowSpan();
+      int &cs = topInf.sizeZ = top.GetColumnSpan();
+      //__________________COG_Deterrmination_____________
+      int tempyCOG = 0;
+      int tempzCOG = 0;
+      int tempFiredPixels = 0;
+      unsigned char tempChar = 0;
+    	int s = 0;
+    	int ic = 0;
+      int ir = 0;
+      for(unsigned int i=2; i<top.GetPattern().length(); i++){
+    		tempChar = top.GetPattern()[i];
+    		s=128;//0b10000000
+        while(s>0){
+          if((tempChar&s)!=0){
+            tempFiredPixels++;
+  				  tempyCOG+=ir;
+            tempzCOG+=ic;
+          }
+          ic++;
+          s/=2;
+          if((ir+1)*ic==(rs*cs)) break;
+    			if(ic==cs){
+            ic=0;
+            ir++;
+          }
         }
-        ic++;
-        s/=2;
-        if((ir+1)*ic==(rs*cs)) break;
-  			if(ic==cs){
-          ic=0;
-          ir++;
-        }
+    		if((ir+1)*ic==(rs*cs)) break;
       }
-  		if((ir+1)*ic==(rs*cs)) break;
+      topInf.xCOG = 0.5 + (float)tempyCOG/(float)tempFiredPixels;
+      topInf.zCOG = 0.5 + (float)tempzCOG/(float)tempFiredPixels;
+      topInf.nPixels = tempFiredPixels;
+      topInf.hdX = TH1F(Form("hdX%lu",top.GetHash()),"#DeltaX",10,-5e-3,5e-3);
+      topInf.hdX.Fill(dX);
+      topInf.hdZ = TH1F(Form("hdA%lu",top.GetHash()),"#DeltaZ",10,-5e-3,5e-3);
+      topInf.hdZ.Fill(dZ);
+      fMapInfo.insert(make_pair(top.GetHash(),topInf));
     }
-    topInf.Y = 0.5 + (float)tempyCOG/(float)tempFiredPixels;
-    topInf.Z = 0.5 + (float)tempzCOG/(float)tempFiredPixels;
-    topInf.nPixels = tempFiredPixels;
-
-    //__________________SETTING_ERRORS_________________
-    topInf.sigmaY2 = cluster.GetSigmaY2();
-    topInf.sigmaZ2 = cluster.GetSigmaZ2();
-    topInf.sigmaYZ = cluster.GetSigmaYZ();
-    topInf.sizeY = top.GetRowSpan();
-    topInf.sizeZ = top.GetColumnSpan();
-    pair<map<unsigned long, TopologyInfo>::iterator,bool> ind;
-    ind = fMapInfo.insert(make_pair(top.GetHash(),topInf));
-    if(ind.second==true){top.printTop(output);}
-    // else{
-    //   if(abs(topInf.sigmaY2-ind.first->second.sigmaY2)>abs(topInf.sigmaY2)*1e-7){
-    //     cout << "Different sigmaY2: " << topInf.sigmaY2 - ind.first->second.sigmaY2 << endl;
-    //     top.printTop(cout);
-    //     cin.get();
-    //   }
-    //   if(abs(topInf.sigmaZ2-ind.first->second.sigmaZ2)>abs(topInf.sigmaZ2)*1e-7){
-    //     cout << "Different sigmaZ2: " << topInf.sigmaZ2 - ind.first->second.sigmaZ2 << endl;
-    //     top.printTop(cout);
-    //     cin.get();
-    //   }
-    //   if(abs(topInf.sigmaYZ-ind.first->second.sigmaYZ)>abs(topInf.sigmaYZ)*1e-7){
-    //     cout << "Different sigmaYZ: " << topInf.sigmaYZ - ind.first->second.sigmaYZ << endl;
-    //     top.printTop(cout);
-    //     cin.get();
-    //   }
-    // }
-  #endif
-}
+    else{
+      ret.first->second.second++;
+      auto ind = fMapInfo.find(top.GetHash());
+      ind->second.hdX.Fill(dX);
+      ind->second.hdZ.Fill(dZ);
+    }
+  }
+#endif
 
 void MinimDatabase::SetThresholdCumulative(float cumulative){
   if(cumulative<=0 || cumulative >=1) cumulative = 0.99;

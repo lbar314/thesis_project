@@ -4,18 +4,27 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include "TH1F.h"
 #include <map>
 #include "AliITSMFTClusterPix.h"
 #include "./MinimTopology.h"
 
-//#define _STUDY_
+#define _STUDY_
 
 class MinimDatabase {
 
   public:
     MinimDatabase();
     ~MinimDatabase();
-    void AccountTopology(const AliITSMFTClusterPix &cluster/*, ostream& output=cout*/);
+
+    #ifndef _STUDY_
+      void AccountTopology(const AliITSMFTClusterPix &cluster);
+    #endif
+
+    #ifdef _STUDY_
+      void AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ);
+    #endif
+
     void SetThresholdCumulative(float cumulative);
     std::ostream& showMap(std::ostream &out);
 
@@ -32,11 +41,10 @@ class MinimDatabase {
     struct TopologyInfo{
       int sizeX;
       int sizeZ;
-      float X;
-      float Z;
-      float sigmaY2;
-      float sigmaZ2;
-      float sigmaYZ;
+      float xCOG;
+      float zCOG;
+      TH1F hdX;
+      TH1F hdZ;
       int nPixels;
     };
     map<long unsigned,TopologyInfo> fMapInfo;

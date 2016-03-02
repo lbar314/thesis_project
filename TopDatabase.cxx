@@ -44,7 +44,6 @@ TopDatabase::~TopDatabase(){
 }
 
 void TopDatabase::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ, float alpha, float beta){
-
   Topology top(cluster);
   bool newPatt = true;
   bool Junk = false;
