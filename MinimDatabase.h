@@ -14,6 +14,8 @@
 class MinimDatabase {
 
   public:
+    TH1F fHdist;
+
     MinimDatabase();
     ~MinimDatabase();
 
@@ -27,6 +29,11 @@ class MinimDatabase {
 
     void SetThresholdCumulative(float cumulative);
     std::ostream& showMap(std::ostream &out);
+
+    void Grouping();
+    int GetTotClusters() const {return fTotClusters;}
+    int GetNotInGroups() const {return fNotInGroups;}
+    int GetNGroups() const {return fNGroups;}
 
   private:
     map<unsigned long,pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,

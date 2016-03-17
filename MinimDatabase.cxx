@@ -9,7 +9,7 @@
 
 using namespace std;
 
-MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0),freqv(),fNotInGroups(0)
+MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0),freqv(),fNotInGroups(0),fHdist()
 #ifdef _STUDY_
   ,fMapInfo()
 #endif
@@ -37,7 +37,6 @@ MinimDatabase::~MinimDatabase(){
     MinimTopology top(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
     auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
-    if(ret.second==false) ret.first->second.second++;
     if(ret.second==true){
       //___________________DEFINING_TOPOLOGY_CHARACTERISTICS__________________
       TopologyInfo topInf;
@@ -104,7 +103,42 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
       fNotInGroups++;
       fFinalMap.insert(make_pair(q.second,fNGroups++));
     }
+    else break;
   }
+}
+
+void MinimDatabase::Grouping(){
+  fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
+  fHdist.GetXaxis()->SetTitle("GroupID");
+  fHdist.SetFillColor(kRed);
+  fHdist.SetFillStyle(3005);
+
+  for(int j=0; j<fNotInGroups; j++){
+    fHdist.Fill(j,freqv[j].first);
+  }
+  for(unsigned int j = (unsigned int)fNotInGroups; j<freqv.size(); j++){
+    unsigned long int &hash = freqv[j].second;
+    int rs = fMapTop.find(hash)->second.first.GetRowSpan();
+    int cs = fMapTop.find(hash)->second.first.GetColumnSpan();
+    int box = rs*cs;
+    if(box < 10){
+      fFinalMap.insert(make_pair(hash,fNGroups));
+      fHdist.Fill(fNGroups,freqv[j].first);
+    }
+    else if(box >=10 && box<25){
+      fFinalMap.insert(make_pair(hash,fNGroups+1));
+      fHdist.Fill(fNGroups+1,freqv[j].first);
+    }
+    else if(box >=25 && box<50){
+      fFinalMap.insert(make_pair(hash,fNGroups+2));
+      fHdist.Fill(fNGroups+2,freqv[j].first);
+    }
+    else{
+      fFinalMap.insert(make_pair(hash,fNGroups+3));
+      fHdist.Fill(fNGroups+3,freqv[j].first);
+    }
+  }
+  fNGroups+=4;
 }
 
 std::ostream& MinimDatabase::showMap(std::ostream &out){
@@ -113,3 +147,8 @@ std::ostream& MinimDatabase::showMap(std::ostream &out){
     p.second.first.printTop(out);
   }
 }
+//
+// long unsigned int MinimDatabase::FastSim(){
+//   int tot = freqv.size();
+//
+// }

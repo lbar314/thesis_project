@@ -67,14 +67,11 @@ void debugMin(int nev=-1)
   TH1F* testY = new TH1F("testY","testY", 1000,-3e-3 ,3e-3);
   TH1F* testZ = new TH1F("testZ","testZ", 1000,-5e-3 ,5e-3);
 
-  TFile* boh = TFile::Open("boh.root","recreate");
-  TObjArray bitsArr;
   vector<pair<int,Topology> > mappa;
   vector<pair<int,int> > clashes;
   ofstream a("Check_map.txt");
   ofstream b("prova.txt");
   clSumm cSum;
-  int pippobaudo=0;
   int primo=0;
 
   const int kSplit=0x1<<22;
@@ -394,11 +391,6 @@ void debugMin(int nev=-1)
     //
     arrMCTracks.Delete();
   }//event loop
-  cout<<"Number of errors in conversion from topology to word: " << pippobaudo << endl;
-  boh->cd();
-  boh->WriteObject(&bitsArr,"bitsArr","kSingleKey");
-  boh->Close();
-  delete boh;
   arrMCTracks.Delete();
   //
   DB.EndAndSort();
@@ -412,6 +404,12 @@ void debugMin(int nev=-1)
   c.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
+  minDB.SetThresholdCumulative(0.99);
+  minDB.Grouping();
+  TH1F* prova = new TH1F(minDB.fHdist);
+  TCanvas* cancan = new TCanvas("c","c");
+  cancan->cd();
+  prova->Draw();
   d.close();
   TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
   flDB->WriteObject(&DB,"DB","kSingleKey");
