@@ -108,7 +108,7 @@ void TopDatabase::SetThreshold(float thr){
 }
 
 void TopDatabase::SetThresholdCumulative(float cumulative){
-  if(cumulative<=0 || cumulative >=1) cumulative = 0.99;
+  if(cumulative<=0. || cumulative >=1.) cumulative = 0.99;
   float totFreq = 0.;
   int nPatterns = fN;
   TArrayF arrFreq;
@@ -131,8 +131,8 @@ void TopDatabase::SetThresholdCumulative(float cumulative){
     totFreq+=provvFreq[over++];
   }
   fThreshold=provvFreq[--over];
-  while(provvFreq[over]==fThreshold) over++;
-  over++;
+  while(provvFreq[over]==fThreshold) over--;
+  fThreshold=provvFreq[over++];
   fOverThr = over;
 }
 

@@ -91,7 +91,7 @@ MinimDatabase::~MinimDatabase(){
 #endif
 
 void MinimDatabase::SetThresholdCumulative(float cumulative){
-  if(cumulative<=0 || cumulative >=1) cumulative = 0.99;
+  if(cumulative<=0. || cumulative >=1.) cumulative = 0.99;
   float totFreq = 0.;
   for(auto &&p : fMapTop){
     fTopFreq.push_back(make_pair(p.second.second,p.first));
@@ -101,23 +101,26 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
   fNGroups = 0;
   fFinalMap.clear();
   for(auto &q : fTopFreq){
-    totFreq += (q.first)/fTotClusters;
+    totFreq += ((float)(q.first))/fTotClusters;
     if(totFreq<cumulative){
       fNotInGroups++;
-      fFinalMap.insert(make_pair(q.second,fNGroups++));
+      //fFinalMap.insert(make_pair(q.second,fNGroups++));
     }
     else break;
   }
+  fThreshold=((float)(fTopFreq[--fNotInGroups].first))/fTotClusters;
+
+  while(((float)fTopFreq[fNotInGroups].first)/fTotClusters == fThreshold) fNotInGroups--;
+  fThreshold=((float)fTopFreq[fNotInGroups++].first)/fTotClusters;
+  fNGroups=fNotInGroups;
 }
 
 void MinimDatabase::Grouping(){
-
   #ifdef _HISTO_
     fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
     fHdist.GetXaxis()->SetTitle("GroupID");
     fHdist.SetFillColor(kRed);
     fHdist.SetFillStyle(3005);
-
     for(int j=0; j<fNotInGroups; j++){
       fHdist.Fill(j,fTopFreq[j].first);
       //rough estimation fo the error considering a uniform distribution
@@ -157,6 +160,8 @@ void MinimDatabase::Grouping(){
     }
   }
   fNGroups+=4;
+
+
 }
 
 std::ostream& MinimDatabase::showMap(std::ostream &out){

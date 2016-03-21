@@ -45,6 +45,7 @@ class MinimDatabase {
     int fTotClusters;
     int fNGroups;
     int fNotInGroups;
+    float fThreshold;
 
   #ifdef _STUDY_
 

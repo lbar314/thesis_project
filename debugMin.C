@@ -404,7 +404,7 @@ void debugMin(int nev=-1)
   c.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
-  minDB.SetThresholdCumulative(0.99);
+  minDB.SetThresholdCumulative(0.90);
   minDB.Grouping();
   TH1F* prova = new TH1F(minDB.fHdist);
   TCanvas* cancan = new TCanvas("c","c");
