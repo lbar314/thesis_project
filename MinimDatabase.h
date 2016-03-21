@@ -10,14 +10,17 @@
 #include "./MinimTopology.h"
 
 #define _STUDY_
+#define _HISTO_ //in order to have a histogram with the ditribution of groupIDs
 
 class MinimDatabase {
 
   public:
-    TH1F fHdist;
-
     MinimDatabase();
     ~MinimDatabase();
+
+  #ifdef _HISTO_
+    TH1F fHdist; //Distribution of groupIDs
+  #endif
 
     #ifndef _STUDY_
       void AccountTopology(const AliITSMFTClusterPix &cluster);
@@ -38,7 +41,7 @@ class MinimDatabase {
   private:
     map<unsigned long,pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
     map<unsigned long, int> fFinalMap; //<hash,groupID>
-    vector <pair<unsigned long,unsigned long>> freqv; //<freq,hash>, needed during DB construction
+    vector <pair<unsigned long,unsigned long>> fTopFreq; //<freq,hash>, needed during DB construction
     int fTotClusters;
     int fNGroups;
     int fNotInGroups;
@@ -55,7 +58,7 @@ class MinimDatabase {
       int nPixels;
     };
     map<long unsigned,TopologyInfo> fMapInfo;
-    
+
     struct Group{
       float errX;
       float errZ;

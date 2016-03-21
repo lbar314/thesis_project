@@ -6,10 +6,14 @@
 #include <cmath>
 #include "./MinimTopology.h"
 #include "./MinimDatabase.h"
+#include "TRandom.h"
 
 using namespace std;
 
-MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0),freqv(),fNotInGroups(0),fHdist()
+MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0),fTopFreq(),fNotInGroups(0)
+#ifdef _HISTO_
+  ,fHdist()
+#endif
 #ifdef _STUDY_
   ,fMapInfo()
 #endif
@@ -20,7 +24,6 @@ MinimDatabase::~MinimDatabase(){
 }
 
 #ifndef _STUDY_
-
   void MinimDatabase::AccountTopology(const AliITSMFTClusterPix &cluster){
     fTotClusters++;
     MinimTopology top(cluster);
@@ -91,13 +94,13 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
   if(cumulative<=0 || cumulative >=1) cumulative = 0.99;
   float totFreq = 0.;
   for(auto &&p : fMapTop){
-    freqv.push_back(make_pair(p.second.second,p.first));
+    fTopFreq.push_back(make_pair(p.second.second,p.first));
   }
-  std::sort(freqv.begin(),freqv.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
+  std::sort(fTopFreq.begin(),fTopFreq.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
   fNotInGroups = 0;
   fNGroups = 0;
   fFinalMap.clear();
-  for(auto &q : freqv){
+  for(auto &q : fTopFreq){
     totFreq += (q.first)/fTotClusters;
     if(totFreq<cumulative){
       fNotInGroups++;
@@ -108,38 +111,49 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
 }
 
 void MinimDatabase::Grouping(){
-  fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
-  fHdist.GetXaxis()->SetTitle("GroupID");
-  fHdist.SetFillColor(kRed);
-  fHdist.SetFillStyle(3005);
 
-  for(int j=0; j<fNotInGroups; j++){
-    fHdist.Fill(j,freqv[j].first);
-    //rough estimation fo the error considering a uniform distribution
-    //fGroupVec[j].errX = (fMapTop.find(hash)->second.first.GetRowSpan())/(cmath::sqrt(12));
-    //fGroupVec[j].errZ = (fMapTop.find(hash)->second.first.GetColumnSpan())/(cmath::sqrt(12));
-  }
+  #ifdef _HISTO_
+    fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
+    fHdist.GetXaxis()->SetTitle("GroupID");
+    fHdist.SetFillColor(kRed);
+    fHdist.SetFillStyle(3005);
+
+    for(int j=0; j<fNotInGroups; j++){
+      fHdist.Fill(j,fTopFreq[j].first);
+      //rough estimation fo the error considering a uniform distribution
+      //fGroupVec[j].errX = (fMapTop.find(hash)->second.first.GetRowSpan())/(cmath::sqrt(12));
+      //fGroupVec[j].errZ = (fMapTop.find(hash)->second.first.GetColumnSpan())/(cmath::sqrt(12));
+    }
+  #endif
   //This is just a dummy grouping
-  for(unsigned int j = (unsigned int)fNotInGroups; j<freqv.size(); j++){
-    unsigned long int &hash = freqv[j].second;
+  for(unsigned int j = (unsigned int)fNotInGroups; j<fTopFreq.size(); j++){
+    unsigned long int &hash = fTopFreq[j].second;
     int rs = fMapTop.find(hash)->second.first.GetRowSpan();
     int cs = fMapTop.find(hash)->second.first.GetColumnSpan();
     int box = rs*cs;
     if(box < 10){
       fFinalMap.insert(make_pair(hash,fNGroups));
-      fHdist.Fill(fNGroups,freqv[j].first);
+      #ifdef _HISTO_
+        fHdist.Fill(fNGroups,fTopFreq[j].first);
+      #endif
     }
     else if(box >=10 && box<25){
       fFinalMap.insert(make_pair(hash,fNGroups+1));
-      fHdist.Fill(fNGroups+1,freqv[j].first);
+      #ifdef _HISTO_
+        fHdist.Fill(fNGroups+1,fTopFreq[j].first);
+      #endif
     }
     else if(box >=25 && box<50){
       fFinalMap.insert(make_pair(hash,fNGroups+2));
-      fHdist.Fill(fNGroups+2,freqv[j].first);
+      #ifdef _HISTO_
+        fHdist.Fill(fNGroups+2,fTopFreq[j].first);
+      #endif
     }
     else{
       fFinalMap.insert(make_pair(hash,fNGroups+3));
-      fHdist.Fill(fNGroups+3,freqv[j].first);
+      #ifdef _HISTO_
+        fHdist.Fill(fNGroups+3,fTopFreq[j].first);
+      #endif
     }
   }
   fNGroups+=4;
@@ -151,8 +165,3 @@ std::ostream& MinimDatabase::showMap(std::ostream &out){
     p.second.first.printTop(out);
   }
 }
-//
-// long unsigned int MinimDatabase::FastSim(){
-//   int tot = freqv.size();
-//
-// }
