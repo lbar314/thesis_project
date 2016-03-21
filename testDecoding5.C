@@ -69,14 +69,14 @@ void testDecoding5(int nev=-1,int nRepetintions=100){
   CPUOld->SetFillColor(kRed);
   CPUOld->SetFillStyle(3005);
 
-  TH1F* RealNew = new TH1F("RealOld","Real time with map method",50,0,1e-1);
+  TH1F* RealNew = new TH1F("RealNew","Real time with map method",50,0,1e-1);
   RealNew->SetDirectory(0);
   RealNew->GetXaxis()->SetTitle("t (s)");
   RealNew->SetFillColor(kBlue);
   RealNew->SetFillStyle(3005);
   RealNew->SetNdivisions(505,"X");
 
-  TH1F* CPUNew = new TH1F("CPUOld","CPU time with map method",50,0,1e-1);
+  TH1F* CPUNew = new TH1F("CPUNew","CPU time with map method",50,0,1e-1);
   CPUNew->SetDirectory(0);
   CPUNew->GetXaxis()->SetTitle("t (s)");
   CPUNew->SetFillColor(kRed);

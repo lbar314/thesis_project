@@ -115,7 +115,11 @@ void MinimDatabase::Grouping(){
 
   for(int j=0; j<fNotInGroups; j++){
     fHdist.Fill(j,freqv[j].first);
+    //rough estimation fo the error considering a uniform distribution
+    //fGroupVec[j].errX = (fMapTop.find(hash)->second.first.GetRowSpan())/(cmath::sqrt(12));
+    //fGroupVec[j].errZ = (fMapTop.find(hash)->second.first.GetColumnSpan())/(cmath::sqrt(12));
   }
+  //This is just a dummy grouping
   for(unsigned int j = (unsigned int)fNotInGroups; j<freqv.size(); j++){
     unsigned long int &hash = freqv[j].second;
     int rs = fMapTop.find(hash)->second.first.GetRowSpan();

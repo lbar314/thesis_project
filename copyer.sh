@@ -9,3 +9,4 @@ cp $HOME/thesis_project/MinimDatabase.* . || printf "Failed to copy MinimDatabas
 cp $HOME/thesis_project/debug.C . || printf "Failed to copy debug.C\n"
 cp $HOME/thesis_project/debugMin.C . || printf "Failed to copy debugMin.C\n"
 cp $HOME/thesis_project/compiler.C . || printf "Failed to copy compiler.C\n"
+cp $HOME/thesis_project/testDecoding5.C . || printf "Failed to copy testDecoding5.C\n"

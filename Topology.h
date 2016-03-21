@@ -69,7 +69,7 @@ class Topology :public TObject {
   float fzCOGPix;
   float fxCOGshift;
   float fzCOGshift;
-  unsigned int fHash;
+  unsigned long fHash;
   int fCounts;
   float fFreq;
   int fGroupID;

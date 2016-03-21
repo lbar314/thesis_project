@@ -396,8 +396,8 @@ void debugMin(int nev=-1)
   DB.EndAndSort();
   DB.SetThresholdCumulative(0.95);
   cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-  //DB.Grouping(10,10);
-  //DB.BuildMap();
+  DB.Grouping(10,10);
+  DB.BuildMap();
   DB.PrintDB("Database1.txt");
   ofstream c("Check_Old_map.txt");
   DB.showMap(c);

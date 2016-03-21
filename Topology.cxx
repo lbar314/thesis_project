@@ -71,7 +71,25 @@ Topology::Topology(const AliITSMFTClusterPix &cluster, int ID):TObject()
   fzCOGshift = zsh;
   fFiredPixels = tempFiredPixels;
   //__________________________________________________________Creating hash
-  fHash=FuncMurmurHash2(fPattern.data(),fPattern.length());
+  int nBytes = fPattern.length()-2;
+  fHash=((unsigned long)(FuncMurmurHash2(fPattern.data(),fPattern.length())))<<32;
+  if(nBytes>=4){
+    fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8) + ((unsigned long)fPattern[5]));
+  }
+  else if(nBytes==3){
+    fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8));
+  }
+  else if(nBytes==2){
+    fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16));
+  }
+  else if(nBytes==1){
+    fHash += ((((unsigned long)fPattern[2])<<24));
+  }
+  else{
+    cout << "ERROR: no fired pixels\n";
+    exit(1);
+  }
+
   fFreq=0.; //WARNING: it is to set in a second time
   fCounts=0; //WARNING: it is to set in a second time
   fGroupID=-1; //WARNING: it is to set in a second time

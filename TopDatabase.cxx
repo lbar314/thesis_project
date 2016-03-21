@@ -1,6 +1,7 @@
 #include <Riostream.h>
 #include "TObject.h"
 #include "TMath.h"
+#include <limits>
 #include "TString.h"
 #include "TObjArray.h"
 #include "TArrayI.h"
@@ -97,7 +98,7 @@ void TopDatabase::SetThreshold(float thr){
   }
   TMath::Sort(nPatterns,arrFreq.GetArray(),sortIndex.GetArray());
   int over=0;
-  float fr=0;
+  float fr=0.;
   for(int j=0; j<fN; j++){
     fr=arrFreq[sortIndex[j]];
     if(fr<thr) break;
@@ -159,7 +160,7 @@ void TopDatabase::EndAndSort(int mode){
     Topology* topFreq = (Topology*)fArrTopologies.At(sortIndex[i]);
     topFreq->SetPattID(i);
     Topology* top = (Topology*)fArrTopologies.At(i);
-    unsigned int refHash = top->GetHash();
+    unsigned long refHash = top->GetHash();
     for(int j=i+1; j<nPatterns; j++){
       Topology* top2comp = (Topology*)fArrTopologies.At(j);
       int counter = 0;
@@ -231,6 +232,7 @@ void TopDatabase::Grouping(int NumberofShiftXbins, int NumberofShiftZbins){
       tempgroupID++;
       notINgorups++;
     }
+    else break;
   }
   printf("Processing patterns under threshold:\n");
   for(int i=0; i<nPatterns; i++){
@@ -372,13 +374,13 @@ void TopDatabase::Grouping(int NumberofShiftXbins, int NumberofShiftZbins){
 
 int TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   Topology top(cl);
-  unsigned int hashcode = top.GetHash();
+  unsigned long hashcode = top.GetHash();
   //Looking up in the database with intepolation search
   int low = 0;
   int high = fN-1;
   int interIndex=-1;
-  unsigned int min=0;//minimum int value
-  unsigned int max=4294967295;
+  unsigned long min=0;//minimum unsigned long value
+  unsigned long max=std::numeric_limits<unsigned long>::max();
   while(1){
     if(low>high || hashcode<min || hashcode>max){
       interIndex=-1;
@@ -409,37 +411,9 @@ int TopDatabase::FromCluster2GroupID(const AliITSMFTClusterPix &cl) const{
   if(interIndex==-1){//junk case
     return -1;
   }
-  //Solving clashes if necessary
-  if(( (Topology*)fArrTopologies.At(interIndex) )->GetFlag()==1){
-    //printf("Clash found.\n");
-    bool IndexFound = false;
-    int guessIndex = interIndex;
-    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==false){
-      string str = ((Topology*)fArrTopologies.At(guessIndex))->GetPattern();
-      if(top.GetPattern().compare(2,4,str,2,4)==0){
-      	IndexFound = true;
-      	interIndex = guessIndex;
-      }
-      guessIndex--;
-    }
-    guessIndex = interIndex;
-    while(((Topology*)fArrTopologies.At(guessIndex))->GetHash()==hashcode && IndexFound==false){
-      string str = ((Topology*)fArrTopologies.At(guessIndex))->GetPattern();
-      if(top.GetPattern().compare(2,4,str,2,4)==0){
-      	IndexFound = true;
-      	interIndex = guessIndex;
-      }
-      guessIndex++;
-    }
-    if(IndexFound==false){
-      printf("Index not found after clash\n");
-      exit(1);
-    }
-  }
   string str = top.GetPattern();
   string str1 = ((Topology*)fArrTopologies.At(interIndex))->GetPattern();
-  if(str.length()!=str1.length() || str.compare(0,str1.length()-1,str1,0,str1.length()-1)!=0) cout << "Error during research" << endl;
-
+  //if(str.length()!=str1.length() || str.compare(0,str1.length()-1,str1,0,str1.length()-1)!=0) cout << "Error during research" << endl;
   return ( (Topology*)fArrTopologies.At(interIndex) )->GetGroupID();
 }
 
@@ -449,25 +423,7 @@ void TopDatabase::BuildMap(){
     string &str = ((Topology*)fArrTopologies.At(i))->GetPattern();
     unsigned long hash = (unsigned long)((Topology*)fArrTopologies.At(i))->GetHash();
     int groupID = ((Topology*)fArrTopologies.At(i))->GetGroupID();
-    unsigned long ExteHash = (hash<<32);
-    int nBytes = str.length()-2;
-    if(nBytes>=4){
-      ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8) + ((unsigned long)str[5]));
-    }
-    else if(nBytes==3){
-      ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8));
-    }
-    else if(nBytes==2){
-      ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16));
-    }
-    else if(nBytes==1){
-      ExteHash += ((((unsigned long)str[2])<<24));
-    }
-    else{
-      cout << "ERROR: no fired pixels\n";
-      exit(1);
-    }
-    if(!fMap.insert(pair<unsigned long, int>(ExteHash,groupID)).second) cout << "errore" << endl;
+    if(!fMap.insert(pair<unsigned long, int>(hash,groupID)).second) cout << "errore" << endl;
   }
 }
 
@@ -475,45 +431,26 @@ int TopDatabase::FromCluster2GroupIDMap(const AliITSMFTClusterPix &cl) const{
   Topology top(cl);
   string &str = top.GetPattern();
   unsigned long hash = (unsigned long)top.GetHash();
-  unsigned long ExteHash = (hash<<32);
-  int nBytes = str.length()-2;
-  if(nBytes>=4){
-    ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8) + ((unsigned long)str[5]));
-  }
-  else if(nBytes==3){
-    ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16) + (((unsigned long)str[4])<<8));
-  }
-  else if(nBytes==2){
-    ExteHash += ((((unsigned long)str[2])<<24) + (((unsigned long)str[3])<<16));
-  }
-  else if(nBytes==1){
-    ExteHash += ((((unsigned long)str[2])<<24));
-  }
-  else{
-    cout << "ERROR: no fired pixels\n";
-    exit(1);
-  }
-  return fMap.find(ExteHash)->second;
+  return fMap.find(hash)->second;
 }
 
 std::ostream& TopDatabase::showMap(std::ostream &out){
   typedef map<unsigned long, int>::const_iterator MapIterator;
   for(MapIterator iter = fMap.begin(); iter != fMap.end(); iter++){
-    out << "ExteHash: " << iter->first << " GroupID: " << iter->second << endl;
+    out << "Hash: " << iter->first << " GroupID: " << iter->second << endl;
   }
 }
 
 void TopDatabase::CompareMap(){
   int i=0;
   for(auto &p : fMap){
-    unsigned long MapHash = ((p.first)>>32);
-    unsigned long TopHash = ((unsigned long)((Topology*)fArrTopologies.At(i))->GetHash());
+    unsigned long MapHash = p.first;
+    unsigned long TopHash = ((Topology*)fArrTopologies.At(i))->GetHash();
     if(MapHash!=TopHash) printf("%d)  Different Values: %lu %lu\n",i,MapHash,TopHash);
     //cout << i << ")  Different Values: " << MapHash << " " << TopHash << endl;
     //else cout << i << ")  " << MapHash << " " << TopHash << endl;
     else printf("%d)  %lu %lu\n",i,MapHash,TopHash);
     ((Topology*)fArrTopologies.At(i))->printTop(cout);
     i++;
-
   }
 }

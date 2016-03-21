@@ -55,6 +55,12 @@ class MinimDatabase {
       int nPixels;
     };
     map<long unsigned,TopologyInfo> fMapInfo;
+    
+    struct Group{
+      float errX;
+      float errZ;
+    };
+    vector<Group> fGroupVec;
 
   #endif
 };
