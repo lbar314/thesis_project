@@ -116,52 +116,88 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
 }
 
 void MinimDatabase::Grouping(){
-  #ifdef _HISTO_
-    fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
-    fHdist.GetXaxis()->SetTitle("GroupID");
-    fHdist.SetFillColor(kRed);
-    fHdist.SetFillStyle(3005);
-    for(int j=0; j<fNotInGroups; j++){
-      fHdist.Fill(j,fTopFreq[j].first);
-      //rough estimation fo the error considering a uniform distribution
-      //fGroupVec[j].errX = (fMapTop.find(hash)->second.first.GetRowSpan())/(cmath::sqrt(12));
-      //fGroupVec[j].errZ = (fMapTop.find(hash)->second.first.GetColumnSpan())/(cmath::sqrt(12));
-    }
-  #endif
+  struct groupTmp{
+    unsigned long GrCounts;
+    int tempGroupID;
+    vector<unsigned long> GrHashes;
+    //float tempErrX;
+    //float tempErrZ;
+    int groupID;
+  };
+  vector<groupTmp> tempGroupVector;
+  for(int j=0; j<fNotInGroups; j++){
+    groupTmp gr;
+    gr.GrCounts = fTopFreq[j].first;
+    gr.GrHashes.push_back(fTopFreq[j].second);
+    gr.tempGroupID = j;
+    //rough estimation fo the error considering a uniform distribution
+    //fGroupVec[j].errX = (fMapTop.find(hash)->second.first.GetRowSpan())/(cmath::sqrt(12));
+    //fGroupVec[j].errZ = (fMapTop.find(hash)->second.first.GetColumnSpan())/(cmath::sqrt(12));
+    tempGroupVector.push_back(gr);
+  }
   //This is just a dummy grouping
+  fNGroups+=4; //for choice
+  //group 1:
+  groupTmp gr1;
+    gr1.GrCounts = 0;
+    gr1.tempGroupID = fNGroups;
+  //group 2:
+  groupTmp gr2;
+    gr2.GrCounts = 0;
+    gr2.tempGroupID = fNGroups+1;
+  //group 3:
+  groupTmp gr3;
+    gr3.GrCounts = 0;
+    gr3.tempGroupID = fNGroups+2;
+  //group 3:
+  groupTmp gr4;
+    gr4.GrCounts = 0;
+    gr4.tempGroupID = fNGroups+3;
+
   for(unsigned int j = (unsigned int)fNotInGroups; j<fTopFreq.size(); j++){
     unsigned long int &hash = fTopFreq[j].second;
     int rs = fMapTop.find(hash)->second.first.GetRowSpan();
     int cs = fMapTop.find(hash)->second.first.GetColumnSpan();
     int box = rs*cs;
     if(box < 10){
-      fFinalMap.insert(make_pair(hash,fNGroups));
-      #ifdef _HISTO_
-        fHdist.Fill(fNGroups,fTopFreq[j].first);
-      #endif
+      gr1.GrCounts+=fTopFreq[j].first;
+      gr1.GrHashes.push_back(hash);
     }
     else if(box >=10 && box<25){
-      fFinalMap.insert(make_pair(hash,fNGroups+1));
-      #ifdef _HISTO_
-        fHdist.Fill(fNGroups+1,fTopFreq[j].first);
-      #endif
+      gr2.GrCounts+=fTopFreq[j].first;
+      gr2.GrHashes.push_back(hash);
     }
     else if(box >=25 && box<50){
-      fFinalMap.insert(make_pair(hash,fNGroups+2));
-      #ifdef _HISTO_
-        fHdist.Fill(fNGroups+2,fTopFreq[j].first);
-      #endif
+      gr1.GrCounts+=fTopFreq[j].first;
+      gr1.GrHashes.push_back(hash);
     }
     else{
-      fFinalMap.insert(make_pair(hash,fNGroups+3));
-      #ifdef _HISTO_
-        fHdist.Fill(fNGroups+3,fTopFreq[j].first);
-      #endif
+      gr1.GrCounts+=fTopFreq[j].first;
+      gr1.GrHashes.push_back(hash);
     }
   }
-  fNGroups+=4;
+  tempGroupVector.push_back(gr1);
+  tempGroupVector.push_back(gr2);
+  tempGroupVector.push_back(gr3);
+  tempGroupVector.push_back(gr4);
+  //sorting the temporary array
+  std::sort(tempGroupVector.begin(),tempGroupVector.end(), [] (const groupTmp &comp1, const groupTmp &comp2){return (comp1.GrCounts > comp2.GrCounts);});
 
+  #ifdef _HISTO_
+    fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
+    fHdist.GetXaxis()->SetTitle("GroupID");
+    fHdist.SetFillColor(kRed);
+    fHdist.SetFillStyle(3005);
+  #endif
 
+  int iDef=0;
+  for(auto &p : tempGroupVector){
+    p.groupID = iDef++;
+    fHdist.Fill(p.groupID,p.GrCounts);
+    for(auto &q : p.GrHashes){
+      fFinalMap.insert(make_pair(q,p.groupID));
+    }
+  }
 }
 
 std::ostream& MinimDatabase::showMap(std::ostream &out){
