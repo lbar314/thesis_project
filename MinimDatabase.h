@@ -17,6 +17,7 @@ class MinimDatabase {
   public:
     MinimDatabase();
     ~MinimDatabase();
+    friend class FastSimulation;
 
   #ifdef _HISTO_
     TH1F fHdist; //Distribution of groupIDs
@@ -60,13 +61,16 @@ class MinimDatabase {
     };
     map<long unsigned,TopologyInfo> fMapInfo;
 
-    struct Group{
-      float errX;
-      float errZ;
-    };
-    vector<Group> fGroupVec;
-
   #endif
+
+  struct GroupStr{
+    float errX;
+    float errZ;
+    unsigned long counts;
+  };
+  vector<GroupStr> fGroupVec;
+
+  //TH1F fHcheck; check histogram
 };
 
 #endif

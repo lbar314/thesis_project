@@ -410,11 +410,17 @@ void debugMin(int nev=-1)
   TCanvas* cancan = new TCanvas("c","c");
   cancan->cd();
   prova->Draw();
+  // TH1F* verifica = new TH1F(minDB.fHcheck);
+  // TCanvas* cancan1 = new TCanvas("c1","c1");
+  // cancan1->cd();
+  // verifica->Draw();
   d.close();
   TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
   flDB->WriteObject(&DB,"DB","kSingleKey");
   flDB->Close();
   delete flDB;
+
+
 
   TCanvas* canvy = new TCanvas("canvy","canvy");
   canvy->Divide(3,1);

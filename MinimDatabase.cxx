@@ -10,7 +10,7 @@
 
 using namespace std;
 
-MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0),fTopFreq(),fNotInGroups(0)
+MinimDatabase::MinimDatabase():fMapTop(),fFinalMap(),fTotClusters(0),fNGroups(0),fTopFreq(),fNotInGroups(0),fGroupVec()
 #ifdef _HISTO_
   ,fHdist()
 #endif
@@ -104,7 +104,6 @@ void MinimDatabase::SetThresholdCumulative(float cumulative){
     totFreq += ((float)(q.first))/fTotClusters;
     if(totFreq<cumulative){
       fNotInGroups++;
-      //fFinalMap.insert(make_pair(q.second,fNGroups++));
     }
     else break;
   }
@@ -190,14 +189,28 @@ void MinimDatabase::Grouping(){
     fHdist.SetFillStyle(3005);
   #endif
 
+  //_________________________fGroupVec_Check____________________________
+  // fHcheck = TH1F("fHcheck", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
+  // fHcheck.GetXaxis()->SetTitle("GroupID");
+  // fHcheck.SetFillColor(kBlue);
+  // fHcheck.SetFillStyle(3005);
+
   int iDef=0;
   for(auto &p : tempGroupVector){
     p.groupID = iDef++;
-    fHdist.Fill(p.groupID,p.GrCounts);
+    #ifdef _HISTO_
+      fHdist.Fill(p.groupID,p.GrCounts);
+    #endif
     for(auto &q : p.GrHashes){
       fFinalMap.insert(make_pair(q,p.groupID));
     }
+    GroupStr ggg;
+    ggg.counts = p.GrCounts;
+    fGroupVec.push_back(ggg);
   }
+  // for(unsigned int i=0; i<fGroupVec.size(); i++){
+  //   fHcheck.Fill(i,fGroupVec[i].counts);
+  // }
 }
 
 std::ostream& MinimDatabase::showMap(std::ostream &out){
