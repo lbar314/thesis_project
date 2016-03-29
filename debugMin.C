@@ -24,7 +24,8 @@
 #include "./Topology.h"
 #include "./TopDatabase.h"
 #include "./MinimTopology.h"
-#include "./MinimDatabase.h"
+#include "./Dictionary.h"
+#include "BuildDictionary.h"
 #include <map>
 
 #endif
@@ -133,7 +134,7 @@ void debugMin(int nev=-1)
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
   TopDatabase DB;
-  MinimDatabase minDB;
+  BuildDictionary minDB;
 
   for (int iEvent = 0; iEvent < ntotev; iEvent++) {
     printf("\n Event %i \n",iEvent);
@@ -406,6 +407,29 @@ void debugMin(int nev=-1)
   minDB.showMap(d);
   minDB.SetThresholdCumulative(0.90);
   minDB.Grouping();
+  minDB.PrintDictionary("dizionario.txt");
+  //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)
+  // Dictionary nuevo;
+  // nuevo.ReadFile("dizionario.txt");
+  // if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
+  // else cout<<"Map is wrong :("<< endl;
+  // bool vec_check = true;
+  // if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
+  //   vec_check = false;
+  //   cout<<"Vector is wrong :("<< endl;
+  // }
+  // else{
+  //   for(unsigned int i=0; i< nuevo.fGroupVec.size(); i++){
+  //     if(nuevo.fGroupVec[i].hash != minDB.fDict.fGroupVec[i].hash &&
+  //       nuevo.fGroupVec[i].errX != minDB.fDict.fGroupVec[i].errX &&
+  //       nuevo.fGroupVec[i].errZ != minDB.fDict.fGroupVec[i].errZ &&
+  //       nuevo.fGroupVec[i].freq != minDB.fDict.fGroupVec[i].freq
+  //     ) vec_check = false;
+  //   }
+  //   if(vec_check) cout << "Vek is OK" << endl;
+  //   else cout << "Vec is wrong :(" << endl;
+  // }
+
   TH1F* prova = new TH1F(minDB.fHdist);
   TCanvas* cancan = new TCanvas("c","c");
   cancan->cd();
