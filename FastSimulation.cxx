@@ -7,8 +7,8 @@ FastSimulation::FastSimulation(std::string fname){
 }
 
 int FastSimulation::GetRandom(){
-  const double ciccio = fDict.fGroupVec.back().freq;
-  double rnd = gRandom->Uniform(ciccio);
+  double &max1 = fDict.fGroupVec.back().freq;
+  double rnd = gRandom->Uniform(max1);
   auto ind = std::upper_bound(fDict.fGroupVec.begin(),fDict.fGroupVec.end(),rnd, [] (const double &comp1, const GroupStr &comp2) {return comp1<comp2.freq;});
   return std::distance(fDict.fGroupVec.begin(),ind);
 }
