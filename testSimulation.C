@@ -8,6 +8,9 @@
 void testSimulan(unsigned int rep=10000){
   FastSimulation test = FastSimulation("dizionario.txt");
   TH1F* histo = new TH1F("histo","histo",100,-0.5,99.5);
+  histo->GetXaxis()->SetTitle("GroupID");
+  histo->SetFillStyle(3008);
+  histo->SetFillColor(kGreen-3);
   for(unsigned int i=0; i<rep; i++){
     histo->Fill(test.GetRandom());
   }
