@@ -63,7 +63,7 @@ typedef struct {
 
 TObjArray arrMCTracks; //array of hit arrays for each particle
 
-void testBuild(int nev=-1, std::string outstr="../outputBuild.root"){
+void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   clSumm cSum;
   int primo=0;
 
@@ -127,7 +127,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.root"){
   //
   BuildDictionary minDB;
 
-  ofstream time_output(outstr, std::ios_base::app | std::ios_base);
+  ofstream time_output(outstr, std::ios_base::app | std::ios_base::out);
 
   TStopwatch timerBuild;
 
@@ -287,7 +287,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.root"){
           cSum.dY = (txyzH[1]-xyzClTr[1])*1e4;
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
-          cSum.nColPatt = cl-> GetPatternColSpan()
+          cSum.nColPatt = cl-> GetPatternColSpan();
           bool firstClusterReset = (ilr==0 && icl==0) ? true : false;
           timerBuild.Start(firstClusterReset);
           minDB.AccountTopology(*cl,cSum.dX, cSum.dZ);
@@ -353,8 +353,4 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.root"){
   // cancan1->cd();
   // verifica->Draw();
   d.close();
-  TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
-  flDB->WriteObject(&DB,"DB","kSingleKey");
-  flDB->Close();
-  delete flDB;
 }

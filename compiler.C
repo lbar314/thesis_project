@@ -11,15 +11,9 @@ void compiler(TString myopt="fast"){
   else {
     opt = "kg";
   }
-  gSystem->CompileMacro("Topology.cxx",opt.data());
-  cout << endl << " Topology: COMPILED" <<  endl << endl;
-  gSystem->CompileMacro("TopDatabase.cxx",opt.data());
-  cout << endl << " TopDatabase: COMPILED" <<  endl << endl;
   gSystem->CompileMacro("MinimTopology.cxx",opt.data());
   cout << endl << " MinimTopology: COMPILED" <<  endl << endl;
   gSystem->CompileMacro("MinimDatabase.cxx",opt.data());
-  cout << endl << " MinimDatabase: COMPILED" <<  endl << endl;
-  gSystem->CompileMacro("Dictionary.cxx",opt.data());
   cout << endl << " Dictionary: COMPILED" <<  endl << endl;
   gSystem->CompileMacro("BuildDictionary.cxx",opt.data());
   cout << endl << " BuildDictionary: COMPILED" <<  endl << endl;

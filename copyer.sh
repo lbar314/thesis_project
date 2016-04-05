@@ -2,10 +2,7 @@
 
 #Questo script copia le bacro da thesis_project alla cartella corrente
 
-cp $HOME/thesis_project/Topology.* . || printf "Failed to copy Topology.*\n"
-cp $HOME/thesis_project/TopDatabase.* . || printf "Failed to copy TopDatabase.*\n"
 cp $HOME/thesis_project/MinimTopology.* . || printf "Failed to copy MinimTopology.*\n"
-cp $HOME/thesis_project/MinimDatabase.* . || printf "Failed to copy MinimDatabase.*\n"
 cp $HOME/thesis_project/Dictionary.* . || printf "Failed to copy Dictionary.*\n"
 cp $HOME/thesis_project/BuildDictionary.* . || printf "Failed to copy BuildDictionary.*\n"
 cp $HOME/thesis_project/LookUp.* . || printf "Failed to copy Lookup.*\n"
