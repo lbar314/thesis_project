@@ -4,7 +4,7 @@ LookUp::LookUp(std::string fname){
   fDict.ReadFile(fname);
 }
 
-int LookUp::GroupFinder(const AliITSUClusterPix& clust){
+int LookUp::GroupFinder(const AliITSMFTClusterPix& clust){
   MinimTopology top(clust);
   int over = fDict.fFinalMap.size();
   auto ret = fDict.fFinalMap.find(top.GetHash());

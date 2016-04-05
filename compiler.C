@@ -53,4 +53,10 @@ void compiler(TString myopt="fast"){
     cout << endl << " testSimulation: FAILED" <<  endl << endl;
     return;
   }
+  if(gSystem->CompileMacro("testLookUp.C",opt.data()))
+    cout << endl << " testLookUp: COMPILED" <<  endl << endl;
+  else{
+    cout << endl << " testLookUp: FAILED" <<  endl << endl;
+    return;
+  }
 }

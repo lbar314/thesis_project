@@ -22,8 +22,9 @@
 #include "TClonesArray.h"
 #include "TStopwatch.h"
 #include <Riostream.h>
-#include "./Topology.h"
-#include "./TopDatabase.h"
+#include "./MinimTopology.h"
+#include "./Dictionary.h"
+#include "./LookUp.h"
 #include <map>
 
 #endif
@@ -34,54 +35,26 @@ enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,
 
 TObjArray arrMCTracks; // array of hit arrays for each particle
 
-void testDecoding5(int nev=-1,int nRepetintions=100){
-  vector<pair<int,Topology> > mappa;
-  vector<pair<int,int> > clashes;
+void testLookUp(string inputfile,int nRepetintions=100,int nev=-1){
 
-  TopDatabase DB;
-  TFile* fl = TFile::Open("TopologyDatabase.root");
-  DB = *((TopDatabase*)fl->Get("DB"));
-  fl->Close();
-  delete fl;
-  DB.PrintDB("check.txt");
-  ofstream a("map.txt");
-  DB.showMap(a);
-  a.close();
-  DB.BuildMap();
-  //DB.CompareMap();
-
-  TStopwatch TimerOld;
-  TStopwatch TimerNew;
-
+  LookUp finder(inputfile);
+  TStopwatch timerLookUp;
+  //
   TCanvas* c = new TCanvas("c","cTime");
-  c->Divide(2,2);
-
-  TH1F* RealOld = new TH1F("RealOld","Real time with the old method",50,0,1e-1);
-  RealOld->SetDirectory(0);
-  RealOld->GetXaxis()->SetTitle("t (s)");
-  RealOld->SetFillColor(kBlue);
-  RealOld->SetFillStyle(3005);
-  RealOld->SetNdivisions(505,"X");
-
-  TH1F* CPUOld = new TH1F("CPUOld","CPU time with the old method",50,0,1e-1);
-  CPUOld->SetDirectory(0);
-  CPUOld->GetXaxis()->SetTitle("t (s)");
-  CPUOld->SetFillColor(kRed);
-  CPUOld->SetFillStyle(3005);
-
-  TH1F* RealNew = new TH1F("RealNew","Real time with map method",50,0,1e-1);
-  RealNew->SetDirectory(0);
-  RealNew->GetXaxis()->SetTitle("t (s)");
-  RealNew->SetFillColor(kBlue);
-  RealNew->SetFillStyle(3005);
-  RealNew->SetNdivisions(505,"X");
-
-  TH1F* CPUNew = new TH1F("CPUNew","CPU time with map method",50,0,1e-1);
-  CPUNew->SetDirectory(0);
-  CPUNew->GetXaxis()->SetTitle("t (s)");
-  CPUNew->SetFillColor(kRed);
-  CPUNew->SetFillStyle(3005);
-
+  c->Divide(2,1);
+  //
+  TH1F* timerReal = new TH1F("timerReal","Real time with the old method",50,0,1e-1);
+  timerReal->SetDirectory(0);
+  timerReal->GetXaxis()->SetTitle("t (s)");
+  timerReal->SetFillColor(kBlue);
+  timerReal->SetFillStyle(3008);
+  timerReal->SetNdivisions(505,"X");
+  //
+  TH1F* timerCpu = new TH1F("timerCpu","CPU time with the old method",50,0,1e-1);
+  timerCpu->SetDirectory(0);
+  timerCpu->GetXaxis()->SetTitle("t (s)");
+  timerCpu->SetFillColor(kRed);
+  timerCpu->SetFillStyle(3008);
 
   //
   const int kSplit=0x1<<22;
@@ -223,56 +196,23 @@ void testDecoding5(int nev=-1,int nRepetintions=100){
               }
             }
           }
-          //------------
-          const AliITSMFTSegmentationPix* segm = gm->GetSegmentation(ilr);
-          //
-          cl->GetGlobalXYZ(xyzClGloF);
-          int clsize = cl->GetNPix();
-          for (int i=3;i--;) xyzClGlo[i] = xyzClGloF[i];
-          const TGeoHMatrix* mat = gm->GetMatrixSens(modID);
-          if (!mat) {printf("failed to get matrix for module %d\n",cl->GetVolumeId());}
-          mat->MasterToLocal(xyzClGlo,xyzClTr);
-          //
-          int col,row;
-          segm->LocalToDet(xyzClTr[0],xyzClTr[2],row,col); // effective col/row
-          nLab = 0;
-          for (int il=0;il<3;il++) {
-            if (cl->GetLabel(il)>=0) labels[nLab++] = cl->GetLabel(il);
-            else break;
-          }
-          Topology top(*cl);
-          TimerOld.Start(!totClusters);
-      	  int num1 = DB.FromCluster2GroupID(*cl);
-          TimerOld.Stop();
-          TimerNew.Start(!totClusters);
-          int num2 = DB.FromCluster2GroupIDMap(*cl);
-          TimerNew.Stop();
-          if(num1!=num2) cout << "Different results from different methods: " << num1 << " " << num2 << endl;
+          timerLookUp.Start(!totClusters);
+          finder.GroupFinder(*cl);
+          timerLookUp.Stop();
           totClusters++;
         }
       }
       //    layerClus.Clear();
       //
       arrMCTracks.Delete();
-      Double_t oldCPUTime = TimerOld.CpuTime();
-      Double_t oldRealTime = TimerOld.RealTime();
-      CPUOld->Fill(oldCPUTime);
-      RealOld->Fill(oldRealTime);
-      Double_t newCPUTime = TimerNew.CpuTime();
-      Double_t newRealTime = TimerNew.RealTime();
-      CPUNew->Fill(newCPUTime);
-      RealNew->Fill(newRealTime);
-
+      timerCpu->Fill(timerLookUp.CpuTime());
+      timerReal->Fill(timerLookUp.RealTime());
     }//event loop
     arrMCTracks.Delete();
   }//repetition loop
   c->cd(1);
-  RealOld->Draw();
+  timerReal->Draw();
   c->cd(2);
-  CPUOld->Draw();
-  c->cd(3);
-  RealNew->Draw();
-  c->cd(4);
-  CPUNew->Draw();
+  timerCpu->Draw();
   c->Print("Time.pdf");
 }
