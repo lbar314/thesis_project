@@ -1,4 +1,3 @@
-#include "AliITSUClusterPix.h"
 #include <iostream>
 #include <string>
 #include "./MinimTopology.h"
