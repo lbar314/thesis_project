@@ -131,6 +131,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
 
   for (int iEvent = 0; iEvent < ntotev; iEvent++) {
     printf("\n Event %i \n",iEvent);
+    Int_t totClusters=0;
     runLoader->GetEvent(iEvent);
     AliStack *stack = runLoader->Stack();
     cluTree=dl->TreeR();
@@ -286,10 +287,10 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-          bool firstClusterReset = (ilr==0 && icl==0) ? true : false;
-          timerBuild.Start(firstClusterReset);
+          timerBuild.Start(!totClusters);
           minDB.AccountTopology(*cl,cSum.dX, cSum.dZ);
           timerBuild.Stop();
+          totClusters++;
           //
           int label = cl->GetLabel(0);
           TParticle* part = 0;
