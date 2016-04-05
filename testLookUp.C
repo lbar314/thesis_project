@@ -25,7 +25,7 @@
 #include "./MinimTopology.h"
 #include "./Dictionary.h"
 #include "./LookUp.h"
-#include <map>
+#include <fstream>
 
 #endif
 
@@ -35,27 +35,11 @@ enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,
 
 TObjArray arrMCTracks; // array of hit arrays for each particle
 
-void testLookUp(string inputfile,int nRepetintions=100,int nev=-1){
+void testLookUp(string inputfile,int nRepetintions=100,int nev=-1, string outputfile="../timeLookUp.txt"){
 
   LookUp finder(inputfile);
+  ofstream time_output(outputfile, std::ios_base::app | std::ios_base::out);
   TStopwatch timerLookUp;
-  //
-  TCanvas* c = new TCanvas("c","cTime");
-  c->Divide(2,1);
-  //
-  TH1F* timerReal = new TH1F("timerReal","Real time with the old method",50,0,1e-1);
-  timerReal->SetDirectory(0);
-  timerReal->GetXaxis()->SetTitle("t (s)");
-  timerReal->SetFillColor(kBlue);
-  timerReal->SetFillStyle(3008);
-  timerReal->SetNdivisions(505,"X");
-  //
-  TH1F* timerCpu = new TH1F("timerCpu","CPU time with the old method",50,0,1e-1);
-  timerCpu->SetDirectory(0);
-  timerCpu->GetXaxis()->SetTitle("t (s)");
-  timerCpu->SetFillColor(kRed);
-  timerCpu->SetFillStyle(3008);
-
   //
   const int kSplit=0x1<<22;
   const int kSplCheck=0x1<<23;
@@ -205,14 +189,9 @@ void testLookUp(string inputfile,int nRepetintions=100,int nev=-1){
       //    layerClus.Clear();
       //
       arrMCTracks.Delete();
-      timerCpu->Fill(timerLookUp.CpuTime());
-      timerReal->Fill(timerLookUp.RealTime());
+      time_output << timerLookUp.RealTime() << " " << timerLookUp.CpuTime() << endl;
     }//event loop
     arrMCTracks.Delete();
   }//repetition loop
-  c->cd(1);
-  timerReal->Draw();
-  c->cd(2);
-  timerCpu->Draw();
-  c->Print("Time.pdf");
+  time_output.close();
 }
