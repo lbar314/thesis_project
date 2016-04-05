@@ -22,8 +22,6 @@
 #include "TClonesArray.h"
 #include "TStopwatch.h"
 #include <Riostream.h>
-#include "./Topology.h"
-#include "./TopDatabase.h"
 #include "./MinimTopology.h"
 #include "./Dictionary.h"
 #include "BuildDictionary.h"
