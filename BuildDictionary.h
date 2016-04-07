@@ -42,9 +42,9 @@ class BuildDictionary {
     #endif
 
     #ifndef _STUDY_
-      void AccountTopology(const AliITSMFTClusterPix &cluster);
+      void AccountTopology(AliITSMFTClusterPix &cluster);
     #else
-      void AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ);
+      void AccountTopology(AliITSMFTClusterPix &cluster, float dX, float dZ);
     #endif
 
     void SetThresholdCumulative(double cumulative);

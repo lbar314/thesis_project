@@ -5,7 +5,7 @@ LookUp::LookUp(std::string fname){
   fOver = fDict.fFinalMap.size();
 }
 
-int LookUp::GroupFinder(const AliITSMFTClusterPix& clust){
+int LookUp::GroupFinder(AliITSMFTClusterPix& clust){
   MinimTopology top(clust);
   auto ret = fDict.fFinalMap.find(top.GetHash());
   if(ret!=fDict.fFinalMap.end()) return ret->second;
