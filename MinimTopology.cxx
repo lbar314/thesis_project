@@ -13,6 +13,7 @@ MinimTopology::~MinimTopology(){
 MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster) : fHash(0) {
   int rs = cluster.GetPatternRowSpan();
   int cs = cluster.GetPatternColSpan();
+  fPattern.reserve(((rs*cs)>>3)+3);
   fPattern.push_back(rs);
 	fPattern.push_back(cs);
   unsigned char tempChar = 0;
