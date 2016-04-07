@@ -7,9 +7,6 @@ using namespace std;
 MinimTopology::MinimTopology():fPattern(),fHash(0){
 }
 
-MinimTopology::~MinimTopology(){
-}
-
 MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster) : fHash(0) {
   int rs = cluster.GetPatternRowSpan();
   int cs = cluster.GetPatternColSpan();

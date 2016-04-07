@@ -17,6 +17,7 @@ class LookUp{
 
   private:
     Dictionary fDict;
+    int fOver;
 
 };
 
