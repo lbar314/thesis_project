@@ -7,27 +7,15 @@ using namespace std;
 MinimTopology::MinimTopology():fPattern(),fHash(0){
 }
 
-MinimTopology::MinimTopology(AliITSMFTClusterPix &cluster) : fHash(0) {
+MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster) : fHash(0) {
   int rs = cluster.GetPatternRowSpan();
   int cs = cluster.GetPatternColSpan();
-  fPattern.reserve(((rs*cs)>>3)+3);
-  fPattern.push_back(rs);
-	fPattern.push_back(cs);
-  unsigned char tempChar = 0;
-  int BitCounter=7;
-  for(int ir=0; ir<rs; ir++){
-    for(int ic=0; ic<cs; ic++){
-      if(BitCounter<0) {
-	      fPattern.push_back(tempChar);
-	      tempChar=0;
-	      BitCounter=7;
-      }
-      if(cluster.TestPixel(ir,ic)) tempChar+=(1<<BitCounter);
-      BitCounter--;
-    }
-  }
-  fPattern.push_back(tempChar);
-  int nBytes = fPattern.length()-2;
+  int nBytes = (rs*cs)>>3;
+  if(((rs*cs)%8)!=0) nBytes++;
+  fPattern.resize(nBytes+2);
+  fPattern[0]=rs;
+	fPattern[1]=cs;
+  cluster.GetPattern(&fPattern[2],nBytes);
   fHash = ((unsigned long)(hashFunction(fPattern.data(),fPattern.length())))<<32;
   if(nBytes>=4){
     fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8) + ((unsigned long)fPattern[5]));

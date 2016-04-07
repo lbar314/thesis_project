@@ -35,7 +35,7 @@ enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,
 
 TObjArray arrMCTracks; // array of hit arrays for each particle
 
-void testLookUp(string inputfile,int nRepetintions=100,int nev=-1, string outputfile="../timeLookUp.txt"){
+void testLookUp(string inputfile,int nRepetintions=100,int nev=-1, string outputfile="timeLookUp.txt"){
 
   LookUp finder(inputfile);
   ofstream time_output(outputfile, std::ios_base::app | std::ios_base::out);

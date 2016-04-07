@@ -12,7 +12,7 @@
 using namespace std;
 
 #ifndef _STUDY_
-  void BuildDictionary::AccountTopology(AliITSMFTClusterPix &cluster){
+  void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster){
     fTotClusters++;
     MinimTopology top(cluster);
     top.GetHash();
@@ -21,7 +21,7 @@ using namespace std;
     if(ret.second==false) ret.first->second.second++;
   }
 #else
-  void BuildDictionary::AccountTopology(AliITSMFTClusterPix &cluster, float dX, float dZ){
+  void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ){
     fTotClusters++;
     MinimTopology top(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;

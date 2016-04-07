@@ -10,7 +10,7 @@ class MinimTopology {
 
   public:
     MinimTopology();
-    MinimTopology(AliITSMFTClusterPix &cluster);
+    MinimTopology(const AliITSMFTClusterPix &cluster);
 
     string& GetPattern() {return fPattern;}
     int GetRowSpan() const {return fPattern[0];}

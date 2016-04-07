@@ -59,4 +59,11 @@ void compiler(TString myopt="fast"){
     cout << endl << " testLookUp: FAILED" <<  endl << endl;
     return;
   }
+  if(gSystem->CompileMacro("HistoFiller.C",opt.data()))
+    cout << endl << " HistoFiller: COMPILED" <<  endl << endl;
+  else{
+    cout << endl << " HistoFiller: FAILED" <<  endl << endl;
+    return;
+  }
+  //testLookUp("dizionario.txt",10,-1);
 }

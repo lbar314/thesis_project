@@ -13,7 +13,7 @@ using std::map;
 class LookUp{
   public:
     LookUp(std::string fname);
-    int GroupFinder(AliITSMFTClusterPix& clust);
+    int GroupFinder(const AliITSMFTClusterPix& clust);
 
   private:
     Dictionary fDict;

@@ -177,7 +177,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
       //printf("Layer %d : %d clusters\n",ilr,nClu);
       //
       for (int icl=0;icl<nClu;icl++) {
-        if(icl%100 == 0) printf("ilr: %d icl: %d / %d\n", ilr, icl, nClu);
+        printf("ilr: %d icl: %d / %d\n", ilr, icl, nClu);
         AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
         int modID = cl->GetVolumeId();
         //------------ check if this is a split cluster
