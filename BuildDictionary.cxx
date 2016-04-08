@@ -15,13 +15,13 @@ using namespace std;
   void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster){
     fTotClusters++;
     fTtop.SetPattern(cluster);
-    top.GetHash();
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
-    auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
+    auto ret = fMapTop.insert(make_pair(fTop.GetHash(),make_pair(fTop,1)));
     if(ret.second==false) ret.first->second.second++;
   }
 #else
   void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ){
+    fTotClusters++;
     fTop.SetPattern(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
     auto ret = fMapTop.insert(make_pair(fTop.GetHash(),make_pair(fTop,1)));
