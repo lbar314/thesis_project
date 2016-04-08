@@ -6,12 +6,12 @@ LookUp::LookUp(std::string fname){
 }
 
 int LookUp::GroupFinder(const AliITSMFTClusterPix& clust){
-  MinimTopology top(clust);
-  auto ret = fDict.fFinalMap.find(top.GetHash());
+  fTop.SetPattern(clust);
+  auto ret = fDict.fFinalMap.find(fTop.GetHash());
   if(ret!=fDict.fFinalMap.end()) return ret->second;
   else{
-    int rs = top.GetRowSpan();
-    int cs = top.GetColumnSpan();
+    int rs = fTop.GetRowSpan();
+    int cs = fTop.GetColumnSpan();
     int box = rs*cs;
     if(box < 10){
       return fOver;

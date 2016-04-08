@@ -18,7 +18,7 @@ class LookUp{
   private:
     Dictionary fDict;
     int fOver;
-
+    MinimTopology fTop;
 };
 
 #endif
