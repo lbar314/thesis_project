@@ -47,6 +47,8 @@ class BuildDictionary {
       void AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ);
     #endif
 
+    BuildDictionary();
+
     void SetThresholdCumulative(double cumulative);
     void Grouping();
     std::ostream& showMap(std::ostream &out);

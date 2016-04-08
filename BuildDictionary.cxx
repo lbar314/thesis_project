@@ -11,6 +11,8 @@
 
 using namespace std;
 
+  BuildDictionary::BuildDictionary():fTotClusters(0){}
+
 #ifndef _STUDY_
   void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster){
     fTotClusters++;
@@ -96,13 +98,10 @@ void BuildDictionary::SetThresholdCumulative(double cumulative){
   while(((double)fTopFreq[fNotInGroups].first)/fTotClusters == fThreshold) fNotInGroups--;
   fThreshold=((double)fTopFreq[fNotInGroups++].first)/fTotClusters;
   fNGroups=fNotInGroups;
-
-  cout<<"SetThresholdCumulative: fTotClusters: "<<fTotClusters<<endl;
 }
 
 void BuildDictionary::Grouping(){
 
-  cout<<"Grouping: fTotClusters: "<<fTotClusters<<endl;
   #ifdef _HISTO_
     fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
     fHdist.GetXaxis()->SetTitle("GroupID");
@@ -112,7 +111,9 @@ void BuildDictionary::Grouping(){
 
   double totFreq=0.;
   for(int j=0; j<fNotInGroups; j++){
-    fHdist.Fill(j,fTopFreq[j].first);
+    #ifdef _HISTO_
+      fHdist.Fill(j,fTopFreq[j].first);
+    #endif
     totFreq+=((double)(fTopFreq[j].first))/fTotClusters;
     GroupStr gr;
     gr.hash=fTopFreq[j].second;
@@ -183,10 +184,8 @@ void BuildDictionary::Grouping(){
 }
 
 std::ostream& BuildDictionary::showMap(std::ostream &out){
-  out << "Nuova versione"<< endl;
   for(auto &p : fMapTop){
     out << "Hash: " << p.second.first.GetHash() << endl;
-    out << "counts: " << p.second.second << endl;
     p.second.first.printTop(out);
   }
 }
