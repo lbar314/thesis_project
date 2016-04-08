@@ -40,7 +40,7 @@ class BuildDictionary {
     #ifdef _HISTO_
       TH1F fHdist; //Distribution of groupIDs
     #endif
-
+    
     #ifndef _STUDY_
       void AccountTopology(const AliITSMFTClusterPix &cluster);
     #else

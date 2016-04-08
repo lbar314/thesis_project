@@ -77,6 +77,7 @@ using namespace std;
 #endif
 
 void BuildDictionary::SetThresholdCumulative(double cumulative){
+  cout<<"SetThresholdCumulative: fTotClusters: " << fTotClusters << endl;
   if(cumulative<=0. || cumulative >=1.) cumulative = 0.99;
   double totFreq = 0.;
   for(auto &&p : fMapTop){
@@ -101,6 +102,7 @@ void BuildDictionary::SetThresholdCumulative(double cumulative){
 
 void BuildDictionary::Grouping(){
 
+  cout<<"Grouping: fTotClusters: " << fTotClusters << endl;
   #ifdef _HISTO_
     fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
     fHdist.GetXaxis()->SetTitle("GroupID");
