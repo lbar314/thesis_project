@@ -96,10 +96,13 @@ void BuildDictionary::SetThresholdCumulative(double cumulative){
   while(((double)fTopFreq[fNotInGroups].first)/fTotClusters == fThreshold) fNotInGroups--;
   fThreshold=((double)fTopFreq[fNotInGroups++].first)/fTotClusters;
   fNGroups=fNotInGroups;
+
+  cout<<"SetThresholdCumulative: fTotClusters: "<<fTotClusters<<endl;
 }
 
 void BuildDictionary::Grouping(){
 
+  cout<<"Grouping: fTotClusters: "<<fTotClusters<<endl;
   #ifdef _HISTO_
     fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
     fHdist.GetXaxis()->SetTitle("GroupID");
