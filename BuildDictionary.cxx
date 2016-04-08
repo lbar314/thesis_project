@@ -181,6 +181,7 @@ void BuildDictionary::Grouping(){
 }
 
 std::ostream& BuildDictionary::showMap(std::ostream &out){
+  out << "Vecchia versione" << endl;
   for(auto &p : fMapTop){
     out << "Hash: " << p.second.first.GetHash() << endl;
     p.second.first.printTop(out);
