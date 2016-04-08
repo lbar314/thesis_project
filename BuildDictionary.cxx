@@ -11,26 +11,27 @@
 
 using namespace std;
 
+  BuildDictionary::BuildDictionary():fTotClusters(0){}
+
 #ifndef _STUDY_
   void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster){
     fTotClusters++;
-    MinimTopology top(cluster);
-    top.GetHash();
+    fTtop.SetPattern(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
-    auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
+    auto ret = fMapTop.insert(make_pair(fTop.GetHash(),make_pair(fTop,1)));
     if(ret.second==false) ret.first->second.second++;
   }
 #else
   void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ){
     fTotClusters++;
-    MinimTopology top(cluster);
+    fTop.SetPattern(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
-    auto ret = fMapTop.insert(make_pair(top.GetHash(),make_pair(top,1)));
+    auto ret = fMapTop.insert(make_pair(fTop.GetHash(),make_pair(fTop,1)));
     if(ret.second==true){
       //___________________DEFINING_TOPOLOGY_CHARACTERISTICS__________________
       TopologyInfo topInf;
-      int &rs = topInf.sizeX = top.GetRowSpan();
-      int &cs = topInf.sizeZ = top.GetColumnSpan();
+      int &rs = topInf.sizeX = fTop.GetRowSpan();
+      int &cs = topInf.sizeZ = fTop.GetColumnSpan();
       //__________________COG_Deterrmination_____________
       int tempyCOG = 0;
       int tempzCOG = 0;
@@ -39,8 +40,8 @@ using namespace std;
     	int s = 0;
     	int ic = 0;
       int ir = 0;
-      for(unsigned int i=2; i<top.GetPattern().length(); i++){
-    		tempChar = top.GetPattern()[i];
+      for(unsigned int i=2; i<fTop.GetPattern().length(); i++){
+    		tempChar = fTop.GetPattern()[i];
     		s=128;//0b10000000
         while(s>0){
           if((tempChar&s)!=0){
@@ -61,15 +62,15 @@ using namespace std;
       topInf.xCOG = 0.5 + (float)tempyCOG/(float)tempFiredPixels;
       topInf.zCOG = 0.5 + (float)tempzCOG/(float)tempFiredPixels;
       topInf.nPixels = tempFiredPixels;
-      topInf.hdX = TH1F(Form("hdX%lu",top.GetHash()),"#DeltaX",10,-5e-3,5e-3);
+      topInf.hdX = TH1F(Form("hdX%lu",fTop.GetHash()),"#DeltaX",10,-5e-3,5e-3);
       topInf.hdX.Fill(dX);
-      topInf.hdZ = TH1F(Form("hdA%lu",top.GetHash()),"#DeltaZ",10,-5e-3,5e-3);
+      topInf.hdZ = TH1F(Form("hdA%lu",fTop.GetHash()),"#DeltaZ",10,-5e-3,5e-3);
       topInf.hdZ.Fill(dZ);
-      fMapInfo.insert(make_pair(top.GetHash(),topInf));
+      fMapInfo.insert(make_pair(fTop.GetHash(),topInf));
     }
     else{
       ret.first->second.second++;
-      auto ind = fMapInfo.find(top.GetHash());
+      auto ind = fMapInfo.find(fTop.GetHash());
       ind->second.hdX.Fill(dX);
       ind->second.hdZ.Fill(dZ);
     }
@@ -112,7 +113,9 @@ void BuildDictionary::Grouping(){
 
   double totFreq=0.;
   for(int j=0; j<fNotInGroups; j++){
-    fHdist.Fill(j,fTopFreq[j].first);
+    #ifdef _HISTO_
+      fHdist.Fill(j,fTopFreq[j].first);
+    #endif
     totFreq+=((double)(fTopFreq[j].first))/fTotClusters;
     GroupStr gr;
     gr.hash=fTopFreq[j].second;

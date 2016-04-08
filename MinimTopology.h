@@ -19,8 +19,9 @@ class MinimTopology {
 
     std::ostream& printTop(std::ostream &out);
     static unsigned int hashFunction(const void * key, int len);
-
+    void SetPattern(const AliITSMFTClusterPix &cluster);
   private:
+
     string fPattern;
     unsigned long fHash;
 
