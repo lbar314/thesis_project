@@ -138,7 +138,7 @@ void BuildDictionary::Grouping(){
   //group 3:
   GroupStr gr3;
     gr3.hash = ((unsigned long)3) << 56;
-    gr3.errX = gr1.errZ = 10.*2e-3/std::sqrt(12);
+    gr3.errX = gr3.errZ = 10.*2e-3/std::sqrt(12);
     unsigned long count3 = 0;
   //group 3:
   GroupStr gr4;
