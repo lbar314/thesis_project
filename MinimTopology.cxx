@@ -8,11 +8,15 @@ MinimTopology::MinimTopology():fPattern(),fHash(0){
 }
 
 MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster) : fHash(0) {
+  SetPattern(cluster);
+}
+
+void MinimTopology::SetPattern(const AliITSMFTClusterPix &cluster) {
   int rs = cluster.GetPatternRowSpan();
   int cs = cluster.GetPatternColSpan();
   int nBytes = (rs*cs)>>3;
   if(((rs*cs)%8)!=0) nBytes++;
-  fPattern.resize(nBytes+2);
+  fPattern.resize(nBytes+2,0);
   fPattern[0]=rs;
 	fPattern[1]=cs;
   cluster.GetPattern(&fPattern[2],nBytes);

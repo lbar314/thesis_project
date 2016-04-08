@@ -67,6 +67,7 @@ class BuildDictionary {
     #ifdef _STUDY_
       map<long unsigned,TopologyInfo> fMapInfo;
     #endif
+    MinimTopology fTop;
 };
 
 #endif
