@@ -318,7 +318,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   time_output.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
-  minDB.SetThresholdCumulative(0.99999);
+  minDB.SetThreshold(0.00001);
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");
   //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)

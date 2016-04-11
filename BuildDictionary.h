@@ -40,7 +40,7 @@ class BuildDictionary {
     #ifdef _HISTO_
       TH1F fHdist; //Distribution of groupIDs
     #endif
-    
+
     #ifndef _STUDY_
       void AccountTopology(const AliITSMFTClusterPix &cluster);
     #else
@@ -49,7 +49,9 @@ class BuildDictionary {
 
     BuildDictionary();
 
-    void SetThresholdCumulative(double cumulative);
+    void SetNGroups(unsigned int ngr); //Set number of groups
+    void SetThreshold(double thr);
+    void SetThresholdCumulative(double cumulative); //Considering the integral
     void Grouping();
     std::ostream& showMap(std::ostream &out);
     void PrintDictionary(string fname);

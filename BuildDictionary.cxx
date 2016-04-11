@@ -77,6 +77,36 @@ using namespace std;
   }
 #endif
 
+void BuildDictionary::SetThreshold(double thr){
+  for(auto &&p : fMapTop){
+    fTopFreq.push_back(make_pair(p.second.second,p.first));
+  }
+  std::sort(fTopFreq.begin(),fTopFreq.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
+  fNotInGroups = 0;
+  fNGroups = 0;
+  fDict.fFinalMap.clear();
+  fThreshold=thr;
+  for(auto &q : fTopFreq){
+    if( ((double)q.first)/fTotClusters > thr ) fNotInGroups++;
+    else break;
+  }
+  fNGroups=fNotInGroups;
+}
+
+void BuildDictionary::SetNGroups(unsigned int ngr){
+  for(auto &&p : fMapTop){
+    fTopFreq.push_back(make_pair(p.second.second,p.first));
+  }
+  std::sort(fTopFreq.begin(),fTopFreq.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
+  if(ngr<10 || ngr > (fTopFreq.size()-4)){
+    cout << "Invalid number of groups" << endl;
+    exit(1);
+  }
+  fNGroups = fNotInGroups = ngr-4;
+  fDict.fFinalMap.clear();
+  fThreshold=((double)fTopFreq[fNotInGroups-1].first)/fTotClusters;
+}
+
 void BuildDictionary::SetThresholdCumulative(double cumulative){
   cout<<"SetThresholdCumulative: fTotClusters: " << fTotClusters << endl;
   if(cumulative<=0. || cumulative >=1.) cumulative = 0.99;
