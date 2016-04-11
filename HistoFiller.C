@@ -7,13 +7,13 @@
 
 void HistoFiller(string inputfile="timeLookUp.txt"){
 
-  TH1F* hr = new TH1F("hr","LookUp: real time",100,0,2e-2);
+  TH1F* hr = new TH1F("hr","LookUp: real time",100,0,1.5e-1);
   hr->SetDirectory(0);
   hr->GetXaxis()->SetTitle("t (s)");
   hr->SetFillColor(kRed);
   hr->SetFillStyle(3005);
 
-  TH1F* hc = new TH1F("hc","LookUp: CPU time",100,0,2e-2);
+  TH1F* hc = new TH1F("hc","LookUp: CPU time",100,0,1.5e-1);
   hc->SetDirectory(0);
   hc->GetXaxis()->SetTitle("t (s)");
   hc->SetFillColor(kRed);

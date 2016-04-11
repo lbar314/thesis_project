@@ -169,20 +169,31 @@ void BuildDictionary::Grouping(){
   }
   totFreq+=((double)count1)/fTotClusters;
   gr1.freq=totFreq;
-  fHdist.Fill(fNotInGroups,count1);
+  #ifdef _HISTO_
+    fHdist.Fill(fNotInGroups,count1);
+  #endif
   fDict.fGroupVec.push_back(gr1);
   totFreq+=((double)count2)/fTotClusters;
   gr2.freq=totFreq;
-  fHdist.Fill(fNotInGroups+1,count2);
+  #ifdef _HISTO_
+    fHdist.Fill(fNotInGroups+1,count2);
+  #endif
   fDict.fGroupVec.push_back(gr2);
   totFreq+=((double)count3)/fTotClusters;
   gr3.freq=totFreq;
-  fHdist.Fill(fNotInGroups+2,count3);
+  #ifdef _HISTO_
+    fHdist.Fill(fNotInGroups+2,count3);
+  #endif
   fDict.fGroupVec.push_back(gr3);
   totFreq+=((double)count4)/fTotClusters;
   gr4.freq=totFreq;
-  fHdist.Fill(fNotInGroups+3,count4);
-  fDict.fGroupVec.push_back(gr4);
+  #ifdef _HISTO_
+    fHdist.Fill(fNotInGroups+3,count4);
+  #endif
+    fDict.fGroupVec.push_back(gr4);
+  #ifdef _HISTO_
+    fHdist.Scale(1./fTotClusters);
+  #endif
 }
 
 std::ostream& BuildDictionary::showMap(std::ostream &out){

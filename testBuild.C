@@ -318,7 +318,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   time_output.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
-  minDB.SetThresholdCumulative(0.90);
+  minDB.SetThresholdCumulative(0.99999);
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");
   //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)
@@ -345,6 +345,8 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
 
   TH1F* prova = new TH1F(minDB.fHdist);
   TCanvas* cancan = new TCanvas("c","c");
+  cancan->SetLogy();
+  cancan->SetLogx();
   cancan->cd();
   prova->Draw();
   // TH1F* verifica = new TH1F(minDB.fHcheck);
