@@ -26,6 +26,7 @@
 #include "./Dictionary.h"
 #include "BuildDictionary.h"
 #include <map>
+#include <math.h>
 
 #endif
 
@@ -120,7 +121,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   int nlr=its->GetNLayersActive();
   int ntotev = (int)runLoader->GetNumberOfEvents();
 
-  printf("N Events : %i \n",ntotev);
+  Printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
   BuildDictionary minDB;
@@ -130,7 +131,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   TStopwatch timerBuild;
 
   for (int iEvent = 0; iEvent < ntotev; iEvent++) {
-    printf("\n Event %i \n",iEvent);
+    Printf("\n Event %i \n",iEvent);
     Int_t totClusters=0;
     runLoader->GetEvent(iEvent);
     AliStack *stack = runLoader->Stack();
@@ -141,7 +142,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
     // read clusters
     for (int ilr=nlr;ilr--;) {
       TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
-      if (!br) {printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
+      if (!br) {Printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
       br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
     }
     cluTree->GetEntry(0);
@@ -154,7 +155,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
       for(int iHit=0; iHit<nh;iHit++){
         AliITSMFTHit *pHit = (AliITSMFTHit*)hitList->At(iHit);
         int mcID = pHit->GetTrack();
-	      //printf("MCid: %d %d %d Ch %d\n",iEnt,iHit, mcID, pHit->GetChip());
+	      //Printf("MCid: %d %d %d Ch %d\n",iEnt,iHit, mcID, pHit->GetChip());
         TClonesArray* harr = arrMCTracks.GetEntriesFast()>mcID ? (TClonesArray*)arrMCTracks.At(mcID) : 0;
         if (!harr) {
           harr = new TClonesArray("AliITSMFTHit"); // 1st encounter of the MC track
@@ -168,16 +169,16 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
     //
     // compare clusters and hits
     //
-    printf(" tree entries: %lld\n",cluTree->GetEntries());
+    //Printf(" tree entries: %lld\n",cluTree->GetEntries());
     //
     for (int ilr=0;ilr<nlr;ilr++) {
       AliITSURecoLayer* lr = its->GetLayerActive(ilr);
       TClonesArray* clr = lr->GetClusters();
       int nClu = clr->GetEntries();
-      //printf("Layer %d : %d clusters\n",ilr,nClu);
+      //Printf("Layer %d : %d clusters\n",ilr,nClu);
       //
       for (int icl=0;icl<nClu;icl++) {
-        printf("ilr: %d icl: %d / %d\n", ilr, icl, nClu);
+        if(icl%100==0)printf("ilr: %d icl: %d / %d\r", ilr, icl, nClu);
         AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
         int modID = cl->GetVolumeId();
         //------------ check if this is a split cluster
@@ -188,7 +189,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
           AliITSURecoSens* sens = lr->GetSensor(sInL);
           int nclSn = sens->GetNClusters();
           int offs = sens->GetFirstClusterId();
-          //  printf("To check for %d (mod:%d) N=%d from %d\n",icl,modID,nclSn,offs);
+          //  Printf("To check for %d (mod:%d) N=%d from %d\n",icl,modID,nclSn,offs);
           for (int ics=0;ics<nclSn;ics++) {
             AliITSMFTClusterPix* clusT = (AliITSMFTClusterPix*)lr->GetCluster(offs+ics); // access to clusters
             if (clusT==cl) continue;
@@ -200,7 +201,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
                   cl->SetBit(kSplit);
                   clusT->SetBit(kSplit);
                   /*
-                  printf("Discard clusters of module %d:\n",modID);
+                  Printf("Discard clusters of module %d:\n",modID);
                   cl->Print();
                   clusT->Print();
                   */
@@ -217,7 +218,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
         int clsize = cl->GetNPix();
         for (int i=3;i--;) xyzClGlo[i] = xyzClGloF[i];
         const TGeoHMatrix* mat = gm->GetMatrixSens(modID);
-        if (!mat) {printf("failed to get matrix for module %d\n",cl->GetVolumeId());}
+        if (!mat) {Printf("failed to get matrix for module %d\n",cl->GetVolumeId());}
         mat->MasterToLocal(xyzClGlo,xyzClTr);
         //
         int col,row;
@@ -230,8 +231,8 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
         // find hit info
         for (int il=0;il<nLab;il++) {
           TClonesArray* htArr = (TClonesArray*)arrMCTracks.At(labels[il]);
-	        //printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
-	        if (!htArr) {printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
+	        //Printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
+	        if (!htArr) {Printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
           //
           int nh = htArr->GetEntriesFast();
           AliITSMFTHit *pHit=0;
@@ -242,7 +243,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
             break;
           }
           if (!pHit) {
-            printf("did not find MChit for label %d on module %d ",il,modID);
+            Printf("did not find MChit for label %d on module %d ",il,modID);
             cl->Print();
             htArr->Print();
             continue;
@@ -322,26 +323,19 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");
   //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)
-  // Dictionary nuevo;
-  // nuevo.ReadFile("dizionario.txt");
-  // if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
-  // else cout<<"Map is wrong :("<< endl;
-  // bool vec_check = true;
-  // if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
-  //   vec_check = false;
-  //   cout<<"Vector is wrong :("<< endl;
-  // }
-  // else{
-  //   for(unsigned int i=0; i< nuevo.fGroupVec.size(); i++){
-  //     if(nuevo.fGroupVec[i].hash != minDB.fDict.fGroupVec[i].hash &&
-  //       nuevo.fGroupVec[i].errX != minDB.fDict.fGroupVec[i].errX &&
-  //       nuevo.fGroupVec[i].errZ != minDB.fDict.fGroupVec[i].errZ &&
-  //       nuevo.fGroupVec[i].freq != minDB.fDict.fGroupVec[i].freq
-  //     ) vec_check = false;
-  //   }
-  //   if(vec_check) cout << "Vek is OK" << endl;
-  //   else cout << "Vec is wrong :(" << endl;
-  // }
+  cout << "Checking dictionary storage" << endl;
+  Dictionary nuevo;
+  nuevo.ReadFile("dizionario.txt");
+  ofstream darkopancev("darkopancev.txt");
+  darkopancev << nuevo;
+  darkopancev.close();
+  if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
+  else cout<<"Map is wrong :("<< endl;
+  bool vec_check = true;
+  if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
+    vec_check = false;
+    cout<<"Vector is wrong :("<< endl;
+  } //In order to test the vector use diff to compare dizionario.txt and darkopancev.txtali
 
   TH1F* prova = new TH1F(minDB.fHdist);
   TCanvas* cancan = new TCanvas("c","c");
@@ -349,9 +343,12 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   cancan->SetLogx();
   cancan->cd();
   prova->Draw();
+  TFile* ciccio = TFile::Open("./histos.root","RECREATE");
+  ciccio->WriteObject(prova,"costr","kSingleKey");
   // TH1F* verifica = new TH1F(minDB.fHcheck);
   // TCanvas* cancan1 = new TCanvas("c1","c1");
   // cancan1->cd();
   // verifica->Draw();
+  ciccio->Close();
   d.close();
 }

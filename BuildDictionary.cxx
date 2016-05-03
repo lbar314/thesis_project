@@ -77,6 +77,11 @@ using namespace std;
   }
 #endif
 
+unsigned long BuildDictionary::checkHash(const AliITSMFTClusterPix& clust){
+  fTop.SetPattern(clust);
+  return fTop.GetHash();
+}
+
 void BuildDictionary::SetThreshold(double thr){
   for(auto &&p : fMapTop){
     fTopFreq.push_back(make_pair(p.second.second,p.first));
@@ -99,7 +104,7 @@ void BuildDictionary::SetNGroups(unsigned int ngr){
   }
   std::sort(fTopFreq.begin(),fTopFreq.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
   if(ngr<10 || ngr > (fTopFreq.size()-4)){
-    cout << "Invalid number of groups" << endl;
+    cout << "BuildDictionary::SetNGroups : Invalid number of groups" << endl;
     exit(1);
   }
   fNGroups = fNotInGroups = ngr-4;
@@ -222,7 +227,7 @@ void BuildDictionary::Grouping(){
   #endif
     fDict.fGroupVec.push_back(gr4);
   #ifdef _HISTO_
-    fHdist.Scale(1./fTotClusters);
+    fHdist.Scale(1./fHdist.Integral());
   #endif
 }
 

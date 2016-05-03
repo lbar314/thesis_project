@@ -14,6 +14,8 @@ class LookUp{
   public:
     LookUp(std::string fname);
     int GroupFinder(const AliITSMFTClusterPix& clust);
+    int GetOver() {return fOver;}
+    bool CheckIntegrity(const AliITSMFTClusterPix& clust, const unsigned long& hash);
 
   private:
     Dictionary fDict;

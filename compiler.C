@@ -59,6 +59,12 @@ void compiler(TString myopt="fast"){
     cout << endl << " testLookUp: FAILED" <<  endl << endl;
     return;
   }
+  if(gSystem->CompileMacro("CheckChain.C",opt.data()))
+    cout << endl << " CheckChain: COMPILED" <<  endl << endl;
+  else{
+    cout << endl << " CheckChain: FAILED" <<  endl << endl;
+    return;
+  }
   if(gSystem->CompileMacro("HistoFiller.C",opt.data()))
     cout << endl << " HistoFiller: COMPILED" <<  endl << endl;
   else{
