@@ -11,7 +11,6 @@ class MinimTopology {
   public:
     MinimTopology();
     MinimTopology(const AliITSMFTClusterPix &cluster);
-    virtual ~MinimTopology();
 
     string& GetPattern() {return fPattern;}
     int GetRowSpan() const {return fPattern[0];}
@@ -20,8 +19,9 @@ class MinimTopology {
 
     std::ostream& printTop(std::ostream &out);
     static unsigned int hashFunction(const void * key, int len);
-
+    void SetPattern(const AliITSMFTClusterPix &cluster);
   private:
+
     string fPattern;
     unsigned long fHash;
 

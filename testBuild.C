@@ -20,13 +20,13 @@
 #include "TCanvas.h"
 #include "TPaveStats.h"
 #include "TClonesArray.h"
+#include "TStopwatch.h"
 #include <Riostream.h>
-#include "./Topology.h"
-#include "./TopDatabase.h"
 #include "./MinimTopology.h"
 #include "./Dictionary.h"
 #include "BuildDictionary.h"
 #include <map>
+#include <math.h>
 
 #endif
 
@@ -60,18 +60,9 @@ typedef struct {
   int nColPatt;
 } clSumm;
 
-TObjArray arrMCTracks; // array of hit arrays for each particle
+TObjArray arrMCTracks; //array of hit arrays for each particle
 
-void debugMin(int nev=-1)
-{
-  TH1F* testX = new TH1F("testX","testX", 1000,-3e-3 ,3e-3);
-  TH1F* testY = new TH1F("testY","testY", 1000,-3e-3 ,3e-3);
-  TH1F* testZ = new TH1F("testZ","testZ", 1000,-5e-3 ,5e-3);
-
-  vector<pair<int,Topology> > mappa;
-  vector<pair<int,int> > clashes;
-  ofstream a("Check_map.txt");
-  ofstream b("prova.txt");
+void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   clSumm cSum;
   int primo=0;
 
@@ -130,14 +121,18 @@ void debugMin(int nev=-1)
   int nlr=its->GetNLayersActive();
   int ntotev = (int)runLoader->GetNumberOfEvents();
 
-  printf("N Events : %i \n",ntotev);
+  Printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
-  TopDatabase DB;
   BuildDictionary minDB;
 
+  ofstream time_output(outstr, std::ios_base::app | std::ios_base::out);
+
+  TStopwatch timerBuild;
+
   for (int iEvent = 0; iEvent < ntotev; iEvent++) {
-    printf("\n Event %i \n",iEvent);
+    Printf("\n Event %i \n",iEvent);
+    Int_t totClusters=0;
     runLoader->GetEvent(iEvent);
     AliStack *stack = runLoader->Stack();
     cluTree=dl->TreeR();
@@ -147,7 +142,7 @@ void debugMin(int nev=-1)
     // read clusters
     for (int ilr=nlr;ilr--;) {
       TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
-      if (!br) {printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
+      if (!br) {Printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
       br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
     }
     cluTree->GetEntry(0);
@@ -160,7 +155,7 @@ void debugMin(int nev=-1)
       for(int iHit=0; iHit<nh;iHit++){
         AliITSMFTHit *pHit = (AliITSMFTHit*)hitList->At(iHit);
         int mcID = pHit->GetTrack();
-	      //printf("MCid: %d %d %d Ch %d\n",iEnt,iHit, mcID, pHit->GetChip());
+	      //Printf("MCid: %d %d %d Ch %d\n",iEnt,iHit, mcID, pHit->GetChip());
         TClonesArray* harr = arrMCTracks.GetEntriesFast()>mcID ? (TClonesArray*)arrMCTracks.At(mcID) : 0;
         if (!harr) {
           harr = new TClonesArray("AliITSMFTHit"); // 1st encounter of the MC track
@@ -174,16 +169,16 @@ void debugMin(int nev=-1)
     //
     // compare clusters and hits
     //
-    printf(" tree entries: %lld\n",cluTree->GetEntries());
+    //Printf(" tree entries: %lld\n",cluTree->GetEntries());
     //
     for (int ilr=0;ilr<nlr;ilr++) {
       AliITSURecoLayer* lr = its->GetLayerActive(ilr);
       TClonesArray* clr = lr->GetClusters();
       int nClu = clr->GetEntries();
-      //printf("Layer %d : %d clusters\n",ilr,nClu);
+      //Printf("Layer %d : %d clusters\n",ilr,nClu);
       //
       for (int icl=0;icl<nClu;icl++) {
-        if(icl%100 == 0) printf("ilr: %d icl: %d / %d\n", ilr, icl, nClu);
+        if(icl%100==0)printf("ilr: %d icl: %d / %d\r", ilr, icl, nClu);
         AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
         int modID = cl->GetVolumeId();
         //------------ check if this is a split cluster
@@ -194,7 +189,7 @@ void debugMin(int nev=-1)
           AliITSURecoSens* sens = lr->GetSensor(sInL);
           int nclSn = sens->GetNClusters();
           int offs = sens->GetFirstClusterId();
-          //  printf("To check for %d (mod:%d) N=%d from %d\n",icl,modID,nclSn,offs);
+          //  Printf("To check for %d (mod:%d) N=%d from %d\n",icl,modID,nclSn,offs);
           for (int ics=0;ics<nclSn;ics++) {
             AliITSMFTClusterPix* clusT = (AliITSMFTClusterPix*)lr->GetCluster(offs+ics); // access to clusters
             if (clusT==cl) continue;
@@ -206,7 +201,7 @@ void debugMin(int nev=-1)
                   cl->SetBit(kSplit);
                   clusT->SetBit(kSplit);
                   /*
-                  printf("Discard clusters of module %d:\n",modID);
+                  Printf("Discard clusters of module %d:\n",modID);
                   cl->Print();
                   clusT->Print();
                   */
@@ -223,7 +218,7 @@ void debugMin(int nev=-1)
         int clsize = cl->GetNPix();
         for (int i=3;i--;) xyzClGlo[i] = xyzClGloF[i];
         const TGeoHMatrix* mat = gm->GetMatrixSens(modID);
-        if (!mat) {printf("failed to get matrix for module %d\n",cl->GetVolumeId());}
+        if (!mat) {Printf("failed to get matrix for module %d\n",cl->GetVolumeId());}
         mat->MasterToLocal(xyzClGlo,xyzClTr);
         //
         int col,row;
@@ -236,8 +231,8 @@ void debugMin(int nev=-1)
         // find hit info
         for (int il=0;il<nLab;il++) {
           TClonesArray* htArr = (TClonesArray*)arrMCTracks.At(labels[il]);
-	        //printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
-	        if (!htArr) {printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
+	        //Printf("check %d/%d LB %d  %p\n",il,nLab,labels[il],htArr);
+	        if (!htArr) {Printf("did not find MChits for label %d ",labels[il]); cl->Print(); continue;}
           //
           int nh = htArr->GetEntriesFast();
           AliITSMFTHit *pHit=0;
@@ -248,7 +243,7 @@ void debugMin(int nev=-1)
             break;
           }
           if (!pHit) {
-            printf("did not find MChit for label %d on module %d ",il,modID);
+            Printf("did not find MChit for label %d on module %d ",il,modID);
             cl->Print();
             htArr->Print();
             continue;
@@ -270,22 +265,7 @@ void debugMin(int nev=-1)
 
           Double_t dirHit[3]={(xExit-xEnt),(yExit-yEnt),(zExit-zEnt)};
 
-          testX->Fill(xEnt);
-          testY->Fill(yEnt);
-          testZ->Fill(zEnt);
-
-          /*double PG[3] = {(double)pHit->GetPXG(), (double)pHit->GetPYG(), (double)pHit->GetPZG()}; //Momentum at hit-point in Global Frame
-          double PL[3];
-          if (TMath::Abs(PG[0])<10e-7 && TMath::Abs(PG[1])<10e-7) {
-            pHit->Dump();
-            int lb = pHit->GetTrack();
-            stack->Particle(lb)->Print();
-            continue;
-          }
-          mat->MasterToLocalVect(PG,PL); //Momentum in local Frame
-          //printf(">> %e %e   %e %e   %e %e\n",PG[0],PL[0],PG[1],PL[1],PG[2],PL[2]);*/
-
-          Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[1])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2])); //Polar Angle
+          Double_t alpha1 = TMath::ACos(TMath::Abs(dirHit[1])/TMath::Sqrt(dirHit[0]*dirHit[0]+dirHit[1]*dirHit[1]+dirHit[2]*dirHit[2]));          //Polar Angle
           float alpha2 = (float) alpha1; //convert to float
           cSum.alpha = alpha2;
 
@@ -308,51 +288,11 @@ void debugMin(int nev=-1)
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
-	        DB.AccountTopology(*cl, cSum.dX, cSum.dZ, cSum.alpha, cSum.beta);
+          timerBuild.Start(!totClusters);
           minDB.AccountTopology(*cl,cSum.dX, cSum.dZ);
-          //________________________TESTING_MINIMAL_TOPOLOGY________________________________
-          // vector<int> v;
-          // for(int i=0; i<10; i++){
-          //   Topology top(*cl);
-          //   MinimTopology top1(*cl);
-          //   if(top.GetPattern()!=top1.GetPattern()){
-          //     cout << "Error: different outputs" << endl << endl;
-          //     cout << "Cluster output" << endl;
-          //     Topology::printCluster(*cl,cout);
-          //     cout << "Topology output" << endl;
-          //     top.printTop(cout);
-          //     cout << "MinimTopology output" << endl;
-          //     top1.printTop(cout);
-          //   }
-          //   v.push_back(Topology::FuncMurmurHash2(top.GetPattern().data(),(int)top.GetPattern().length()));
-          // }
-          // bool er = false;
-          // for(int j=0; j<v.size(); j++){
-          //   for(int k=j+1; k<v.size(); k++){
-          //     if(v[j]!=v[k]) er = true;
-          //   }
-          // }
-          // if(er) for(int d=0; d<v.size(); d++) cout << v[d] << endl;
+          timerBuild.Stop();
+          totClusters++;
           //
-          //a << ilr << " " << modID << " " << col << " " << row << " " << hash << endl;
-          //________________________________LOOKING_FOR_CLASHES___________________________
-          // bool newTop = true;
-          // for (int i = 0; i < mappa.size(); ++i) {
-          //   if (mappa[i].first == hash) {
-          //     newTop = false;
-          //     if (mappa[i].second.GetPattern() != top.GetPattern() || mappa[i].second.GetUniqueID() != top.GetUniqueID()) {
-          //       bool newClash = true;
-          //       for (int j = 0; j < clashes.size(); ++j) {
-          //         if(clashes[j].first == hash) {
-          //           clashes[j].second++;
-          //           newClash = false;
-          //           break;
-          //         }
-          //       }
-          //       if (newClash) clashes.push_back(pair<int,int>(hash,1));
-          //     }
-          //   }
-          // }
           int label = cl->GetLabel(0);
           TParticle* part = 0;
           if (label>=0 && (part=stack->Particle(label)) ) {
@@ -366,95 +306,49 @@ void debugMin(int nev=-1)
           for (int ilb=0;ilb<3;ilb++) if (cl->GetLabel(ilb)>=0) cSum.ntr++;
           for (int i=0;i<3;i++) cSum.xyz[i] = xyzClGloF[i];
           //
-          /*
-          if (clsize==5) {
-            printf("\nL%d(%c) Mod%d, Cl:%d | %+5.1f %+5.1f (%d/%d)|H:%e %e %e | C:%e %e %e\n",ilr,cl->TestBit(kSplit) ? 'S':'N',
-             modID,icl,(txyzH[0]-xyzClTr[0])*1e4,(txyzH[2]-xyzClTr[2])*1e4, row,col,
-             gxyzH[0],gxyzH[1],gxyzH[2],xyzClGlo[0],xyzClGlo[1],xyzClGlo[2]);
-            cl->Print();
-            pHit->Print();
-            //
-            double a0,b0,c0,a1,b1,c1,e0;
-            pHit->GetPositionL0(a0,b0,c0,e0);
-            pHit->GetPositionL(a1,b1,c1);
-            float cloc[3];
-            cl->GetLocalXYZ(cloc);
-            printf("LocH: %e %e %e | %e %e %e\n",a0,b0,c0,a1,b1,c1);
-            printf("LocC: %e %e %e | %e %e %e\n",cloc[0],cloc[1],cloc[2],xyzClTr[0],xyzClTr[1],xyzClTr[2]);
-          }
-          */
-          //
         }
       }
     }
-
     //    layerClus.Clear();
     //
     arrMCTracks.Delete();
+    time_output << timerBuild.RealTime() << " " << timerBuild.CpuTime() << endl;
   }//event loop
   arrMCTracks.Delete();
   //
-  DB.EndAndSort();
-  DB.SetThresholdCumulative(0.95);
-  cout << "Over threshold: : "<< DB.GetOverThr()<<endl;
-  DB.Grouping(10,10);
-  DB.BuildMap();
-  DB.PrintDB("Database1.txt");
-  ofstream c("Check_Old_map.txt");
-  DB.showMap(c);
-  c.close();
+  time_output.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
-  minDB.SetThresholdCumulative(0.90);
+  minDB.SetThreshold(0.00001);
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");
   //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)
-  // Dictionary nuevo;
-  // nuevo.ReadFile("dizionario.txt");
-  // if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
-  // else cout<<"Map is wrong :("<< endl;
-  // bool vec_check = true;
-  // if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
-  //   vec_check = false;
-  //   cout<<"Vector is wrong :("<< endl;
-  // }
-  // else{
-  //   for(unsigned int i=0; i< nuevo.fGroupVec.size(); i++){
-  //     if(nuevo.fGroupVec[i].hash != minDB.fDict.fGroupVec[i].hash &&
-  //       nuevo.fGroupVec[i].errX != minDB.fDict.fGroupVec[i].errX &&
-  //       nuevo.fGroupVec[i].errZ != minDB.fDict.fGroupVec[i].errZ &&
-  //       nuevo.fGroupVec[i].freq != minDB.fDict.fGroupVec[i].freq
-  //     ) vec_check = false;
-  //   }
-  //   if(vec_check) cout << "Vek is OK" << endl;
-  //   else cout << "Vec is wrong :(" << endl;
-  // }
+  cout << "Checking dictionary storage" << endl;
+  Dictionary nuevo;
+  nuevo.ReadFile("dizionario.txt");
+  ofstream darkopancev("darkopancev.txt");
+  darkopancev << nuevo;
+  darkopancev.close();
+  if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
+  else cout<<"Map is wrong :("<< endl;
+  bool vec_check = true;
+  if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
+    vec_check = false;
+    cout<<"Vector is wrong :("<< endl;
+  } //In order to test the vector use diff to compare dizionario.txt and darkopancev.txtali
 
   TH1F* prova = new TH1F(minDB.fHdist);
   TCanvas* cancan = new TCanvas("c","c");
+  cancan->SetLogy();
+  cancan->SetLogx();
   cancan->cd();
   prova->Draw();
+  TFile* ciccio = TFile::Open("./histos.root","RECREATE");
+  ciccio->WriteObject(prova,"costr","kSingleKey");
   // TH1F* verifica = new TH1F(minDB.fHcheck);
   // TCanvas* cancan1 = new TCanvas("c1","c1");
   // cancan1->cd();
   // verifica->Draw();
+  ciccio->Close();
   d.close();
-  TFile* flDB = TFile::Open("TopologyDatabase.root", "recreate");
-  flDB->WriteObject(&DB,"DB","kSingleKey");
-  flDB->Close();
-  delete flDB;
-
-
-
-  TCanvas* canvy = new TCanvas("canvy","canvy");
-  canvy->Divide(3,1);
-  canvy->cd(1);
-  testX->Draw();
-  canvy->cd(2);
-  testY->Draw();
-  canvy->cd(3);
-  testZ->Draw();
-
-  a.close();
-  b.close();
 }

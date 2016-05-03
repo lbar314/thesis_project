@@ -5,7 +5,7 @@
 #include "TCanvas.h"
 #endif
 
-void testSimulan(unsigned int rep=10000){
+void testSimulation(unsigned int rep=10000){
   FastSimulation test = FastSimulation("dizionario.txt");
   TH1F* histo = new TH1F("histo","histo",100,-0.5,99.5);
   histo->GetXaxis()->SetTitle("GroupID");

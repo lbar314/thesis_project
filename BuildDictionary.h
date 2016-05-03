@@ -47,7 +47,13 @@ class BuildDictionary {
       void AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ);
     #endif
 
-    void SetThresholdCumulative(double cumulative);
+    unsigned long checkHash(const AliITSMFTClusterPix& clust);
+
+    BuildDictionary();
+
+    void SetNGroups(unsigned int ngr); //Set number of groups
+    void SetThreshold(double thr);
+    void SetThresholdCumulative(double cumulative); //Considering the integral
     void Grouping();
     std::ostream& showMap(std::ostream &out);
     void PrintDictionary(string fname);
@@ -56,6 +62,8 @@ class BuildDictionary {
     int GetNotInGroups() const {return fNotInGroups;}
     int GetNGroups() const {return fNGroups;}
 
+    Dictionary fDict;
+
   private:
     map<unsigned long,pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
     vector <pair<unsigned long,unsigned long>> fTopFreq; //<freq,hash>, needed to define threshold
@@ -63,10 +71,10 @@ class BuildDictionary {
     int fNGroups;
     int fNotInGroups;
     double fThreshold;
-    Dictionary fDict;
     #ifdef _STUDY_
       map<long unsigned,TopologyInfo> fMapInfo;
     #endif
+    MinimTopology fTop;
 };
 
 #endif
