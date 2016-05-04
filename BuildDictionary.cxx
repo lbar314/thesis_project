@@ -214,20 +214,35 @@ void BuildDictionary::Grouping(){
     exit(1);
   }
 
+  cout << endl << "INTERMEDIO" << endl;
+
+  for(int t=0; t<49; t++){
+    cout << "hash: " << GroupArray[t].hash << endl;
+  }
+  cout << endl;
+
   for(unsigned int j = (unsigned int)fNotInGroups; j<fTopFreq.size(); j++){
-    unsigned long int &hash = fTopFreq[j].second;
-    int rs = fMapTop.find(hash)->second.first.GetRowSpan();
-    int cs = fMapTop.find(hash)->second.first.GetColumnSpan();
+    unsigned long &hash1 = fTopFreq[j].second;
+    int rs = fMapTop.find(hash1)->second.first.GetRowSpan();
+    int cs = fMapTop.find(hash1)->second.first.GetColumnSpan();
     int index = (rs/5)*7 + cs/5;
     groupCounts[index]+=fTopFreq[j].first;
   }
+
+  cout << endl << "INTERMEDIO 2" << endl;
+
+  for(int t=0; t<49; t++){
+    cout << "hash: " << GroupArray[t].hash << endl;
+  }
+  cout << endl;
+
   for(int i=0; i<49; i++){
     totFreq+=((double)groupCounts[i])/fTotClusters;
     GroupArray[i].freq = totFreq;
     #ifdef _HISTO_
       fHdist.Fill(fNotInGroups+i,groupCounts[i]);
     #endif
-    if(i==0) cout << "first hash: " << GroupArray[i].hash << endl;
+    cout << " hash: " << GroupArray[i].hash << endl;
     fDict.fGroupVec.push_back(GroupArray[i]);
   }
   #ifdef _HISTO_
