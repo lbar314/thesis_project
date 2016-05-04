@@ -166,75 +166,48 @@ void BuildDictionary::Grouping(){
   //array of groups
   std::array<GroupStr,49> GroupArray;
   std::array<unsigned long,49> groupCounts{0};
+  auto func = [&GroupArray] (int rowBinEdge, int colBinEdge, int &index) {
+    unsigned long provvHash = 0;
+    provvHash = ( ((unsigned long)(index+1)) << 32 ) & 0xffffffff00000000;
+    GroupArray[index].hash = provvHash;
+    GroupArray[index].errX = (rowBinEdge)*2e-3/std::sqrt(12); // 2e-3 is the pitch
+    GroupArray[index].errZ = (colBinEdge)*2e-3/std::sqrt(12); // 2e-3 is the pitch
+    index++;
+    return;
+  };
   int grNum=0;
   for(int ir=0; ir<6; ir++){ //row bins: {[0;4],[5;9],[10;14],[15;19],[20;24],[25,29]} (+ [30;32] later)
     for(int ic=0; ic<6; ic++){ //col bins: {[0;4],[5;9],[10;14],[15;19],[20;24],[25,29]} (+ [30;32] later)
-      unsigned long provvHash = 0;
-      provvHash = ( ((unsigned long)(grNum+1)) << 32 ) & 0xffffffff00000000;
-      cout << "grNum: " << grNum << " provvHash: " << provvHash;
-      GroupArray[grNum].hash = provvHash;
-      cout << " hash: " << GroupArray[grNum].hash << endl;
-      GroupArray[grNum].errX = (ir+1)*5*2e-3/std::sqrt(12); // 2e-3 is the pitch
-      GroupArray[grNum].errZ = (ic+1)*5*2e-3/std::sqrt(12); // 2e-3 is the pitch
-      grNum++;
+      func((ir+1)*5-1, (ic+1)*5-1, grNum);
     }
     // col bin [30;32]
-    unsigned long provvHash = 0;
-    provvHash = ( ((unsigned long)(grNum+1)) << 32 ) & 0xffffffff00000000;
-    cout << "grNum: " << grNum << " provvHash: " << provvHash;
-    GroupArray[grNum].hash = provvHash;
-    cout << " hash: " << GroupArray[grNum].hash << endl;
-    GroupArray[grNum].errX = (ir+1)*5*2e-3/std::sqrt(12); // 2e-3 is the pitch
-    GroupArray[grNum].errZ = 32*2e-3/std::sqrt(12); // 32 is the max colspan
-    grNum++;
+    func((ir+1)*5-1, 32, grNum);
   }
   // row bin [30;32]
   for(int ic=0; ic<6; ic++){ //col bins: {[0;4],[5;9],[10;14],[15;19],[20;24],[25,29]} (+ [30;32] later)
+    func(32, (ic+1)*5-1, grNum);
     unsigned long provvHash = 0;
-    provvHash = ( ((unsigned long)(grNum+1)) << 32 ) & 0xffffffff00000000;
-    cout << "grNum: " << grNum << " provvHash: " << provvHash;
-    GroupArray[grNum].hash = provvHash;
-    cout << " hash: " << GroupArray[grNum].hash << endl;
-    GroupArray[grNum].errX = 32*5*2e-3/std::sqrt(12); // 2e-3 is the pitch
-    GroupArray[grNum].errZ = (ic+1)*5*2e-3/std::sqrt(12); // 2e-3 is the pitch
-    grNum++;
   }
-  unsigned long provvHash = 0;
-  provvHash = ( ((unsigned long)(grNum+1)) << 32 ) & 0xffffffff00000000;
-  cout << "grNum: " << grNum << " provvHash: " << provvHash;
-  GroupArray[grNum].hash = provvHash;
-  cout << " hash: " << GroupArray[grNum].hash << endl;
-  GroupArray[grNum].errX = 32*5*2e-3/std::sqrt(12); // 2e-3 is the pitch
-  GroupArray[grNum].errZ = 32*5*2e-3/std::sqrt(12); // 32 is the max colspan
-  grNum++;
-
+  func(32, 32, grNum);
   if(grNum!=49){
     cout << "Wrong number of groups" << endl;
-    cin.get();
     exit(1);
   }
 
-  cout << endl << "INTERMEDIO" << endl;
-
-  for(int t=0; t<49; t++){
-    cout << "hash: " << GroupArray[t].hash << endl;
-  }
-  cout << endl;
+  cout << endl;unsigned long hash1;
+  int rs;
+  int cs;
+  int index;
 
   for(unsigned int j = (unsigned int)fNotInGroups; j<fTopFreq.size(); j++){
-    unsigned long &hash1 = fTopFreq[j].second;
-    int rs = fMapTop.find(hash1)->second.first.GetRowSpan();
-    int cs = fMapTop.find(hash1)->second.first.GetColumnSpan();
-    int index = (rs/5)*7 + cs/5;
+    unsigned long
+    hash1 = fTopFreq[j].second;
+    rs = fMapTop.find(hash1)->second.first.GetRowSpan();
+    cs = fMapTop.find(hash1)->second.first.GetColumnSpan();
+    index = (rs/5)*7 + cs/5;
+    if(index >48) index = 48;
     groupCounts[index]+=fTopFreq[j].first;
   }
-
-  cout << endl << "INTERMEDIO 2" << endl;
-
-  for(int t=0; t<49; t++){
-    cout << "hash: " << GroupArray[t].hash << endl;
-  }
-  cout << endl;
 
   for(int i=0; i<49; i++){
     totFreq+=((double)groupCounts[i])/fTotClusters;
@@ -242,7 +215,6 @@ void BuildDictionary::Grouping(){
     #ifdef _HISTO_
       fHdist.Fill(fNotInGroups+i,groupCounts[i]);
     #endif
-    cout << " hash: " << GroupArray[i].hash << endl;
     fDict.fGroupVec.push_back(GroupArray[i]);
   }
   #ifdef _HISTO_

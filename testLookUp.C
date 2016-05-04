@@ -69,7 +69,7 @@ void testLookUp(string inputfile,int nev=-1, string outputfile="timeLookUp.txt")
   ofstream time_output(outputfile);
   TStopwatch timerLookUp;
   //
-  int num = finder.GetOver() + 4;
+  int num = finder.GetOver() + 49;
   TH1F* hCheck = new TH1F("hCheck","hCheck",num,-0.5,num-0.5);
   hCheck->SetDirectory(0);
   hCheck->SetFillColor(kBlue);
