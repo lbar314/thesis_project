@@ -133,12 +133,12 @@ void testLookUp(string inputfile="dizionario.txt", int repetitions = 30, int nev
   int nlr=its->GetNLayersActive();
   int ntotev = (int)runLoader->GetNumberOfEvents();
 
-  Printf("N Events : %i \n",ntotev);
+  Printf("N Events : %i \n",ntotev+1);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
   for(int iRep=0; iRep<repetitions; iRep++){
     for (int iEvent = 0; iEvent < ntotev; iEvent++) {
-      Printf("\n Rep %i / %i Event %i / %i\n",iRep,repetitions,iEvent,ntotev);
+      Printf("\n Rep %i / %i Event %i / %i\n",iRep+1,repetitions,iEvent+1,ntotev);
       Int_t totClusters=0;
       runLoader->GetEvent(iEvent);
       AliStack *stack = runLoader->Stack();
@@ -297,7 +297,8 @@ void testLookUp(string inputfile="dizionario.txt", int repetitions = 30, int nev
             cSum.nColPatt = cl-> GetPatternColSpan();
 
             int a;
-            timerLookUp.Start(!totClusters);
+            bool restart = (totClusters==0 && iEvent==0) ? true : false;
+            timerLookUp.Start(restart);
             a=finder.GroupFinder(*cl);
             timerLookUp.Stop();
             totClusters++;
@@ -322,9 +323,9 @@ void testLookUp(string inputfile="dizionario.txt", int repetitions = 30, int nev
       //    layerClus.Clear();
       //
       arrMCTracks.Delete();
-      time_output << timerLookUp.RealTime() << " " << timerLookUp.CpuTime() << endl;
     }//event loop
-  }
+    time_output << timerLookUp.RealTime()/ntotev << " " << timerLookUp.CpuTime()/ntotev << endl;
+  }Fpintf
   arrMCTracks.Delete();
   //
   time_output.close();
