@@ -325,7 +325,7 @@ void testLookUp(string inputfile="dizionario.txt", int repetitions = 30, int nev
       arrMCTracks.Delete();
     }//event loop
     time_output << timerLookUp.RealTime()/ntotev << " " << timerLookUp.CpuTime()/ntotev << endl;
-  }Fpintf
+  }
   arrMCTracks.Delete();
   //
   time_output.close();
