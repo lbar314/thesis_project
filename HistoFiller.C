@@ -22,6 +22,18 @@ void HistoFiller(string inputfile="timeLookUp.txt"){
   double real;
   double cpu;
 
+  double realmax=0.;
+  double realmin=0.;
+  double cpumax=0.;
+  double cpumin=0.;
+
+  double cpumean=0;
+  double cpuerr=0;
+  double realmean=0;
+  double realerr=0;
+
+  int count = 0;
+
   std::ifstream in(inputfile);
   if(!in.is_open()){
     std::cout << "The file could not be opened" << endl;
@@ -29,11 +41,31 @@ void HistoFiller(string inputfile="timeLookUp.txt"){
   }
   else{
     while(in >> real >> cpu){
+      count++;
+      if(real>realmax) realmax = real;
+      if(count==1) realmin = real;
+      else {
+        if(real<realmin) realmin = real;
+      }
+      realmean += real;
+      if(cpu>cpumax) cpumax = cpu;
+      if(count==1) cpumin = cpu;
+      else {
+        if(cpu<cpumin) cpumin = cpu;
+      }
+      cpumean += cpu;
       hr->Fill(real);
       hc->Fill(cpu);
     }
   }
   in.close();
+  cpumean /= count;
+  realmean /= count;
+  realerr = (realmax-realmin)/2;
+  cpuerr = (cpumax-cpumin)/2;
+
+  cout << "real: " << realmean << " +/- " << realerr << endl;
+  cout << "cpu: " << cpumean << " +/- " << cpuerr << endl;
 
   TCanvas* c = new TCanvas("c","c");
   c->Divide(2,1);
