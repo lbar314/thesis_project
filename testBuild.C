@@ -319,6 +319,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   time_output.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
+  //minDB.SetNGroups(100);
   minDB.SetThreshold(0.00001);
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");

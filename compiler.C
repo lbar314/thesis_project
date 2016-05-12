@@ -59,6 +59,12 @@ void compiler(TString myopt="fast"){
     cout << endl << " testLookUp: FAILED" <<  endl << endl;
     return;
   }
+  if(gSystem->CompileMacro("timeDistr.C",opt.data()))
+    cout << endl << " timeDistr: COMPILED" <<  endl << endl;
+  else{
+    cout << endl << " timeDistr: FAILED" <<  endl << endl;
+    return;
+  }
   if(gSystem->CompileMacro("CheckChain.C",opt.data()))
     cout << endl << " CheckChain: COMPILED" <<  endl << endl;
   else{
