@@ -103,11 +103,11 @@ void BuildDictionary::SetNGroups(unsigned int ngr){
     fTopFreq.push_back(make_pair(p.second.second,p.first));
   }
   std::sort(fTopFreq.begin(),fTopFreq.end(), [] (const pair<unsigned long, unsigned long> &couple1, const pair<unsigned long, unsigned long> &couple2){return (couple1.first > couple2.first);});
-  if(ngr<10 || ngr > (fTopFreq.size()-4)){
+  if(ngr<10 || ngr > (fTopFreq.size()-49)){
     cout << "BuildDictionary::SetNGroups : Invalid number of groups" << endl;
     exit(1);
   }
-  fNGroups = fNotInGroups = ngr-4;
+  fNGroups = fNotInGroups = ngr-49;
   fDict.fFinalMap.clear();
   fThreshold=((double)fTopFreq[fNotInGroups-1].first)/fTotClusters;
 }
@@ -140,7 +140,7 @@ void BuildDictionary::Grouping(){
 
   cout<<"Grouping: fTotClusters: " << fTotClusters << endl;
   #ifdef _HISTO_
-    fHdist = TH1F("fHdist", "Groups distribution", fNGroups+4, -0.5, fNGroups+3.5);
+    fHdist = TH1F("fHdist", "Groups distribution", fNGroups+49, -0.5, fNGroups+48.5);
     fHdist.GetXaxis()->SetTitle("GroupID");
     fHdist.SetFillColor(kRed);
     fHdist.SetFillStyle(3005);
@@ -161,71 +161,62 @@ void BuildDictionary::Grouping(){
     fDict.fGroupVec.push_back(gr);
     fDict.fFinalMap.insert(make_pair(gr.hash,j));
   }
-  //This is just a dummy grouping
-  fNGroups+=4; //for choice
-  //group 1:
-  GroupStr gr1;
-    gr1.hash = ((unsigned long)1) << 56;
-    gr1.errX = gr1.errZ = std::sqrt(10)*2e-3/std::sqrt(12);
-    unsigned long count1 = 0;
-  //group 2:
-  GroupStr gr2;
-    gr2.hash = ((unsigned long)2) << 56;
-    gr2.errX = gr2.errZ = 5.*2e-3/std::sqrt(12);
-    unsigned long count2 = 0;
-  //group 3:
-  GroupStr gr3;
-    gr3.hash = ((unsigned long)3) << 56;
-    gr3.errX = gr3.errZ = 10.*2e-3/std::sqrt(12);
-    unsigned long count3 = 0;
-  //group 3:
-  GroupStr gr4;
-    gr4.hash = ((unsigned long)4) << 56;
-    gr4.errX = gr1.errZ = 30.*2e-3/std::sqrt(12);
-    unsigned long count4 = 0;
+  //Grouping based on binning over number of rows and columns (7*7)
+  fNGroups+=49; //(7*7)
+  //array of groups
+  std::array<GroupStr,49> GroupArray;
+  std::array<unsigned long,49> groupCounts{0};
+  auto func = [&GroupArray] (int rowBinEdge, int colBinEdge, int &index) {
+    unsigned long provvHash = 0;
+    provvHash = ( ((unsigned long)(index+1)) << 32 ) & 0xffffffff00000000;
+    GroupArray[index].hash = provvHash;
+    GroupArray[index].errX = (rowBinEdge)*2e-3/std::sqrt(12); // 2e-3 is the pitch
+    GroupArray[index].errZ = (colBinEdge)*2e-3/std::sqrt(12); // 2e-3 is the pitch
+    index++;
+    return;
+  };
+  int grNum=0;
+  for(int ir=0; ir<6; ir++){ //row bins: {[0;4],[5;9],[10;14],[15;19],[20;24],[25,29]} (+ [30;32] later)
+    for(int ic=0; ic<6; ic++){ //col bins: {[0;4],[5;9],[10;14],[15;19],[20;24],[25,29]} (+ [30;32] later)
+      func((ir+1)*5-1, (ic+1)*5-1, grNum);
+    }
+    // col bin [30;32]
+    func((ir+1)*5-1, 32, grNum);
+  }
+  // row bin [30;32]
+  for(int ic=0; ic<6; ic++){ //col bins: {[0;4],[5;9],[10;14],[15;19],[20;24],[25,29]} (+ [30;32] later)
+    func(32, (ic+1)*5-1, grNum);
+    unsigned long provvHash = 0;
+  }
+  func(32, 32, grNum);
+  if(grNum!=49){
+    cout << "Wrong number of groups" << endl;
+    exit(1);
+  }
+
+  cout << endl;unsigned long hash1;
+  int rs;
+  int cs;
+  int index;
 
   for(unsigned int j = (unsigned int)fNotInGroups; j<fTopFreq.size(); j++){
-    unsigned long int &hash = fTopFreq[j].second;
-    int rs = fMapTop.find(hash)->second.first.GetRowSpan();
-    int cs = fMapTop.find(hash)->second.first.GetColumnSpan();
-    int box = rs*cs;
-    if(box < 10){
-      count1+=fTopFreq[j].first;
-    }
-    else if(box >=10 && box<25){
-      count2+=fTopFreq[j].first;
-    }
-    else if(box >=25 && box<100){
-      count3+=fTopFreq[j].first;
-    }
-    else{
-      count4+=fTopFreq[j].first;
-    }
+    unsigned long
+    hash1 = fTopFreq[j].second;
+    rs = fMapTop.find(hash1)->second.first.GetRowSpan();
+    cs = fMapTop.find(hash1)->second.first.GetColumnSpan();
+    index = (rs/5)*7 + cs/5;
+    if(index >48) index = 48;
+    groupCounts[index]+=fTopFreq[j].first;
   }
-  totFreq+=((double)count1)/fTotClusters;
-  gr1.freq=totFreq;
-  #ifdef _HISTO_
-    fHdist.Fill(fNotInGroups,count1);
-  #endif
-  fDict.fGroupVec.push_back(gr1);
-  totFreq+=((double)count2)/fTotClusters;
-  gr2.freq=totFreq;
-  #ifdef _HISTO_
-    fHdist.Fill(fNotInGroups+1,count2);
-  #endif
-  fDict.fGroupVec.push_back(gr2);
-  totFreq+=((double)count3)/fTotClusters;
-  gr3.freq=totFreq;
-  #ifdef _HISTO_
-    fHdist.Fill(fNotInGroups+2,count3);
-  #endif
-  fDict.fGroupVec.push_back(gr3);
-  totFreq+=((double)count4)/fTotClusters;
-  gr4.freq=totFreq;
-  #ifdef _HISTO_
-    fHdist.Fill(fNotInGroups+3,count4);
-  #endif
-    fDict.fGroupVec.push_back(gr4);
+
+  for(int i=0; i<49; i++){
+    totFreq+=((double)groupCounts[i])/fTotClusters;
+    GroupArray[i].freq = totFreq;
+    #ifdef _HISTO_
+      fHdist.Fill(fNotInGroups+i,groupCounts[i]);
+    #endif
+    fDict.fGroupVec.push_back(GroupArray[i]);
+  }
   #ifdef _HISTO_
     fHdist.Scale(1./fHdist.Integral());
   #endif

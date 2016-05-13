@@ -319,6 +319,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   time_output.close();
   ofstream d("Check_Min_map.txt");
   minDB.showMap(d);
+  //minDB.SetNGroups(100);
   minDB.SetThreshold(0.00001);
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");
@@ -330,12 +331,16 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   darkopancev << nuevo;
   darkopancev.close();
   if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
-  else cout<<"Map is wrong :("<< endl;
+  else {
+    cout<<"Map is wrong :("<< endl;
+    cout<<"nuevo map size: " << nuevo.fFinalMap.size() << endl;
+    cout<<"minDB map size: " << minDB.fDict.fFinalMap.size() << endl;
+  }
   bool vec_check = true;
   if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
     vec_check = false;
     cout<<"Vector is wrong :("<< endl;
-  } //In order to test the vector use diff to compare dizionario.txt and darkopancev.txtali
+  } //In order to test the vector use diff to compare dizionario.txt and darkopancev.txt
 
   TH1F* prova = new TH1F(minDB.fHdist);
   TCanvas* cancan = new TCanvas("c","c");
