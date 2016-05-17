@@ -4,14 +4,13 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "TH1F.h"
 #include <map>
-#include "AliITSMFTClusterPix.h"
 #include "./MinimTopology.h"
 #include "./Dictionary.h"
+//#include "TH1F.h"
 
 #define _STUDY_
-#define _HISTO_ //in order to have a histogram with the ditribution of groupIDs
+//#define _HISTO_ //in order to have a histogram with the ditribution of groupIDs
 
 #ifdef _STUDY_
   struct TopologyInfo{
@@ -19,8 +18,10 @@
     int sizeZ;
     float xCOG;
     float zCOG;
-    TH1F hdX;
-    TH1F hdZ;
+    float xMean;
+    float xSigma2;
+    float zMean;
+    float zSigma2;
     int nPixels;
   };
 #endif
@@ -29,8 +30,6 @@ struct groupTmp{
   unsigned long GrCounts;
   int tempGroupID;
   vector<unsigned long> GrHashes;
-  //float tempErrX;
-  //float tempErrZ;
   int groupID;
 };
 
@@ -42,12 +41,12 @@ class BuildDictionary {
     #endif
 
     #ifndef _STUDY_
-      void AccountTopology(const AliITSMFTClusterPix &cluster);
+      void AccountTopology(const std::string &cluster);
     #else
-      void AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ);
+      void AccountTopology(const std::string &cluster, float dX, float dZ);
     #endif
 
-    unsigned long checkHash(const AliITSMFTClusterPix& clust);
+    unsigned long checkHash(const std::string& clust);
 
     BuildDictionary();
 

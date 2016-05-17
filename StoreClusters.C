@@ -36,26 +36,11 @@ using namespace std;
 
 enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,kDTZSPL};
 
-void timeDistr(string inputfile="dizionario.txt", int repetitions = 1, int nev=-1){
+void StoreClusters(int nev=-1, string outputfile="clusterlist.bin"){
 
-  LookUp finder(inputfile);
+  ofstream check("store.txt");
 
-  TStopwatch timerLookUp;
-
-  TH1F* hr = new TH1F("hr","LookUp: real time",100,0,1.5e-6);
-  hr->SetDirectory(0);
-  hr->GetXaxis()->SetTitle("t (s)");
-  hr->SetFillColor(kRed);
-  hr->SetFillStyle(3005);
-
-  TH1F* hc = new TH1F("hc","LookUp: CPU time",100,0,1.5e-6);
-  hc->SetDirectory(0);
-  hc->GetXaxis()->SetTitle("t (s)");
-  hc->SetFillColor(kRed);
-  hc->SetFillStyle(3005);
-
-  const int kSplit=0x1<<22;
-  const int kSplCheck=0x1<<23;
+  ofstream file_output(outputfile, ios::out | ios::binary);
   //
   gSystem->Load("libITSUpgradeBase");
   gSystem->Load("libITSUpgradeSim");
@@ -100,52 +85,49 @@ void timeDistr(string inputfile="dizionario.txt", int repetitions = 1, int nev=-
   int nlr=its->GetNLayersActive();
   int ntotev = (int)runLoader->GetNumberOfEvents();
 
+  int ntotclusters=0;
+
   Printf("N Events : %i \n",ntotev);
   if (nev>0) ntotev = TMath::Min(nev,ntotev);
   //
-  for(int iRep=0; iRep<repetitions; iRep++){
-    for (int iEvent = 0; iEvent < ntotev; iEvent++){
-      Printf("\n Rep %i / %i Event %i / %i\n",iRep+1,repetitions,iEvent+1,ntotev);
-      runLoader->GetEvent(iEvent);
-      AliStack *stack = runLoader->Stack();
-      cluTree=dl->TreeR();
+  for (int iEvent = 0; iEvent < ntotev; iEvent++) {
+    Printf("Event %i / %i\n",iEvent+1,ntotev);
+    runLoader->GetEvent(iEvent);
+    AliStack *stack = runLoader->Stack();
+    cluTree=dl->TreeR();
+    //
+    // read clusters
+    for (int ilr=nlr;ilr--;) {
+      TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
+      if (!br) {Printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
+      br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
+    }
+    cluTree->GetEntry(0);
+    its->ProcessClusters();
+    //
+    for (int ilr=0;ilr<nlr;ilr++) {
+      AliITSURecoLayer* lr = its->GetLayerActive(ilr);
+      TClonesArray* clr = lr->GetClusters();
+      int nClu = clr->GetEntries();
+      //Printf("Layer %d : %d clusters\n",ilr,nClu);
       //
-      // read clusters
-      for (int ilr=nlr;ilr--;) {
-        TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
-        if (!br) {Printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
-        br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
+      for (int icl=0;icl<nClu;icl++){
+        AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
+        string str;
+        FromCluster2String(*cl,str);
+        int stringSize = (int)(str.size());
+        check << ntotclusters << ") string size: " << stringSize << endl;
+        MinimTopology a(str);
+        a.printTop(check);
+        file_output.write(reinterpret_cast<char *>(&stringSize), sizeof(int));
+        file_output.write(str.c_str(), stringSize);
+        ntotclusters++;
       }
-      cluTree->GetEntry(0);
-      its->ProcessClusters();
-      //
-      // read hits
-      //
-      for (int ilr=0;ilr<nlr;ilr++) {
-        AliITSURecoLayer* lr = its->GetLayerActive(ilr);
-        TClonesArray* clr = lr->GetClusters();
-        int nClu = clr->GetEntries();
-        //Printf("Layer %d : %d clusters\n",ilr,nClu);
-        //
-        for (int icl=0;icl<nClu;icl++) {
-          AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
-          string str;
-          FromCluster2String(*cl,str);
-          timerLookUp.Start();
-          finder.GroupFinder(str);
-          timerLookUp.Stop();
-          hr->Fill(timerLookUp.RealTime());
-          hc->Fill(timerLookUp.CpuTime());
-        }
-      }
-    }//event loop
-  }
+    }
+  }//event loop
   //
+  check.close();
+  cout << "Number of clusters: " << ntotclusters << endl;
+  file_output.close();
   cout << endl;
-  TCanvas* c = new TCanvas("c","c");
-  c->Divide(2,1);
-  c->cd(1);
-  hr->Draw();
-  c->cd(2);
-  hc->Draw();
 }

@@ -1,28 +1,26 @@
 #ifndef MINIMTOPOLOGY_H
 #define MINIMTOPOLOGY_H
-#include "AliITSMFTClusterPix.h"
 #include <iostream>
 #include <string>
-
-using namespace std;
 
 class MinimTopology {
 
   public:
     MinimTopology();
-    MinimTopology(const AliITSMFTClusterPix &cluster);
+    MinimTopology(const std::string &str);
 
-    string& GetPattern() {return fPattern;}
+    std::string& GetPattern() {return fPattern;}
     int GetRowSpan() const {return fPattern[0];}
     int GetColumnSpan() const {return fPattern[1];}
     unsigned long GetHash() const {return fHash;}
 
     std::ostream& printTop(std::ostream &out);
     static unsigned int hashFunction(const void * key, int len);
-    void SetPattern(const AliITSMFTClusterPix &cluster);
+    void SetPattern(const std::string &str);
+
   private:
 
-    string fPattern;
+    std::string fPattern;
     unsigned long fHash;
 
 };

@@ -7,14 +7,13 @@
 #include <cmath>
 #include "./MinimTopology.h"
 #include "./BuildDictionary.h"
-#include "TRandom.h"
 
 using namespace std;
 
   BuildDictionary::BuildDictionary():fTotClusters(0){}
 
 #ifndef _STUDY_
-  void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster){
+  void BuildDictionary::AccountTopology(const std::string &cluster){
     fTotClusters++;
     fTtop.SetPattern(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
@@ -22,7 +21,7 @@ using namespace std;
     if(ret.second==false) ret.first->second.second++;
   }
 #else
-  void BuildDictionary::AccountTopology(const AliITSMFTClusterPix &cluster, float dX, float dZ){
+  void BuildDictionary::AccountTopology(const std::string &cluster, float dX, float dZ){
     fTotClusters++;
     fTop.SetPattern(cluster);
     //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
@@ -62,22 +61,28 @@ using namespace std;
       topInf.xCOG = 0.5 + (float)tempyCOG/(float)tempFiredPixels;
       topInf.zCOG = 0.5 + (float)tempzCOG/(float)tempFiredPixels;
       topInf.nPixels = tempFiredPixels;
-      topInf.hdX = TH1F(Form("hdX%lu",fTop.GetHash()),"#DeltaX",10,-5e-3,5e-3);
-      topInf.hdX.Fill(dX);
-      topInf.hdZ = TH1F(Form("hdA%lu",fTop.GetHash()),"#DeltaZ",10,-5e-3,5e-3);
-      topInf.hdZ.Fill(dZ);
+      topInf.xMean = dX;
+      topInf.xSigma2 = 0;
+      topInf.zMean = dZ;
+      topInf.zSigma2 = 0;
       fMapInfo.insert(make_pair(fTop.GetHash(),topInf));
     }
     else{
-      ret.first->second.second++;
+      int num = (ret.first->second.second++);
       auto ind = fMapInfo.find(fTop.GetHash());
-      ind->second.hdX.Fill(dX);
-      ind->second.hdZ.Fill(dZ);
+      float tmpxMean = ind->second.xMean;
+      float newxMean = ind->second.xMean = ( (tmpxMean)*num + dX ) / (num+1);
+      float tmpxSigma2 = ind->second.xSigma2;
+      ind->second.xSigma2 = ( num*tmpxSigma2 + (dX - tmpxMean)*(dX - newxMean) ) / (num+1); //online vriance algorithm
+      float tmpzMean = ind->second.zMean;
+      float newzMean = ind->second.zMean = ( (tmpzMean)*num + dZ ) / (num+1);
+      float tmpzSigma2 = ind->second.zSigma2;
+      ind->second.zSigma2 = ( num*tmpzSigma2 + (dZ - tmpzMean)*(dZ - newzMean) ) / (num+1); //online vriance algorithm
     }
   }
 #endif
 
-unsigned long BuildDictionary::checkHash(const AliITSMFTClusterPix& clust){
+unsigned long BuildDictionary::checkHash(const std::string &clust){
   fTop.SetPattern(clust);
   return fTop.GetHash();
 }

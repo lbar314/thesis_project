@@ -1,4 +1,9 @@
 #include "Dictionary.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+using std::cout;
+using std::endl;
 
 std::ostream& operator<<(std::ostream& os, const Dictionary& dict)
 {
@@ -15,13 +20,13 @@ void Dictionary::ReadFile(string fname){
   GroupStr gr;
   int groupID=0;
   if(!in.is_open()){
-    std::cout << "The file could not be opened" << endl;
+    cout << "The file could not be opened" << endl;
     exit(1);
   }
   else{
     while(in >> gr.hash >> gr.errX >> gr.errZ >> gr.freq){
       fGroupVec.push_back(gr);
-      if(((gr.hash)&0xffffffff) != 0) fFinalMap.insert(make_pair(gr.hash,groupID));
+      if(((gr.hash)&0xffffffff) != 0) fFinalMap.insert(std::make_pair(gr.hash,groupID));
       groupID++;
     }
   }
