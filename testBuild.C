@@ -27,6 +27,7 @@
 #include "BuildDictionary.h"
 #include <map>
 #include <math.h>
+#include "./cluster2string.h"
 
 #endif
 
@@ -131,7 +132,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   TStopwatch timerBuild;
 
   for (int iEvent = 0; iEvent < ntotev; iEvent++) {
-    Printf("\n Event %i \n",iEvent);
+    Printf("\nEvent %i \n",iEvent);
     Int_t totClusters=0;
     runLoader->GetEvent(iEvent);
     AliStack *stack = runLoader->Stack();
@@ -142,7 +143,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
     // read clusters
     for (int ilr=nlr;ilr--;) {
       TBranch* br = cluTree->GetBranch(Form("ITSRecPoints%d",ilr));
-      if (!br) {Printf("Did not find cluster branch for lr %d\n",ilr); exit(1);}
+      if (!br) {Printf("Did not find cluster branch for lr %d\n\n",ilr); exit(1);}
       br->SetAddress(its->GetLayerActive(ilr)->GetClustersAddress());
     }
     cluTree->GetEntry(0);
@@ -178,7 +179,7 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
       //Printf("Layer %d : %d clusters\n",ilr,nClu);
       //
       for (int icl=0;icl<nClu;icl++) {
-        if(icl%100==0)printf("ilr: %d icl: %d / %d\r", ilr, icl, nClu);
+        if(icl%100==0)printf("ilr: %d / %d \r", ilr+1, nlr);
         AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
         int modID = cl->GetVolumeId();
         //------------ check if this is a split cluster
@@ -288,8 +289,10 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
           cSum.dZ = (txyzH[2]-xyzClTr[2])*1e4;
           cSum.nRowPatt = cl-> GetPatternRowSpan();
           cSum.nColPatt = cl-> GetPatternColSpan();
+          string str;
+          FromCluster2String(*cl,str);
           timerBuild.Start(!totClusters);
-          minDB.AccountTopology(*cl,cSum.dX, cSum.dZ);
+          minDB.AccountTopology(str,cSum.dX, cSum.dZ);
           timerBuild.Stop();
           totClusters++;
           //
@@ -324,36 +327,36 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   minDB.Grouping();
   minDB.PrintDictionary("dizionario.txt");
   //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)
-  cout << "Checking dictionary storage" << endl;
-  Dictionary nuevo;
-  nuevo.ReadFile("dizionario.txt");
-  ofstream darkopancev("darkopancev.txt");
-  darkopancev << nuevo;
-  darkopancev.close();
-  if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
-  else {
-    cout<<"Map is wrong :("<< endl;
-    cout<<"nuevo map size: " << nuevo.fFinalMap.size() << endl;
-    cout<<"minDB map size: " << minDB.fDict.fFinalMap.size() << endl;
-  }
-  bool vec_check = true;
-  if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
-    vec_check = false;
-    cout<<"Vector is wrong :("<< endl;
-  } //In order to test the vector use diff to compare dizionario.txt and darkopancev.txt
+  // cout << "Checking dictionary storage" << endl;
+  // Dictionary nuevo;
+  // nuevo.ReadFile("dizionario.txt");
+  // ofstream comparison("comparison.txt");
+  // comparison << nuevo;
+  // comparison.close();
+  // if(nuevo.fFinalMap == minDB.fDict.fFinalMap) cout << "Map is OK" << endl;
+  // else {
+  //   cout<<"Map is wrong :("<< endl;
+  //   cout<<"nuevo map size: " << nuevo.fFinalMap.size() << endl;
+  //   cout<<"minDB map size: " << minDB.fDict.fFinalMap.size() << endl;
+  // }
+  // bool vec_check = true;
+  // if(nuevo.fGroupVec.size() != minDB.fDict.fGroupVec.size()){
+  //   vec_check = false;
+  //   cout<<"Vector is wrong :("<< endl;
+  // } //In order to test the vector use diff to compare dizionario.txt and comparison.txt
 
-  TH1F* prova = new TH1F(minDB.fHdist);
-  TCanvas* cancan = new TCanvas("c","c");
-  cancan->SetLogy();
-  cancan->SetLogx();
-  cancan->cd();
-  prova->Draw();
-  TFile* ciccio = TFile::Open("./histos.root","RECREATE");
-  ciccio->WriteObject(prova,"costr","kSingleKey");
-  // TH1F* verifica = new TH1F(minDB.fHcheck);
-  // TCanvas* cancan1 = new TCanvas("c1","c1");
-  // cancan1->cd();
-  // verifica->Draw();
-  ciccio->Close();
+  // TH1F* prova = new TH1F(minDB.fHdist);
+  // TCanvas* cancan = new TCanvas("c","c");
+  // cancan->SetLogy();
+  // cancan->SetLogx();
+  // cancan->cd();
+  // prova->Draw();
+  // TFile* ciccio = TFile::Open("./histos.root","RECREATE");
+  // ciccio->WriteObject(prova,"costr","kSingleKey");
+  // // TH1F* verifica = new TH1F(minDB.fHcheck);
+  // // TCanvas* cancan1 = new TCanvas("c1","c1");
+  // // cancan1->cd();
+  // // verifica->Draw();
+  // ciccio->Close();
   d.close();
 }

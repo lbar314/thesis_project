@@ -5,7 +5,7 @@ LookUp::LookUp(std::string fname){
   fOver = fDict.fFinalMap.size();
 }
 
-int LookUp::GroupFinder(const AliITSMFTClusterPix& clust){
+int LookUp::GroupFinder(const std::string& clust){
   fTop.SetPattern(clust);
   auto ret = fDict.fFinalMap.find(fTop.GetHash());
   if(ret!=fDict.fFinalMap.end()) return ret->second;

@@ -11,6 +11,12 @@ void compiler(TString myopt="fast"){
   else {
     opt = "kg";
   }
+  if(gSystem->CompileMacro("cluster2string.cxx",opt.data()))
+    cout << endl << " cluster2string: COMPILED" <<  endl << endl;
+  else{
+    cout << endl << " cluster2string: FAILED" <<  endl << endl;
+    return;
+  }
   if(gSystem->CompileMacro("MinimTopology.cxx",opt.data()))
     cout << endl << " MinimTopology: COMPILED" <<  endl << endl;
   else{
@@ -59,6 +65,12 @@ void compiler(TString myopt="fast"){
     cout << endl << " testLookUp: FAILED" <<  endl << endl;
     return;
   }
+  if(gSystem->CompileMacro("StoreClusters.C",opt.data()))
+    cout << endl << " StoreClusters: COMPILED" <<  endl << endl;
+  else{
+    cout << endl << " StoreClusters: FAILED" <<  endl << endl;
+    return;
+  }
   if(gSystem->CompileMacro("timeDistr.C",opt.data()))
     cout << endl << " timeDistr: COMPILED" <<  endl << endl;
   else{
@@ -77,5 +89,4 @@ void compiler(TString myopt="fast"){
     cout << endl << " HistoFiller: FAILED" <<  endl << endl;
     return;
   }
-  //testLookUp("dizionario.txt",10,-1);
 }

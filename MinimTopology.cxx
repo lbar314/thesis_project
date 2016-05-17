@@ -1,25 +1,21 @@
 #include <iostream>
-#include <string>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "./MinimTopology.h"
-
-using namespace std;
 
 MinimTopology::MinimTopology():fPattern(),fHash(0){
 }
 
-MinimTopology::MinimTopology(const AliITSMFTClusterPix &cluster) : fHash(0) {
-  SetPattern(cluster);
+MinimTopology::MinimTopology(const std::string &str) : fHash(0) {
+  SetPattern(str);
 }
 
-void MinimTopology::SetPattern(const AliITSMFTClusterPix &cluster) {
-  int rs = cluster.GetPatternRowSpan();
-  int cs = cluster.GetPatternColSpan();
-  int nBytes = (rs*cs)>>3;
-  if(((rs*cs)%8)!=0) nBytes++;
-  fPattern.resize(nBytes+2,0);
-  fPattern[0]=rs;
-	fPattern[1]=cs;
-  cluster.GetPattern(&fPattern[2],nBytes);
+void MinimTopology::SetPattern(const std::string &str) {
+  int nBytes = (int)str.size();
+  fPattern.resize(nBytes,0);
+  memcpy(&fPattern[0],&str[0],nBytes);
+  nBytes-=2;
   fHash = ((unsigned long)(hashFunction(fPattern.data(),fPattern.length())))<<32;
   if(nBytes>=4){
     fHash += ((((unsigned long)fPattern[2])<<24) + (((unsigned long)fPattern[3])<<16) + (((unsigned long)fPattern[4])<<8) + ((unsigned long)fPattern[5]));
@@ -34,7 +30,7 @@ void MinimTopology::SetPattern(const AliITSMFTClusterPix &cluster) {
     fHash += ((((unsigned long)fPattern[2])<<24));
   }
   else{
-    cout << "ERROR: no fired pixels\n";
+    std::cout << "ERROR: no fired pixels\n";
     exit(1);
   }
 }
@@ -79,7 +75,7 @@ unsigned int MinimTopology::hashFunction(const void* key, int len){
 std::ostream& MinimTopology::printTop(std::ostream &out){
 	int rs = fPattern[0];
 	int cs = fPattern[1];
-	out << "rs: " << rs << " cs: " << cs << " #bytes: " << fPattern.length() << endl;
+	out << "rs: " << rs << " cs: " << cs << " #bytes: " << fPattern.length() << std::endl;
 	unsigned char tempChar = 0;
 	int s=0;
 	int ic = 0;
@@ -92,10 +88,10 @@ std::ostream& MinimTopology::printTop(std::ostream &out){
       if((tempChar&s)!=0) out << '+';
       else out << ' ';
       s/=2;
-			if(ic%cs==0) out << "|" << endl;
+			if(ic%cs==0) out << "|" << std::endl;
 			if(ic==(rs*cs)) break;
     }
 		if(ic==(rs*cs)) break;
   }
-  out<< endl;
+  out<< std::endl;
 }

@@ -28,6 +28,7 @@
 #include "LookUp.h"
 #include <map>
 #include <math.h>
+#include "./cluster2string.h"
 
 #endif
 
@@ -120,7 +121,9 @@ void testLookUp(string inputfile="dizionario.txt", int repetitions = 30, int nev
         timerLookUp.Start(restart);
         for (int icl=0;icl<nClu;icl++) {
           AliITSMFTClusterPix *cl = (AliITSMFTClusterPix*)clr->At(icl);
-          finder.GroupFinder(*cl);
+          string str;
+          FromCluster2String(*cl,str);
+          finder.GroupFinder(str);
         }
         timerLookUp.Stop();
       }
