@@ -72,26 +72,27 @@ unsigned int MinimTopology::hashFunction(const void* key, int len){
   return h;
 }
 
-std::ostream& MinimTopology::printTop(std::ostream &out){
-	int rs = fPattern[0];
-	int cs = fPattern[1];
-	out << "rs: " << rs << " cs: " << cs << " #bytes: " << fPattern.length() << std::endl;
+std::ostream& operator<<(std::ostream& os, const MinimTopology& top){
+	int rs = top.fPattern[0];
+	int cs = top.fPattern[1];
+	os << "rs: " << rs << " cs: " << cs << " #bytes: " << top.fPattern.length() << std::endl;
 	unsigned char tempChar = 0;
 	int s=0;
 	int ic = 0;
-  for (unsigned int i=2; i<fPattern.length(); i++){
-		tempChar = fPattern[i];
+  for (unsigned int i=2; i<top.fPattern.length(); i++){
+		tempChar = top.fPattern[i];
 		s=128; //0b10000000
     while(s>0){
-			if(ic%cs==0) out << "|";
+			if(ic%cs==0) os << "|";
 			ic++;
-      if((tempChar&s)!=0) out << '+';
-      else out << ' ';
+      if((tempChar&s)!=0) os << '+';
+      else os << ' ';
       s/=2;
-			if(ic%cs==0) out << "|" << std::endl;
+			if(ic%cs==0) os << "|" << std::endl;
 			if(ic==(rs*cs)) break;
     }
 		if(ic==(rs*cs)) break;
   }
-  out<< std::endl;
+  os<< std::endl;
+  return os;
 }

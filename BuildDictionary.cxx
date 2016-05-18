@@ -232,7 +232,7 @@ std::ostream& BuildDictionary::showMap(std::ostream &out){
   for(auto &p : fMapTop){
     out << "Hash: " << p.second.first.GetHash() << endl;
     out << "counts: " << p.second.second << endl;
-    p.second.first.printTop(out);
+    out <<p.second.first;
   }
 }
 
