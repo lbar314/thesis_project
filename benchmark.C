@@ -23,8 +23,8 @@ void group_storer(string dictionary_file, string outut_file);
 
 int main(){
   read_clusters("clusterlist.bin");
-  timer("dizionario.txt");
-  group_storer("dizionario.txt", "groups.txt");
+  timer("dizionario.bin");
+  group_storer("dizionario.bin", "groups.txt");
   return 0;
 }
 

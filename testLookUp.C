@@ -36,7 +36,7 @@ using namespace std;
 
 enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,kDTZSPL};
 
-void testLookUp(string inputfile="dizionario.txt", int repetitions = 30, int nev=-1, string outputfile="timeLookUp.txt"){
+void testLookUp(string inputfile="dizionario.bin", int repetitions = 30, int nev=-1, string outputfile="timeLookUp.txt"){
 
   LookUp finder(inputfile);
   ofstream time_output(outputfile);

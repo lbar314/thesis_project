@@ -56,6 +56,7 @@ class BuildDictionary {
     void Grouping();
     std::ostream& showMap(std::ostream &out);
     void PrintDictionary(string fname);
+    void PrintDictionaryBin(string fname);
 
     int GetTotClusters() const {return fTotClusters;}
     int GetNotInGroups() const {return fNotInGroups;}

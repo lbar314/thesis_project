@@ -325,7 +325,8 @@ void testBuild(int nev=-1, std::string outstr="../outputBuild.txt"){
   //minDB.SetNGroups(100);
   minDB.SetThreshold(0.00001);
   minDB.Grouping();
-  minDB.PrintDictionary("dizionario.txt");
+  //minDB.PrintDictionary("dizionario.txt");
+  minDB.PrintDictionaryBin("dizionario.bin");
   //________________________Checking_dictionay_I/O_out__(BuildDictionary::fDict must moved to public)
   // cout << "Checking dictionary storage" << endl;
   // Dictionary nuevo;
