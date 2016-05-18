@@ -1,7 +1,7 @@
 #include "./LookUp.h"
 
 LookUp::LookUp(std::string fname){
-  fDict.ReadFile(fname);
+  fDict.ReadBinary(fname);
   fOver = fDict.fFinalMap.size();
 }
 

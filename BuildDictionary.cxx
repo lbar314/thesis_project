@@ -241,3 +241,9 @@ void BuildDictionary::PrintDictionary(string fname){
   out << fDict;
   out.close();
 }
+
+void BuildDictionary::PrintDictionaryBin(string fname){
+  ofstream out(fname);
+  fDict.WriteBinary(fname);
+  out.close();
+}

@@ -36,7 +36,7 @@ using namespace std;
 
 enum {kNPixAll=0,kNPixSPL=1,kDR=0,kDTXodd,kDTXeven,kDTZ, kDTXoddSPL,kDTXevenSPL,kDTZSPL};
 
-void timeDistr(string inputfile="dizionario.txt", int repetitions = 1, int nev=-1){
+void timeDistr(string inputfile="dizionario.bin", int repetitions = 1, int nev=-1){
 
   LookUp finder(inputfile);
 

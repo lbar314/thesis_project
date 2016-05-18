@@ -6,8 +6,8 @@
 #endif
 
 void testSimulation(unsigned int rep=10000){
-  FastSimulation test = FastSimulation("dizionario.txt");
-  TH1F* histo = new TH1F("histo","histo",100,-0.5,99.5);
+  FastSimulation test = FastSimulation("dizionario.bin");
+  TH1F* histo = new TH1F("histo","histo",1500,-0.5,1499.5);
   histo->GetXaxis()->SetTitle("GroupID");
   histo->SetFillStyle(3008);
   histo->SetFillColor(kGreen-3);

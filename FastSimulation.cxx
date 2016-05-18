@@ -3,7 +3,7 @@
 #include <algorithm>
 
 FastSimulation::FastSimulation(std::string fname){
-  fDict.ReadFile(fname);
+  fDict.ReadBinary(fname);
 }
 
 int FastSimulation::GetRandom(){

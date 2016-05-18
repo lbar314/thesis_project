@@ -20,7 +20,9 @@ struct Dictionary{
   map<unsigned long, int> fFinalMap; //<hash,groupID> just for topologies over threshold
   vector<GroupStr> fGroupVec;
   friend std::ostream& operator<<(std::ostream& os, const Dictionary& dict);
+  void WriteBinary(string outputfile);
   void ReadFile(string fname);
+  void ReadBinary(string fname);
 };
 
 #endif
