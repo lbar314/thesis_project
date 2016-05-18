@@ -48,7 +48,7 @@ void read_clusters(string inputfile){
 	    in.read(buf, size1);
       str.append(buf, size1);
       MinimTopology a(str);
-      a.printTop(check);
+      check << a;
       vec.push_back(str);
       delete[] buf;
       ntotclusters++;

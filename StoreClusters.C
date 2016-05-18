@@ -118,7 +118,7 @@ void StoreClusters(int nev=-1, string outputfile="clusterlist.bin"){
         int stringSize = (int)(str.size());
         check << ntotclusters << ") string size: " << stringSize << endl;
         MinimTopology a(str);
-        a.printTop(check);
+        check << a;
         file_output.write(reinterpret_cast<char *>(&stringSize), sizeof(int));
         file_output.write(str.c_str(), stringSize);
         ntotclusters++;
