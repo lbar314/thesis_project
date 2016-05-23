@@ -54,7 +54,7 @@ class BuildDictionary {
     void SetThreshold(double thr);
     void SetThresholdCumulative(double cumulative); //Considering the integral
     void Grouping();
-    std::ostream& showMap(std::ostream &out);
+    friend std::ostream& operator<<(std::ostream& os, const BuildDictionary& BD);
     void PrintDictionary(string fname);
     void PrintDictionaryBin(string fname);
 
@@ -65,8 +65,8 @@ class BuildDictionary {
     Dictionary fDict;
 
   private:
-    map<unsigned long,pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
-    vector <pair<unsigned long,unsigned long>> fTopFreq; //<freq,hash>, needed to define threshold
+    map<unsigned long,std::pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
+    vector <std::pair<unsigned long,unsigned long>> fTopFreq; //<freq,hash>, needed to define threshold
     int fTotClusters;
     int fNGroups;
     int fNotInGroups;

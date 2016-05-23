@@ -73,11 +73,11 @@ using namespace std;
       float tmpxMean = ind->second.xMean;
       float newxMean = ind->second.xMean = ( (tmpxMean)*num + dX ) / (num+1);
       float tmpxSigma2 = ind->second.xSigma2;
-      ind->second.xSigma2 = ( num*tmpxSigma2 + (dX - tmpxMean)*(dX - newxMean) ) / (num+1); //online vriance algorithm
+      ind->second.xSigma2 = ( num*tmpxSigma2 + (dX - tmpxMean)*(dX - newxMean) ) / (num+1); //online variance algorithm
       float tmpzMean = ind->second.zMean;
       float newzMean = ind->second.zMean = ( (tmpzMean)*num + dZ ) / (num+1);
       float tmpzSigma2 = ind->second.zSigma2;
-      ind->second.zSigma2 = ( num*tmpzSigma2 + (dZ - tmpzMean)*(dZ - newzMean) ) / (num+1); //online vriance algorithm
+      ind->second.zSigma2 = ( num*tmpzSigma2 + (dZ - tmpzMean)*(dZ - newzMean) ) / (num+1); //online variance algorithm
     }
   }
 #endif
@@ -161,8 +161,8 @@ void BuildDictionary::Grouping(){
     gr.hash=fTopFreq[j].second;
     gr.freq=totFreq;
     //rough estimation fo the error considering a uniform distribution
-    gr.errX = (fMapTop.find(gr.hash)->second.first.GetRowSpan())/(std::sqrt(12));
-    gr.errZ = (fMapTop.find(gr.hash)->second.first.GetColumnSpan())/(std::sqrt(12));
+    gr.errX = std::sqrt(fMapInfo.find(gr.hash)->second.xSigma2);
+    gr.errZ = std::sqrt(fMapInfo.find(gr.hash)->second.zSigma2);
     fDict.fGroupVec.push_back(gr);
     fDict.fFinalMap.insert(make_pair(gr.hash,j));
   }
@@ -198,8 +198,6 @@ void BuildDictionary::Grouping(){
     cout << "Wrong number of groups" << endl;
     exit(1);
   }
-
-  cout << endl;unsigned long hash1;
   int rs;
   int cs;
   int index;
@@ -227,13 +225,15 @@ void BuildDictionary::Grouping(){
   #endif
 }
 
-std::ostream& BuildDictionary::showMap(std::ostream &out){
-  out << "Vecchia versione" << endl;
-  for(auto &p : fMapTop){
-    out << "Hash: " << p.second.first.GetHash() << endl;
-    out << "counts: " << p.second.second << endl;
-    out <<p.second.first;
+
+std::ostream& operator<<(std::ostream& os, const BuildDictionary& DB){
+  os << "Vecchia versione" << endl;
+  for(auto &p : DB.fMapTop){
+    os << "Hash: " << p.second.first.GetHash() << endl;
+    os << "counts: " << p.second.second << endl;
+    os <<p.second.first;
   }
+  return os;
 }
 
 void BuildDictionary::PrintDictionary(string fname){
