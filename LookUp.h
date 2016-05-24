@@ -3,11 +3,11 @@
 #include "./Dictionary.h"
 #include "./MinimTopology.h"
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 using std::vector;
-using std::map;
+using std::unordered_map;
 
 class LookUp{
   public:

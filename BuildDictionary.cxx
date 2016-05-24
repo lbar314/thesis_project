@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -16,7 +16,7 @@ using namespace std;
   void BuildDictionary::AccountTopology(const std::string &cluster){
     fTotClusters++;
     fTtop.SetPattern(cluster);
-    //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
+    //pair<unordered_map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
     auto ret = fMapTop.insert(make_pair(fTop.GetHash(),make_pair(fTop,1)));
     if(ret.second==false) ret.first->second.second++;
   }
@@ -24,7 +24,7 @@ using namespace std;
   void BuildDictionary::AccountTopology(const std::string &cluster, float dX, float dZ){
     fTotClusters++;
     fTop.SetPattern(cluster);
-    //pair<map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
+    //pair<unordered_map<unsigned long, pair<MinimTopology,unsigned long>>::iterator,bool> ret;
     auto ret = fMapTop.insert(make_pair(fTop.GetHash(),make_pair(fTop,1)));
     if(ret.second==true){
       //___________________DEFINING_TOPOLOGY_CHARACTERISTICS__________________

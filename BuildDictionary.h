@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <map>
+#include <unordered_map>
 #include "./MinimTopology.h"
 #include "./Dictionary.h"
 //#include "TH1F.h"
@@ -65,14 +65,14 @@ class BuildDictionary {
     Dictionary fDict;
 
   private:
-    map<unsigned long,std::pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
+    unordered_map<unsigned long,std::pair<MinimTopology,unsigned long>> fMapTop; //<hash,<topology,counts>>,
     vector <std::pair<unsigned long,unsigned long>> fTopFreq; //<freq,hash>, needed to define threshold
     int fTotClusters;
     int fNGroups;
     int fNotInGroups;
     double fThreshold;
     #ifdef _STUDY_
-      map<long unsigned,TopologyInfo> fMapInfo;
+      unordered_map<long unsigned,TopologyInfo> fMapInfo;
     #endif
     MinimTopology fTop;
 };

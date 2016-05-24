@@ -1,12 +1,12 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <iostream>
 #include <fstream>
 
 using std::vector;
-using std::map;
+using std::unordered_map;
 using std::string;
 
 struct GroupStr{
@@ -17,7 +17,7 @@ struct GroupStr{
 };
 
 struct Dictionary{
-  map<unsigned long, int> fFinalMap; //<hash,groupID> just for topologies over threshold
+  unordered_map<unsigned long, int> fFinalMap; //<hash,groupID> just for topologies over threshold
   vector<GroupStr> fGroupVec;
   friend std::ostream& operator<<(std::ostream& os, const Dictionary& dict);
   void WriteBinary(string outputfile);
