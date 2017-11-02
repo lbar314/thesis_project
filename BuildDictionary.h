@@ -3,14 +3,18 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <unordered_map>
 #include "./MinimTopology.h"
 #include "./Dictionary.h"
-//#include "TH1F.h"
 
 #define _STUDY_
 //#define _HISTO_ //in order to have a histogram with the ditribution of groupIDs
+
+#ifdef _HISTO_
+  #include "TH1F.h"
+#endif
 
 #ifdef _STUDY_
   struct TopologyInfo{
