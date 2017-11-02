@@ -160,7 +160,7 @@ void BuildDictionary::Grouping(){
     GroupStr gr;
     gr.hash=fTopFreq[j].second;
     gr.freq=totFreq;
-    //rough estimation fo the error considering a uniform distribution
+    //rough estimation for the error considering a uniform distribution
     gr.errX = std::sqrt(fMapInfo.find(gr.hash)->second.xSigma2);
     gr.errZ = std::sqrt(fMapInfo.find(gr.hash)->second.zSigma2);
     fDict.fGroupVec.push_back(gr);
@@ -227,11 +227,13 @@ void BuildDictionary::Grouping(){
 
 
 std::ostream& operator<<(std::ostream& os, const BuildDictionary& DB){
-  os << "Vecchia versione" << endl;
-  for(auto &p : DB.fMapTop){
-    os << "Hash: " << p.second.first.GetHash() << endl;
-    os << "counts: " << p.second.second << endl;
-    os <<p.second.first;
+  for(int i=0; i<DB.fNotInGroups; i++){
+    const unsigned long &hash = DB.fTopFreq[i].second;
+    os << "Hash: " << hash << endl;
+    os << "counts: " << DB.fMapTop.find(hash)->second.second << endl;
+    os << "sigmaX: " << std::sqrt(DB.fMapInfo.find(hash)->second.xSigma2) << endl;
+    os << "sigmaZ: " << std::sqrt(DB.fMapInfo.find(hash)->second.zSigma2) << endl;
+    os << DB.fMapTop.find(hash)->second.first;
   }
   return os;
 }
